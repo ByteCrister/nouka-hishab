@@ -82,8 +82,8 @@ export const userBlocksRelations = relations(userBlocks, ({ one }) => ({
 // ─── OTPs ──────────────────────────────────────────────────────────────────
 export const otpsRelations = relations(otps, ({ one }) => ({
   user: one(users, {
-    fields: [otps.userId],
-    references: [users.id],
+    fields: [otps.email],
+    references: [users.email],
   }),
 }));
 

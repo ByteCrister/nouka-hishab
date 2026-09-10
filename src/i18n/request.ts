@@ -1,22 +1,18 @@
 import { getRequestConfig } from 'next-intl/server';
 import { routing } from './routing';
-import { homeMessages } from '@/messages/home';
+import { APP_LOCALES } from '@/constants/common';
 
 export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale;
-
+  
   if (!locale || !routing.locales.includes(locale as any)) {
     locale = routing.defaultLocale;
   }
-
-  // Aggregate messages across the app
-  const messages = {
-    nav: homeMessages[locale as "en" | "bn"].nav,
-    hero: homeMessages[locale as "en" | "bn"].hero,
-  };
-
+ 
+  const { homeMessages } = await import('@/messages/home');
+ 
   return {
     locale,
-    messages
+    messages: homeMessages[locale as typeof APP_LOCALES.EN | typeof APP_LOCALES.BN]
   };
 });

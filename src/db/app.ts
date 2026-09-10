@@ -119,9 +119,7 @@ export const otps = pgTable(
   'otps',
   {
     id: serial('id').primaryKey(),
-    userId: integer('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+    email: varchar('email', { length: 255 }).notNull(),
     code: varchar('code', { length: 10 }).notNull(),
     type: varchar('type', { length: 50 })
       .notNull()
@@ -135,7 +133,7 @@ export const otps = pgTable(
       'otps_type_check',
       sql`${t.type} IN ('user_forgot_password', 'admin_forgot_password', 'user_password_change', 'email_verification')`,
     ),
-    userIdx: index('idx_otps_user').on(t.userId),
+    emailIdx: index('idx_otps_email').on(t.email),
     codeIdx: index('idx_otps_code').on(t.code),
     expiresAtIdx: index('idx_otps_expires_at').on(t.expiresAt),
   }),

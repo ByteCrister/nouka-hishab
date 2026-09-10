@@ -103,11 +103,11 @@
 
   /* Keyframes & Animations */
   --animate-wave-drift: wave-drift 10s ease-in-out infinite;
+}
 
-  @keyframes wave-drift {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(-2%); }
-  }
+@keyframes wave-drift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-2%); }
 }
 
 @layer base {
@@ -205,7 +205,7 @@
   }
   .gloss-sheen::after {
     content: "";
-    @apply pointer-events-none absolute inset-0 bg-[var(--background-image-sheen)];
+    @apply pointer-events-none absolute inset-0 bg-[image:var(--background-image-sheen)];
   }
 
   [data-locale="bn"] .text-body,
