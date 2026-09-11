@@ -1,4 +1,4 @@
-import { rateLimit } from "@/lib/services/redis";
+import { rateLimit } from "@/lib/services/redis.service";
 import { db } from "@/config/db";
 import { users } from "@/db";
 import { eq } from "drizzle-orm";
@@ -33,10 +33,15 @@ export const POST = withErrorHandler(async (req: Request) => {
 
     const userRecord = await db.query.users.findFirst({
       where: eq(users.email, email),
+      with: { profile: true },
     });
 
     if (!userRecord || !userRecord.passwordHash) {
       throw new ApiError("Invalid credentials", 401);
+    }
+
+    if (userRecord.profile?.isBlocked) {
+      throw new ApiError("Your account has been blocked.", 403);
     }
 
     const isValid = await bcrypt.compare(password, userRecord.passwordHash as string);

@@ -3,7 +3,6 @@ import {
   users,
   profiles,
   adminDetails,
-  userBlocks,
   subscriptionPlans,
   userSubscriptions,
   sectors,
@@ -11,19 +10,23 @@ import {
   districts,
   upazilas,
   ghats,
-  boats,
-  boatMaintenanceLogs,
-  boatImages,
-  boatDocuments,
-  sandTrips,
-  sandTripExpenses,
-  sandTripAttachments,
   auditLogs,
   reports,
   reportAttachments,
   todos,
   otps,
 } from './app';
+import {
+  boats,
+  boatMaintenanceLogs,
+  boatImages,
+  boatDocuments,
+} from './boat';
+import {
+  sandTrips,
+  sandTripExpenses,
+  sandTripAttachments,
+} from './sand';
 import { assets, files } from './media';
 
 // ─── Users ─────────────────────────────────────────────────────────────────
@@ -36,8 +39,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [adminDetails.userId],
   }),
-  blocks: many(userBlocks, { relationName: 'blockedUser' }),
-  blocksIssued: many(userBlocks, { relationName: 'blockingAdmin' }),
   subscriptions: many(userSubscriptions),
   maintenanceLogsCreated: many(boatMaintenanceLogs),
   sandTripExpensesCreated: many(sandTripExpenses),
@@ -47,6 +48,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   todos: many(todos),
   otps: many(otps),
   uploadedFiles: many(files),
+  avatarFile: one(files, {
+    fields: [users.avatarFileId],
+    references: [files.id],
+  }),
 }));
 
 // ─── Profiles ──────────────────────────────────────────────────────────────
@@ -65,19 +70,7 @@ export const adminDetailsRelations = relations(adminDetails, ({ one }) => ({
   }),
 }));
 
-// ─── User Blocks ───────────────────────────────────────────────────────────
-export const userBlocksRelations = relations(userBlocks, ({ one }) => ({
-  user: one(users, {
-    fields: [userBlocks.userId],
-    references: [users.id],
-    relationName: 'blockedUser',
-  }),
-  admin: one(users, {
-    fields: [userBlocks.blockedBy],
-    references: [users.id],
-    relationName: 'blockingAdmin',
-  }),
-}));
+
 
 // ─── OTPs ──────────────────────────────────────────────────────────────────
 export const otpsRelations = relations(otps, ({ one }) => ({
@@ -157,7 +150,6 @@ export const boatsRelations = relations(boats, ({ one, many }) => ({
   images: many(boatImages),
   documents: many(boatDocuments),
   sandTrips: many(sandTrips),
-  todos: many(todos),
 }));
 
 // ─── Boat Maintenance Logs ─────────────────────────────────────────────────
@@ -214,7 +206,6 @@ export const sandTripsRelations = relations(sandTrips, ({ one, many }) => ({
   }),
   expenses: many(sandTripExpenses),
   attachments: many(sandTripAttachments),
-  todos: many(todos),
 }));
 
 // ─── Sand Trip Expenses ────────────────────────────────────────────────────
@@ -281,14 +272,6 @@ export const todosRelations = relations(todos, ({ one }) => ({
   user: one(users, {
     fields: [todos.userId],
     references: [users.id],
-  }),
-  boat: one(boats, {
-    fields: [todos.boatId],
-    references: [boats.id],
-  }),
-  sandTrip: one(sandTrips, {
-    fields: [todos.sandTripId],
-    references: [sandTrips.id],
   }),
 }));
 

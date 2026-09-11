@@ -2,6 +2,7 @@ import { Fraunces, Manrope, Tiro_Bangla, Hind_Siliguri } from "next/font/google"
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { CustomToaster } from "@/components/shared/client/custom-toaster";
+import { AuthWrapper } from "@/components/wrappers/AuthWrapper";
 import "../globals.css";
 
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", weight: ["500", "600", "700"], display: "swap" });
@@ -30,8 +31,10 @@ export default async function RootLayout({
     >
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages} locale={locale}>
-          {children}
-          <CustomToaster />
+          <AuthWrapper>
+            {children}
+            <CustomToaster />
+          </AuthWrapper>
         </NextIntlClientProvider>
       </body>
     </html>

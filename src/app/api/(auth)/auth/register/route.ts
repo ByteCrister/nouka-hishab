@@ -1,9 +1,10 @@
-import { rateLimit } from "@/lib/services/redis";
+import { rateLimit } from "@/lib/services/redis.service";
 import { db } from "@/config/db";
 import { users, profiles } from "@/db";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
+import { withTransaction } from "@/lib/helpers/withTransaction";
 
 export const POST = withErrorHandler(async (req: Request) => {
   const ip = req.headers.get("x-forwarded-for") || "unknown-ip";
@@ -14,7 +15,7 @@ export const POST = withErrorHandler(async (req: Request) => {
   }
 
   // Rate limit registration attempts
-  const allowed = await rateLimit(`register:${ip}`, 5, 60); 
+  const allowed = await rateLimit(`register:${ip}`, 5, 60);
   if (!allowed) {
     throw new ApiError("Too many attempts. Please try again later.", 429);
   }
@@ -29,8 +30,8 @@ export const POST = withErrorHandler(async (req: Request) => {
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  // Insert user and profile inside a transaction
-  await db.transaction(async (tx) => {
+  // Both inserts are atomic — if profile insert fails, the user row is also rolled back
+  await withTransaction(async (tx) => {
     const [newUser] = await tx.insert(users).values({
       email,
       passwordHash,

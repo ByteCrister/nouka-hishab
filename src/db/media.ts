@@ -9,6 +9,7 @@ import {
   integer,
   unique,
   index,
+  AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { users } from './app';
 
@@ -48,9 +49,10 @@ export const files = pgTable(
       .references(() => assets.id, { onDelete: 'restrict' }),
     uploadedBy: integer('uploaded_by')
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+      .references((): AnyPgColumn => users.id, { onDelete: 'cascade' }),
     originalFileName: varchar('original_file_name', { length: 255 }).notNull(),
     description: text('description'),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => ({

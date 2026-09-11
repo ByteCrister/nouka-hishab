@@ -1,4 +1,4 @@
-import { rateLimit } from "@/lib/services/redis";
+import { rateLimit } from "@/lib/services/redis.service";
 import { db } from "@/config/db";
 import { users } from "@/db";
 import { eq } from "drizzle-orm";
@@ -13,7 +13,7 @@ export const POST = withErrorHandler(async (req: Request) => {
   }
 
   // Rate limit to prevent email enumeration attacks
-  const allowed = await rateLimit(`check-email:${ip}`, 10, 60); 
+  const allowed = await rateLimit(`check-email:${ip}`, 10, 60);
   if (!allowed) {
     throw new ApiError("Too many attempts. Please try again later.", 429);
   }

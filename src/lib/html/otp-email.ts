@@ -1,17 +1,19 @@
+import { OTP_TYPES } from "@/constants/common";
+
 export const generateOtpHtml = (otp: string, type: string) => {
     let title = "Your Verification Code";
     let message = "Please use the following OTP to complete your process.";
     let preheader = "Your NoukaHishab verification code is here.";
     
-    if (type === 'email_verification') {
+    if (type === OTP_TYPES.EMAIL_VERIFICATION) {
         title = "Verify Your Email";
         message = "Please use the following code to verify your email address and complete your signup process.";
         preheader = "Your email verification code for NoukaHishab.";
-    } else if (type === 'user_forgot_password' || type === 'admin_forgot_password') {
+    } else if (type === OTP_TYPES.USER_FORGOT_PASSWORD || type === OTP_TYPES.ADMIN_FORGOT_PASSWORD) {
         title = "Reset Your Password";
         message = "You recently requested to reset your password. Please use the following code to proceed. If you didn't request this, you can safely ignore this email.";
         preheader = "Your password reset code for NoukaHishab.";
-    } else if (type === 'user_password_change') {
+    } else if (type === OTP_TYPES.USER_PASSWORD_CHANGE) {
         title = "Change Your Password";
         message = "Please use the following code to authorize changing your password.";
         preheader = "Your password change code for NoukaHishab.";

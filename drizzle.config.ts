@@ -9,7 +9,7 @@ export default defineConfig({
   dbCredentials: {
     url: env.DATABASE_URL,     // ← Neon connection string
   },
-  schemaFilter: ['app', 'media'],       // only manage these two schemas
+  schemaFilter: ['public'],             // Drizzle uses Postgres schemas, not TS filenames
   verbose: true,
   strict: true,
 });

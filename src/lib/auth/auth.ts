@@ -26,10 +26,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const userRecord = await db.query.users.findFirst({
           where: eq(users.email, credentials.email as string),
+          with: { profile: true },
         });
 
         if (!userRecord) {
           throw new Error("Invalid email or password");
+        }
+
+        if (userRecord.profile?.isBlocked) {
+          throw new Error("Your account has been blocked.");
         }
 
         const isValid = await bcrypt.compare(
@@ -42,13 +47,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         return {
-          id: String(userRecord.id),
+          id: String(userRecord.publicId), // expose publicId, never raw DB id
           email: userRecord.email,
           role: userRecord.role,
         };
       },
     }),
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // must match session maxAge
+  },
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
@@ -57,11 +69,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Check if the user exists in our database
         const userExists = await db.query.users.findFirst({
           where: eq(users.email, user.email),
+          with: { profile: true },
         });
 
         if (!userExists) {
           // Deny sign in
           return "/?error=AccountNotFound";
+        }
+        
+        if (userExists.profile?.isBlocked) {
+          return "/?error=AccountBlocked";
         }
       }
       return true;
@@ -69,14 +86,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
+        token.role = (user as { role?: string }).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        (session.user as any).role = token.role;
+        (session.user as { role?: string }).role = token.role as string | undefined;
       }
       return session;
     },

@@ -1,3 +1,5 @@
 export * from './app';
 export * from './media';
-export * from './relations';
+export * from './boat';
+export * from './sand';
+export * from './relations';
