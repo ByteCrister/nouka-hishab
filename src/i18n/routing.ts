@@ -5,7 +5,7 @@ import { APP_LOCALES } from "@/constants/common";
 export const routing = defineRouting({
   locales: [APP_LOCALES.EN, APP_LOCALES.BN],
   defaultLocale: APP_LOCALES.BN,
-  localePrefix: "as-needed", // "/" = BN, "/en" = EN
+  localePrefix: "always", // /bn/... and /en/...
 });
 
 export const { Link, redirect, usePathname, useRouter, getPathname } =

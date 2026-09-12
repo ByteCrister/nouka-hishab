@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Menu, User, LogOut, Ship, LayoutDashboard, Anchor, Loader, CircleDollarSign, Wallet, Wrench, FileSpreadsheet } from "lucide-react";
+import { Menu, User, LogOut, Ship, LayoutDashboard, Anchor, CircleDollarSign, Wallet, Wrench, FileSpreadsheet, Trash2, ChevronDown } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -14,6 +14,7 @@ import { useState } from "react";
 import { LogoutDialog } from "@/components/shared/logout/LogoutDialog";
 import { Separator } from "@/components/ui/separator";
 import { SignInDialog } from "@/components/shared/signin/SigninDialog";
+import { Logo } from "@/components/marketing/logo";
 
 interface MobileNavProps {
   isAuthenticated: boolean;
@@ -26,16 +27,17 @@ interface MobileNavProps {
 export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
+  const [isSandOpen, setIsSandOpen] = useState(false);
 
   const sandLinks = [
-    { href: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
-    { href: "/boats", label: t("boats"), icon: Ship },
-    { href: "/trips", label: t("trips"), icon: Anchor },
-    { href: "/loading", label: t("loading"), icon: Loader },
-    { href: "/sales", label: t("sales"), icon: CircleDollarSign },
-    { href: "/payments", label: t("payments"), icon: Wallet },
-    { href: "/maintenance", label: t("maintenance"), icon: Wrench },
-    { href: "/reports", label: t("reports"), icon: FileSpreadsheet },
+    { href: "/sand", label: t("dashboard"), icon: LayoutDashboard },
+    { href: "/sand/boats", label: t("boats"), icon: Ship },
+    { href: "/sand/trips", label: t("trips"), icon: Anchor },
+    { href: "/sand/sales", label: t("sales"), icon: CircleDollarSign },
+    { href: "/sand/payments", label: t("payments"), icon: Wallet },
+    { href: "/sand/maintenance", label: t("maintenance"), icon: Wrench },
+    { href: "/sand/reports", label: t("reports"), icon: FileSpreadsheet },
+    { href: "/sand/recyclebin", label: t("recyclebin"), icon: Trash2 },
   ];
 
   return (
@@ -45,7 +47,9 @@ export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
       </SheetTrigger>
       <SheetContent side="right" className="w-[300px] sm:w-[400px] overflow-y-auto">
         <SheetHeader className="text-left mb-6 mt-4">
-          <SheetTitle className="font-display text-2xl text-ink-900">NoukaHishab</SheetTitle>
+          <SheetTitle>
+            <Logo />
+          </SheetTitle>
         </SheetHeader>
 
         <div className="flex flex-col space-y-6">
@@ -66,16 +70,26 @@ export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
             <>
               <Separator />
               <div className="flex flex-col space-y-4">
-                <h4 className="text-sm font-bold text-ink-400 uppercase tracking-wider">{t("sand")}</h4>
-                {sandLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-medium text-ink-700 hover:text-river-500 transition-colors">
-                      <Icon className="w-5 h-5 opacity-70" />
-                      {link.label}
-                    </Link>
-                  );
-                })}
+                <button 
+                  onClick={() => setIsSandOpen(!isSandOpen)}
+                  className="flex items-center justify-between w-full text-sm font-bold text-ink-400 uppercase tracking-wider outline-none"
+                >
+                  {t("sand")}
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isSandOpen ? "rotate-180" : ""}`} />
+                </button>
+                {isSandOpen && (
+                  <div className="flex flex-col space-y-4 pt-2 pl-3 ml-1 border-l-2 border-river-100">
+                    {sandLinks.map((link) => {
+                      const Icon = link.icon;
+                      return (
+                        <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-medium text-ink-700 hover:text-river-500 transition-colors">
+                          <Icon className="w-5 h-5 opacity-70" />
+                          {link.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </>
           )}

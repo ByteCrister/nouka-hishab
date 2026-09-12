@@ -1,6 +1,5 @@
 import postcss from 'postcss';
 import tailwindcss from '@tailwindcss/postcss';
-import fs from 'fs';
 
 const css1 = `
 @import "tailwindcss";

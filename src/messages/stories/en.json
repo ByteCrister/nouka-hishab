@@ -1,0 +1,36 @@
+{
+  "hero": {
+    "title": "Customer Stories",
+    "subtitle": "See how boat owners and sand traders across Bangladesh are transforming their business with NoukaHishab."
+  },
+  "stats": {
+    "trips": "10,000+",
+    "tripsLabel": "Trips Logged",
+    "sand": "50M+ CFT",
+    "sandLabel": "Sand Tracked",
+    "users": "500+",
+    "usersLabel": "Active Boat Owners"
+  },
+  "testimonials": [
+    {
+      "name": "Rahim Uddin",
+      "role": "Boat Owner, Sylhet",
+      "quote": "Before NoukaHishab, calculating Mahajan commission and separating tolls from fuel costs used to take hours of argument. Now it takes 5 seconds on my phone."
+    },
+    {
+      "name": "Jamal Hossain",
+      "role": "Sand Trader, Sunamganj",
+      "quote": "I can now track exactly how much barki is loaded across my 3 boats in real-time. The transparency has completely changed how I do business."
+    },
+    {
+      "name": "Abdul Karim",
+      "role": "Majhi, Bhairab",
+      "quote": "Keeping track of fuel expenses and local tolls on a paper notebook was a nightmare, especially when it rains. This app is a blessing for us."
+    }
+  ],
+  "cta": {
+    "title": "Start writing your success story",
+    "subtitle": "Take control of your river transport business today with NoukaHishab.",
+    "button": "Create Your Account"
+  }
+}

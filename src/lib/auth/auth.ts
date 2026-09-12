@@ -2,8 +2,9 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/config/db";
-import { users } from "@/db";
+import { users, profiles } from "@/db";
 import { eq } from "drizzle-orm";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { env } from "@/config/env";
 
@@ -12,6 +13,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: "select_account",
+        },
+      },
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -62,7 +68,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: 30 * 24 * 60 * 60, // must match session maxAge
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         if (!user.email) return false;
         
@@ -73,8 +79,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         if (!userExists) {
-          // Deny sign in
-          return "/?error=AccountNotFound";
+          // Create a new user with a random password
+          const randomPassword = crypto.randomUUID() + crypto.randomUUID();
+          const passwordHash = await bcrypt.hash(randomPassword, 10);
+          
+          const [newUser] = await db.insert(users).values({
+            email: user.email as string,
+            passwordHash,
+          }).returning({ id: users.id });
+
+          await db.insert(profiles).values({
+            userId: newUser.id,
+            fullName: user.name || (user.email as string).split("@")[0],
+          });
+
+          return true;
         }
         
         if (userExists.profile?.isBlocked) {

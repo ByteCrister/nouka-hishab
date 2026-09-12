@@ -1,18 +1,20 @@
+"use client";
+
 import { Logo } from "@/components/marketing/logo";
 import { LanguageSwitcher } from "@/components/marketing/client/language-switcher";
-import { homeMessages } from "@/messages/home";
+import { homeMessages } from "@/messages/home/index";
 import { type AppLocale } from "@/constants/common";
 import { SignInDialog } from "@/components/shared/signin/SigninDialog";
 import { Link } from "@/i18n/routing";
-import { auth } from "@/lib/auth/auth";
+import { useSession } from "next-auth/react";
 import { UserAccountNav } from "./UserAccountNav";
 import { SandMegaMenu } from "./SandMegaMenu";
 import { MobileNav } from "./MobileNav";
 
-export async function Navbar({ locale }: { locale: AppLocale }) {
+export function Navbar({ locale }: { locale: AppLocale }) {
   const t = homeMessages[locale];
-  const session = await auth();
-  const isAuthenticated = !!session?.user;
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-ink-700/5 bg-sand-50/80 backdrop-blur-xl">

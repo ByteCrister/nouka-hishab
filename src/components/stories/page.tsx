@@ -1,8 +1,8 @@
 import { WaveDivider } from "../marketing/wave-divider";
-import { GlossButton } from "../shared/gloss-button";
-import { SignInDialog } from "../shared/signin/SigninDialog";
-import { storiesMessages } from "@/messages/stories";
-import { APP_LOCALES, type AppLocale } from "@/constants/common";
+import { MarketingCTA } from "../marketing/client/marketing-cta";
+import { storiesMessages } from "@/messages/stories/index";
+import { homeMessages } from "@/messages/home";
+import { type AppLocale } from "@/constants/common";
 import { FadeInUp, StaggerContainer, StaggerItem, ScaleIn } from "../wrappers/motion-wrappers";
 import { Quote } from "lucide-react";
 
@@ -54,11 +54,11 @@ export function StoriesPage({ locale }: { locale: AppLocale }) {
       <section className="py-24 bg-white relative">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
           <StaggerContainer className="grid md:grid-cols-3 gap-8">
-            {t.testimonials.map((testimonial, idx) => (
+            {t.testimonials.map((testimonial: { name: string; role: string; quote: string }, idx: number) => (
               <StaggerItem key={idx} className="bg-river-50/50 border border-river-100 rounded-3xl p-8 relative flex flex-col h-full">
                 <Quote className="w-10 h-10 text-river-200 absolute top-6 right-6 rotate-180" />
                 <p className="text-lg text-ink-700 leading-relaxed mb-8 relative z-10 flex-1 italic">
-                  "{testimonial.quote}"
+                  &quot;{testimonial.quote}&quot;
                 </p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-river-200 to-river-300 flex items-center justify-center text-river-700 font-bold text-lg shrink-0">
@@ -85,11 +85,12 @@ export function StoriesPage({ locale }: { locale: AppLocale }) {
           <p className="text-xl text-ink-500 mb-10 max-w-2xl mx-auto">
             {t.cta.subtitle}
           </p>
-          <SignInDialog>
-            <GlossButton tone="river" className="h-14 px-10 text-lg font-bold rounded-2xl shadow-xl shadow-river-500/20">
-              {t.cta.button}
-            </GlossButton>
-          </SignInDialog>
+          <MarketingCTA
+            signInText={t.cta.button}
+            dashboardText={homeMessages[locale].nav.dashboard}
+            className="h-14 px-10 text-lg font-bold rounded-2xl shadow-xl shadow-river-500/20"
+            tone="river"
+          />
         </FadeInUp>
       </section>
     </div>

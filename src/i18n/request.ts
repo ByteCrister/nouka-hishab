@@ -1,18 +1,30 @@
 import { getRequestConfig } from 'next-intl/server';
 import { routing } from './routing';
-import { APP_LOCALES } from '@/constants/common';
 
 export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale;
-  
-  if (!locale || !routing.locales.includes(locale as any)) {
+
+  if (!locale || !routing.locales.includes(locale as never)) {
     locale = routing.defaultLocale;
   }
- 
-  const { homeMessages } = await import('@/messages/home');
- 
+
+  // Dynamically import only the locale file for this request.
+  // Each page folder has its own en.json / bn.json.
+  // We merge all page messages into one flat messages object so
+  // useTranslations() works across layouts and pages in the same tree.
+  const [home, howItWorks, stories] = await Promise.all([
+    import(`@/messages/home/${locale}.json`),
+    import(`@/messages/how-it-works/${locale}.json`),
+    import(`@/messages/stories/${locale}.json`),
+  ]);
+
   return {
     locale,
-    messages: homeMessages[locale as typeof APP_LOCALES.EN | typeof APP_LOCALES.BN]
+    messages: {
+      ...home.default,
+      howItWorks: howItWorks.default,
+      stories: stories.default,
+    },
   };
 });
+

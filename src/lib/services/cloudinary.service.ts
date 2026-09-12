@@ -1,6 +1,6 @@
 import { cloudinary } from '@/config/cloudinary';
 import { env } from '@/config/env';
-import type { UploadApiResponse } from 'cloudinary';
+import type { UploadApiResponse, UploadApiOptions } from 'cloudinary';
 import crypto from 'crypto';
 
 export const uploadToCloudinary = (
@@ -11,7 +11,7 @@ export const uploadToCloudinary = (
   return new Promise((resolve, reject) => {
     const folder = `${env.CLOUDINARY_FOLDER}/${assetType}`;
 
-    const uploadOptions: any = {
+    const uploadOptions: UploadApiOptions = {
       folder,
       resource_type: 'auto',
     };
@@ -39,7 +39,7 @@ export const uploadToCloudinary = (
 export const deleteFromCloudinary = (
   publicId: string,
   resourceType: 'image' | 'video' | 'raw' | 'auto' = 'auto'
-): Promise<any> => {
+): Promise<unknown> => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader.destroy(publicId, { resource_type: resourceType }, (error, result) => {
       if (error) return reject(error);

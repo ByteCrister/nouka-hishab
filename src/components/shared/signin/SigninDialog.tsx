@@ -75,6 +75,13 @@ const GoogleIcon = () => (
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 type AuthMode = "signin" | "forgot" | "signup-details" | "signup-otp" | "signup-password";
 
+const signinSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+const forgotSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
 const detailsSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -169,6 +176,13 @@ export function SignInDialog({ children }: { children: React.ReactNode }) {
     setErrors({});
 
     if (mode === "signin") {
+      const result = signinSchema.safeParse(formData);
+      if (!result.success) {
+        const newErrors: Record<string, string> = {};
+        result.error.issues.forEach(i => { if (i.path[0] !== undefined) newErrors[String(i.path[0])] = i.message; });
+        setErrors(newErrors);
+        return;
+      }
       setIsLoading(true);
       try {
         await axios.post("/api/auth/verify", { email: formData.email, password: formData.password, provider: "credentials" });
@@ -188,6 +202,11 @@ export function SignInDialog({ children }: { children: React.ReactNode }) {
       } finally { setIsLoading(false); }
 
     } else if (mode === "forgot") {
+      const result = forgotSchema.safeParse(formData);
+      if (!result.success) {
+        setErrors({ email: result.error.issues[0].message });
+        return;
+      }
       setIsLoading(true);
       try {
         await otpService.sendOtp(formData.email, OTP_TYPES.USER_FORGOT_PASSWORD);

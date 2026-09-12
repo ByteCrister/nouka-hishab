@@ -1,0 +1,29 @@
+{
+  "hero": {
+    "title": "How NoukaHishab Works",
+    "subtitle": "The simplest way to manage your river transport business, from loading barki to calculating net profits."
+  },
+  "steps": {
+    "step1": {
+      "title": "1. Setup Your Fleet",
+      "desc": "Add your boats, record their capacities (CFT), engine details, and define sharing rules. Keep all documents and maintenance logs in one place."
+    },
+    "step2": {
+      "title": "2. Log Trips & Barki",
+      "desc": "Schedule a trip by selecting the source ghat. Record the exact amount of sand (barki) purchased and the purchase rate per CFT."
+    },
+    "step3": {
+      "title": "3. Track Expenses on the Go",
+      "desc": "Easily log trip expenses such as fuel (তেল), labor (লেবার), local tolls (টোল), and government royalty (ইজারা) as they happen."
+    },
+    "step4": {
+      "title": "4. Settle & Distribute Profits",
+      "desc": "Enter the final sale amount upon delivery. NoukaHishab automatically deducts expenses, calculates Mahajan commission, and shows the clear net profit for the boat owner."
+    }
+  },
+  "cta": {
+    "title": "Ready to simplify your business?",
+    "subtitle": "Join the digital revolution of Bangladesh's river transport industry today.",
+    "button": "Start Free Trial"
+  }
+}

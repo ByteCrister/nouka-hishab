@@ -1,12 +1,11 @@
 import { WaveDivider } from "../marketing/wave-divider";
-import { GlossButton } from "../shared/gloss-button";
-import { LedgerCard } from "../shared/ledger-card";
-import { SignInDialog } from "../shared/signin/SigninDialog";
+import { MarketingCTA } from "../marketing/client/marketing-cta";
 import { Link } from "@/i18n/routing";
 import { homeMessages } from "@/messages/home";
 import { APP_LOCALES, type AppLocale } from "@/constants/common";
 import { Anchor, Calculator, FileSpreadsheet, Ship, Wallet, LineChart } from "lucide-react";
-import { FadeIn, FadeInUp, FadeInRight, FadeInLeft, ScaleIn, StaggerContainer, StaggerItem } from "../wrappers/motion-wrappers";
+import { FadeInUp, FadeInRight, FadeInLeft, StaggerContainer, StaggerItem } from "../wrappers/motion-wrappers";
+import { LedgerCard } from "../shared/ledger-card";
 
 export function LandingPage({ locale }: { locale: AppLocale }) {
   const t = homeMessages[locale];
@@ -28,11 +27,12 @@ export function LandingPage({ locale }: { locale: AppLocale }) {
                 {t.hero.lead}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <SignInDialog>
-                  <GlossButton tone="red" className="h-12 px-8 text-base font-bold rounded-xl w-full sm:w-auto">
-                    {t.hero.ctaPrimary}
-                  </GlossButton>
-                </SignInDialog>
+                <MarketingCTA
+                  signInText={t.hero.ctaPrimary}
+                  dashboardText={t.nav.dashboard}
+                  className="h-12 px-8 text-base font-bold rounded-xl w-full sm:w-auto"
+                  tone="red"
+                />
                 <Link href="/how-it-works" className="inline-flex h-12 items-center justify-center rounded-xl border-2 border-river-500/20 bg-white/50 px-8 text-base font-bold text-river-700 transition-colors hover:bg-white hover:border-river-500/40 w-full sm:w-auto">
                   {t.hero.ctaSecondary}
                 </Link>
@@ -176,11 +176,12 @@ export function LandingPage({ locale }: { locale: AppLocale }) {
           <p className="text-xl text-river-100 mb-10 max-w-2xl mx-auto">
             {t.cta.subtitle}
           </p>
-          <SignInDialog>
-            <GlossButton tone="red" className="h-14 px-10 text-lg font-bold rounded-2xl shadow-2xl shadow-sindoor-500/20">
-              {t.cta.button}
-            </GlossButton>
-          </SignInDialog>
+          <MarketingCTA
+            signInText={t.cta.button}
+            dashboardText={t.nav.dashboard}
+            className="h-14 px-10 text-lg font-bold rounded-2xl shadow-2xl shadow-sindoor-500/20"
+            tone="red"
+          />
         </FadeInUp>
       </section>
     </div>

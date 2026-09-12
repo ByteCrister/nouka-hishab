@@ -7,25 +7,25 @@ import {
   LayoutDashboard, 
   Ship, 
   Anchor, 
-  Loader, 
-  CircleDollarSign, 
   Wallet, 
   Wrench, 
-  FileSpreadsheet
+  FileSpreadsheet,
+  Trash2,
+  CircleDollarSign
 } from "lucide-react";
 
 export function SandMegaMenu() {
   const t = useTranslations("nav");
 
   const sandLinks = [
-    { href: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
-    { href: "/boats", label: t("boats"), icon: Ship },
-    { href: "/trips", label: t("trips"), icon: Anchor },
-    { href: "/loading", label: t("loading"), icon: Loader },
-    { href: "/sales", label: t("sales"), icon: CircleDollarSign },
-    { href: "/payments", label: t("payments"), icon: Wallet },
-    { href: "/maintenance", label: t("maintenance"), icon: Wrench },
-    { href: "/reports", label: t("reports"), icon: FileSpreadsheet },
+    { href: "/sand", label: t("dashboard"), icon: LayoutDashboard },
+    { href: "/sand/boats", label: t("boats"), icon: Ship },
+    { href: "/sand/trips", label: t("trips"), icon: Anchor },
+    { href: "/sand/sales", label: t("sales"), icon: CircleDollarSign },
+    { href: "/sand/payments", label: t("payments"), icon: Wallet },
+    { href: "/sand/maintenance", label: t("maintenance"), icon: Wrench },
+    { href: "/sand/reports", label: t("reports"), icon: FileSpreadsheet },
+    { href: "/sand/recyclebin", label: t("recyclebin"), icon: Trash2 },
   ];
 
   return (

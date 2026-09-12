@@ -1,10 +1,10 @@
 import { WaveDivider } from "../marketing/wave-divider";
-import { GlossButton } from "../shared/gloss-button";
-import { SignInDialog } from "../shared/signin/SigninDialog";
-import { howItWorksMessages } from "@/messages/how-it-works";
-import { APP_LOCALES, type AppLocale } from "@/constants/common";
-import { FadeIn, FadeInUp, StaggerContainer, StaggerItem, FadeInRight } from "../wrappers/motion-wrappers";
-import { Anchor, ArrowRight, HandCoins, Ship, Navigation } from "lucide-react";
+import { MarketingCTA } from "../marketing/client/marketing-cta";
+import { howItWorksMessages } from "@/messages/how-it-works/index";
+import { homeMessages } from "@/messages/home";
+import { type AppLocale } from "@/constants/common";
+import { FadeIn, FadeInUp, FadeInRight } from "../wrappers/motion-wrappers";
+import { Anchor, HandCoins, Ship, Navigation } from "lucide-react";
 
 export function HowItWorksPage({ locale }: { locale: AppLocale }) {
   const t = howItWorksMessages[locale];
@@ -113,11 +113,12 @@ export function HowItWorksPage({ locale }: { locale: AppLocale }) {
           <p className="text-xl text-river-100 mb-10 max-w-2xl mx-auto">
             {t.cta.subtitle}
           </p>
-          <SignInDialog>
-            <GlossButton tone="red" className="h-14 px-10 text-lg font-bold rounded-2xl shadow-2xl shadow-sindoor-500/20">
-              {t.cta.button}
-            </GlossButton>
-          </SignInDialog>
+          <MarketingCTA
+            signInText={t.cta.button}
+            dashboardText={homeMessages[locale].nav.dashboard}
+            className="h-14 px-10 text-lg font-bold rounded-2xl shadow-2xl shadow-sindoor-500/20"
+            tone="red"
+          />
         </FadeInUp>
       </section>
     </div>

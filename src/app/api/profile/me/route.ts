@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
 import { UserProfileData } from "@/types/profile";
 
-export const GET = withErrorHandler<UserProfileData, [Request]>(async (req: Request) => {
+export const GET = withErrorHandler<UserProfileData, [Request]>(async () => {
   const session = await auth();
   if (!session?.user?.id) throw new ApiError("Unauthorized", 401);
 

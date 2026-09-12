@@ -1,9 +1,14 @@
 import { Fraunces, Manrope, Tiro_Bangla, Hind_Siliguri } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getMessages, setRequestLocale } from 'next-intl/server';
 import { CustomToaster } from "@/components/shared/client/custom-toaster";
 import { AuthWrapper } from "@/components/wrappers/AuthWrapper";
+import { APP_LOCALES, type AppLocale } from "@/constants/common";
 import "../globals.css";
+
+export function generateStaticParams() {
+  return Object.values(APP_LOCALES).map((locale) => ({ locale }));
+}
 
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", weight: ["500", "600", "700"], display: "swap" });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", weight: ["400", "500", "600", "700", "800"], display: "swap" });
@@ -17,11 +22,15 @@ export const metadata = {
 
 export default async function RootLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  const { locale } = await params as { locale: AppLocale };
+  // MUST be called before any next-intl server function to enable static rendering
+  setRequestLocale(locale);
+  const messages = await getMessages({ locale });
 
   return (
     <html
