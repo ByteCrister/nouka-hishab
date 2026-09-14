@@ -1,0 +1,45 @@
+{
+  "title": "Sand Dashboard",
+  "subtitle": "Overview of your sand business performance.",
+  "refresh": "Refresh",
+  "revenue": {
+    "title": "Total Revenue",
+    "currentMonth": "Current month"
+  },
+  "trips": {
+    "title": "Total Trips",
+    "completed": "completed",
+    "ongoing": "ongoing"
+  },
+  "boats": {
+    "title": "Active Boats",
+    "outOf": "Out of {total} total boats"
+  },
+  "maintenance": {
+    "title": "Maintenance Costs",
+    "subtitle": "Total recorded expenses"
+  },
+  "loading": "Loading dashboard data...",
+  "tryAgain": "Try Again",
+  "actions": {
+    "title": "Quick Actions",
+    "addBoat": "Add Boat",
+    "addTrip": "New Trip",
+    "reports": "Reports"
+  },
+  "recentActivity": {
+    "tripsTitle": "Recent Trips",
+    "tripsDesc": "Latest 5 trips recorded.",
+    "maintenanceTitle": "Recent Expenses",
+    "maintenanceDesc": "Latest 5 maintenance logs.",
+    "boat": "Boat",
+    "status": "Status",
+    "amount": "Amount",
+    "date": "Date",
+    "description": "Description",
+    "cost": "Cost",
+    "noTrips": "No recent trips found.",
+    "noMaintenance": "No recent expenses found.",
+    "viewAll": "View all"
+  }
+}

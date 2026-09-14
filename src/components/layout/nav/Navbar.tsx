@@ -3,7 +3,7 @@
 import { Logo } from "@/components/marketing/logo";
 import { LanguageSwitcher } from "@/components/marketing/client/language-switcher";
 import { homeMessages } from "@/messages/home/index";
-import { type AppLocale } from "@/constants/common";
+import { type AppLocale } from "@/constants/common.const";
 import { SignInDialog } from "@/components/shared/signin/SigninDialog";
 import { Link } from "@/i18n/routing";
 import { useSession } from "next-auth/react";

@@ -6,7 +6,8 @@ import { useProfileStore } from "@/store/useProfileStore";
 
 function StoreHydrator() {
   const { status } = useSession();
-  const { fetchProfile, clearProfile } = useProfileStore();
+  const fetchProfile = useProfileStore((state) => state.fetchProfile);
+  const clearProfile = useProfileStore((state) => state.clearProfile);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -21,7 +22,7 @@ function StoreHydrator() {
 
 export function AuthWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <SessionProvider refetchOnWindowFocus={false}>
       <StoreHydrator />
       {children}
     </SessionProvider>

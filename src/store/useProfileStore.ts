@@ -7,7 +7,7 @@ import {
   UpdatePasswordPayload,
   UpdateProfileImagePayload,
   UserProfileData,
-} from '@/types/profile';
+} from '@/types/profile.types';
 
 export const useProfileStore = create<ProfileStore>((set, get) => ({
   profile: null,
@@ -18,10 +18,10 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   fetchProfile: async () => {
     // Prevent fetching if already loading or updating
     if (get().isLoading) return;
-    
+
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get('/api/profile/me');
+      const response = await axios.get('/api/v1/profile/me');
       set({ profile: response.data.data, isLoading: false });
     } catch (error) {
       const message = axios.isAxiosError(error)
@@ -35,10 +35,10 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   updateDetails: async (payload: UpdateProfilePayload) => {
     if (get().isUpdating) return;
     const previousProfile = get().profile;
-    
+
     if (!previousProfile) {
-        toast.error("Profile not loaded.");
-        return;
+      toast.error("Profile not loaded.");
+      return;
     }
 
     // Optimistic update
@@ -55,13 +55,13 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     });
 
     try {
-      const response = await axios.patch('/api/profile/details', payload);
+      const response = await axios.patch('/api/v1/profile/details', payload);
       set({ profile: response.data.data, isUpdating: false });
       toast.success('Profile updated successfully');
     } catch (error) {
       // Revert optimistic update on failure
       set({ profile: previousProfile, isUpdating: false });
-      
+
       const message = axios.isAxiosError(error)
         ? error.response?.data?.error || error.message
         : 'Failed to update profile';
@@ -72,10 +72,10 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
 
   updatePassword: async (payload: UpdatePasswordPayload) => {
     if (get().isUpdating) return;
-    
+
     set({ isUpdating: true, error: null });
     try {
-      await axios.patch('/api/profile/password', payload);
+      await axios.patch('/api/v1/profile/password', payload);
       set({ isUpdating: false });
       toast.success('Password updated successfully');
     } catch (error) {
@@ -93,8 +93,8 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     const previousProfile = get().profile;
 
     if (!previousProfile) {
-        toast.error("Profile not loaded.");
-        return;
+      toast.error("Profile not loaded.");
+      return;
     }
 
     // Optimistic update
@@ -109,13 +109,13 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     });
 
     try {
-      const response = await axios.patch('/api/profile/image', payload);
+      const response = await axios.patch('/api/v1/profile/image', payload);
       set({ profile: response.data.data, isUpdating: false });
       toast.success('Profile image updated successfully');
     } catch (error) {
       // Revert optimistic update
       set({ profile: previousProfile, isUpdating: false });
-      
+
       const message = axios.isAxiosError(error)
         ? error.response?.data?.error || error.message
         : 'Failed to update profile image';

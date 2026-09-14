@@ -1,10 +1,10 @@
-import { OTP_TYPES } from "@/constants/common";
+import { OTP_TYPES } from "@/constants/common.const";
 
 export const generateOtpHtml = (otp: string, type: string) => {
     let title = "Your Verification Code";
     let message = "Please use the following OTP to complete your process.";
     let preheader = "Your NoukaHishab verification code is here.";
-    
+
     if (type === OTP_TYPES.EMAIL_VERIFICATION) {
         title = "Verify Your Email";
         message = "Please use the following code to verify your email address and complete your signup process.";

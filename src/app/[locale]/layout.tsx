@@ -3,7 +3,8 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { CustomToaster } from "@/components/shared/client/custom-toaster";
 import { AuthWrapper } from "@/components/wrappers/AuthWrapper";
-import { APP_LOCALES, type AppLocale } from "@/constants/common";
+import { PublicLayoutWrapper } from "@/components/wrappers/PublicLayoutWrapper";
+import { APP_LOCALES, type AppLocale } from "@/constants/common.const";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -41,7 +42,9 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages} locale={locale}>
           <AuthWrapper>
-            {children}
+            <PublicLayoutWrapper locale={locale}>
+              {children}
+            </PublicLayoutWrapper>
             <CustomToaster />
           </AuthWrapper>
         </NextIntlClientProvider>

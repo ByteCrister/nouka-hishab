@@ -16,6 +16,7 @@ import { sql } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import { files } from './media';
 import { users, sectors } from './app';
+import { BoatCapacityUnit, BoatStatus, BOAT_CAPACITY_UNITS, BOAT_STATUSES } from '@/constants/db/boats.const';
 
 // ─── Boats ─────────────────────────────────────────────────────────────────
 // Steel boat registry. No owner FK — the logged-in user manages their own
@@ -37,8 +38,8 @@ export const boats = pgTable(
     registrationNumber: varchar('registration_number', { length: 100 }).unique(),
     capacityValue: numeric('capacity_value', { precision: 10, scale: 2 }),
     capacityUnit: varchar('capacity_unit', { length: 10 })
-      .default('cubic_ft')
-      .$type<'cubic_ft' | 'ton' | 'cubic_m'>(),
+      .default(BOAT_CAPACITY_UNITS.CUBIC_FT)
+      .$type<BoatCapacityUnit>(),
     lengthM: numeric('length_m', { precision: 8, scale: 2 }),
     widthM: numeric('width_m', { precision: 8, scale: 2 }),
     draftM: numeric('draft_m', { precision: 8, scale: 2 }),
@@ -48,8 +49,8 @@ export const boats = pgTable(
     boatValueTk: numeric('boat_value_tk', { precision: 12, scale: 2 }),
     status: varchar('status', { length: 20 })
       .notNull()
-      .default('active')
-      .$type<'active' | 'inactive' | 'maintenance' | 'decommissioned'>(),
+      .default(BOAT_STATUSES.ACTIVE)
+      .$type<BoatStatus>(),
     notes: text('notes'),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -58,11 +59,11 @@ export const boats = pgTable(
   (t) => ({
     statusCheck: check(
       'boats_status_check',
-      sql`${t.status} IN ('active', 'inactive', 'maintenance', 'decommissioned')`,
+      sql`${t.status} IN (${sql.raw(Object.values(BOAT_STATUSES).map(s => `'${s}'`).join(', '))})`,
     ),
     capacityUnitCheck: check(
       'boats_capacity_unit_check',
-      sql`${t.capacityUnit} IS NULL OR ${t.capacityUnit} IN ('cubic_ft', 'ton', 'cubic_m')`,
+      sql`${t.capacityUnit} IS NULL OR ${t.capacityUnit} IN (${sql.raw(Object.values(BOAT_CAPACITY_UNITS).map(s => `'${s}'`).join(', '))})`,
     ),
     publicIdIdx: index('idx_boats_public_id').on(t.publicId),
     sectorIdx: index('idx_boats_sector').on(t.sectorId),

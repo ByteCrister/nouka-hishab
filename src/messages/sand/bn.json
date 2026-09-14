@@ -1,0 +1,45 @@
+{
+  "title": "বালি ড্যাশবোর্ড",
+  "subtitle": "আপনার বালি ব্যবসার পারফরম্যান্সের ওভারভিউ।",
+  "refresh": "রিফ্রেশ",
+  "revenue": {
+    "title": "মোট আয়",
+    "currentMonth": "চলতি মাস"
+  },
+  "trips": {
+    "title": "মোট ট্রিপ",
+    "completed": "সম্পন্ন",
+    "ongoing": "চলমান"
+  },
+  "boats": {
+    "title": "সক্রিয় নৌকা",
+    "outOf": "মোট {total} নৌকার মধ্যে"
+  },
+  "maintenance": {
+    "title": "রক্ষণাবেক্ষণ খরচ",
+    "subtitle": "মোট রেকর্ডকৃত খরচ"
+  },
+  "loading": "ড্যাশবোর্ড ডেটা লোড হচ্ছে...",
+  "tryAgain": "আবার চেষ্টা করুন",
+  "actions": {
+    "title": "দ্রুত কাজ",
+    "addBoat": "নৌকা যোগ করুন",
+    "addTrip": "নতুন ট্রিপ",
+    "reports": "রিপোর্ট"
+  },
+  "recentActivity": {
+    "tripsTitle": "সাম্প্রতিক ট্রিপ",
+    "tripsDesc": "সর্বশেষ ৫টি ট্রিপ।",
+    "maintenanceTitle": "সাম্প্রতিক খরচ",
+    "maintenanceDesc": "সর্বশেষ ৫টি রক্ষণাবেক্ষণ।",
+    "boat": "নৌকা",
+    "status": "স্ট্যাটাস",
+    "amount": "পরিমাণ",
+    "date": "তারিখ",
+    "description": "বিবরণ",
+    "cost": "খরচ",
+    "noTrips": "কোনো সাম্প্রতিক ট্রিপ পাওয়া যায়নি।",
+    "noMaintenance": "কোনো সাম্প্রতিক খরচ পাওয়া যায়নি।",
+    "viewAll": "সব দেখুন"
+  }
+}

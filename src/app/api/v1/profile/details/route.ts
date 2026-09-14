@@ -1,21 +1,26 @@
-import { auth } from "@/lib/auth/auth";
+import { requireAuthPublicId } from "@/lib/auth/utils";
 import { db } from "@/config/db";
 import { profiles, users } from "@/db/app";
 import { eq } from "drizzle-orm";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
-import { UpdateProfilePayload, UserProfileData } from "@/types/profile";
+import { UpdateProfilePayload, UserProfileData } from "@/types/profile.types";
+import { withTransaction } from "@/lib/helpers/withTransaction";
 
 export const PATCH = withErrorHandler<UserProfileData, [Request]>(async (req: Request) => {
-  const session = await auth();
-  if (!session?.user?.id) throw new ApiError("Unauthorized", 401);
-
-  const userId = parseInt(session.user.id);
+  const publicId = await requireAuthPublicId();
   const payload: UpdateProfilePayload = await req.json();
 
   if (!payload.fullName) throw new ApiError("Full name is required", 400);
 
+  const currentUser = await db.query.users.findFirst({
+    where: (users, { eq }) => eq(users.publicId, publicId)
+  });
+
+  if (!currentUser) throw new ApiError("User not found", 404);
+  const userId = currentUser.id;
+
   // Use transaction for update
-  await db.transaction(async (tx) => {
+  await withTransaction(async (tx) => {
     // Check if profile exists
     const profile = await tx.query.profiles.findFirst({
       where: eq(profiles.userId, userId)

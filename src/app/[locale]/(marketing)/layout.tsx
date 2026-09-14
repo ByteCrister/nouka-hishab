@@ -1,6 +1,5 @@
-import { PublicLayoutWrapper } from "@/components/wrappers/PublicLayoutWrapper";
 import { setRequestLocale } from "next-intl/server";
-import { type AppLocale } from "@/constants/common";
+import { type AppLocale } from "@/constants/common.const";
 
 interface Props {
   children: React.ReactNode;
@@ -10,9 +9,5 @@ interface Props {
 export default async function MarketingLayout({ children, params }: Props) {
   const { locale } = await params as { locale: AppLocale };
   setRequestLocale(locale);
-  return (
-    <PublicLayoutWrapper locale={locale}>
-      {children}
-    </PublicLayoutWrapper>
-  );
+  return <>{children}</>;
 }

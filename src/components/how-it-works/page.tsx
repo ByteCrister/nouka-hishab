@@ -2,7 +2,7 @@ import { WaveDivider } from "../marketing/wave-divider";
 import { MarketingCTA } from "../marketing/client/marketing-cta";
 import { howItWorksMessages } from "@/messages/how-it-works/index";
 import { homeMessages } from "@/messages/home";
-import { type AppLocale } from "@/constants/common";
+import { type AppLocale } from "@/constants/common.const";
 import { FadeIn, FadeInUp, FadeInRight } from "../wrappers/motion-wrappers";
 import { Anchor, HandCoins, Ship, Navigation } from "lucide-react";
 

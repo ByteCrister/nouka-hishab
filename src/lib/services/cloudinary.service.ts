@@ -47,3 +47,30 @@ export const deleteFromCloudinary = (
     });
   });
 };
+
+export const generateSignature = (folder: string, originalFileName?: string) => {
+  const timestamp = Math.round(new Date().getTime() / 1000);
+  
+  const params: Record<string, string | number> = {
+    timestamp,
+    folder,
+  };
+
+  if (originalFileName) {
+    const nameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.')) || originalFileName;
+    const sanitized = nameWithoutExt.replace(/[^a-zA-Z0-9]/g, '_');
+    const randomStr = crypto.randomBytes(4).toString('hex');
+    params.public_id = `${sanitized}_${randomStr}`;
+  }
+
+  const signature = cloudinary.utils.api_sign_request(params, env.CLOUDINARY_API_SECRET);
+
+  return {
+    signature,
+    timestamp,
+    public_id: params.public_id,
+    api_key: env.CLOUDINARY_API_KEY,
+    folder,
+    cloud_name: env.CLOUDINARY_CLOUD_NAME,
+  };
+};

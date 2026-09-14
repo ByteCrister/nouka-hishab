@@ -33,6 +33,8 @@ export interface MediaUpdateInput {
 }
 
 /**
+ * @deprecated Use client-side `useMediaUpload` hook directly for direct-to-cloudinary browser uploads instead.
+ * 
  * Adds multiple media assets.
  * Deduplicates by file hash and asset type.
  * Uploads to Cloudinary only if the asset is new.
@@ -91,6 +93,8 @@ export const addMediaAssets = async (inputs: MediaUploadInput[]) => {
 };
 
 /**
+ * @deprecated Use client-side `useMediaUpload` hook directly for direct-to-cloudinary browser uploads instead.
+ * 
  * Updates media assets by taking an array of inputs with their corresponding old file IDs.
  * Soft-deletes the old file (deletedAt = new Date()), and processes the new one same as adding.
  */

@@ -16,6 +16,14 @@ import { ulid } from 'ulid';
 import { files } from './media';
 import { users, ghats } from './app';
 import { boats } from './boat';
+import { 
+  SandCargoUnit, 
+  SandTripExpenseCategory, 
+  SandTripStatus,
+  SAND_CARGO_UNITS,
+  SAND_TRIP_EXPENSE_CATEGORIES,
+  SAND_TRIP_STATUSES
+} from '@/constants/db/sand.const';
 
 // ─── Sand Trips ────────────────────────────────────────────────────────────
 // One record = one sand cargo run. Fully models the Bangladesh sand business
@@ -63,8 +71,8 @@ export const sandTrips = pgTable(
     // ── Cargo ────────────────────────────────────────────────────────────
     cargoValue: numeric('cargo_value', { precision: 10, scale: 2 }), // e.g. 5000
     cargoUnit: varchar('cargo_unit', { length: 10 })
-      .default('cubic_ft')
-      .$type<'cubic_ft' | 'ton' | 'cubic_m'>(),
+      .default(SAND_CARGO_UNITS.CUBIC_FT)
+      .$type<SandCargoUnit>(),
 
     // ── Revenue ──────────────────────────────────────────────────────────
     saleAmountTk: numeric('sale_amount_tk', { precision: 12, scale: 2 }), // 480,000 tk
@@ -96,8 +104,8 @@ export const sandTrips = pgTable(
     // 'loading' covers the barki-boat sand-loading phase before departure.
     status: varchar('status', { length: 20 })
       .notNull()
-      .default('scheduled')
-      .$type<'scheduled' | 'loading' | 'in_transit' | 'completed' | 'cancelled'>(),
+      .default(SAND_TRIP_STATUSES.SCHEDULED)
+      .$type<SandTripStatus>(),
 
     notes: text('notes'),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
@@ -107,11 +115,11 @@ export const sandTrips = pgTable(
   (t) => ({
     statusCheck: check(
       'sand_trips_status_check',
-      sql`${t.status} IN ('scheduled', 'loading', 'in_transit', 'completed', 'cancelled')`,
+      sql`${t.status} IN (${sql.raw(Object.values(SAND_TRIP_STATUSES).map(s => `'${s}'`).join(', '))})`,
     ),
     cargoUnitCheck: check(
       'sand_trips_cargo_unit_check',
-      sql`${t.cargoUnit} IS NULL OR ${t.cargoUnit} IN ('cubic_ft', 'ton', 'cubic_m')`,
+      sql`${t.cargoUnit} IS NULL OR ${t.cargoUnit} IN (${sql.raw(Object.values(SAND_CARGO_UNITS).map(s => `'${s}'`).join(', '))})`,
     ),
     boatIdx: index('idx_sand_trips_boat').on(t.boatId),
     publicIdIdx: index('idx_sand_trips_public_id').on(t.publicId),
@@ -138,7 +146,7 @@ export const sandTripExpenses = pgTable(
       .references(() => sandTrips.id, { onDelete: 'cascade' }),
     category: varchar('category', { length: 50 })
       .notNull()
-      .$type<'fuel' | 'labour' | 'maintenance' | 'toll_payment' | 'loading_fee' | 'engine_repair' | 'other'>(),
+      .$type<SandTripExpenseCategory>(),
     description: text('description'),
     amountTk: numeric('amount_tk', { precision: 10, scale: 2 }).notNull(),
     expenseDate: date('expense_date'),
@@ -151,7 +159,7 @@ export const sandTripExpenses = pgTable(
   (t) => ({
     categoryCheck: check(
       'sand_trip_expenses_category_check',
-      sql`${t.category} IN ('fuel', 'labour', 'maintenance', 'toll_payment', 'loading_fee', 'other')`,
+      sql`${t.category} IN (${sql.raw(Object.values(SAND_TRIP_EXPENSE_CATEGORIES).map(s => `'${s}'`).join(', '))})`,
     ),
     tripIdx: index('idx_sand_trip_expenses_trip').on(t.sandTripId),
   }),

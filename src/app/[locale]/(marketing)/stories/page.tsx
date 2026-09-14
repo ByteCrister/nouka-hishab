@@ -1,6 +1,6 @@
 import { StoriesPage } from "@/components/stories/page";
 import { setRequestLocale } from "next-intl/server";
-import { APP_LOCALES, type AppLocale } from "@/constants/common";
+import { APP_LOCALES, type AppLocale } from "@/constants/common.const";
 
 export function generateStaticParams() {
   return Object.values(APP_LOCALES).map((locale) => ({ locale }));

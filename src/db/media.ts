@@ -10,8 +10,11 @@ import {
   unique,
   index,
   AnyPgColumn,
+  check,
 } from 'drizzle-orm/pg-core';
 import { users } from './app';
+import { AssetStatus, AssetType, ASSET_STATUSES, ASSET_TYPES } from '@/constants/db/media.const';
+import { sql } from 'drizzle-orm';
 
 // ─── Assets: deduplicated by (file_hash, asset_type) ──────────────────────
 export const assets = pgTable(
@@ -22,12 +25,21 @@ export const assets = pgTable(
       .unique()
       .notNull(),
     cloudinaryUrl: text('cloudinary_url').notNull(),
+    cloudinaryResourceType: varchar('cloudinary_resource_type', { length: 50 }),
+    cloudinaryFormat: varchar('cloudinary_format', { length: 50 }),
+    status: varchar('status', { length: 20 })
+      .notNull()
+      .default(ASSET_STATUSES.PENDING)
+      .$type<AssetStatus>(),
     assetType: varchar('asset_type', { length: 20 })
       .notNull()
-      .$type<'image' | 'pdf' | 'docx' | 'other'>(),
+      .$type<AssetType>(),
     mimeType: varchar('mime_type', { length: 100 }),
     sizeBytes: bigint('size_bytes', { mode: 'number' }),
+    width: integer('width'),
+    height: integer('height'),
     fileHash: char('file_hash', { length: 64 }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => ({
@@ -36,6 +48,14 @@ export const assets = pgTable(
       table.assetType,
     ),
     hashIdx: index('idx_assets_hash').on(table.fileHash),
+    statusCheck: check(
+      'assets_status_check',
+      sql`${table.status} IN (${sql.raw(Object.values(ASSET_STATUSES).map((s) => `'${s}'`).join(', '))})`,
+    ),
+    typeCheck: check(
+      'assets_type_check',
+      sql`${table.assetType} IN (${sql.raw(Object.values(ASSET_TYPES).map((s) => `'${s}'`).join(', '))})`,
+    ),
   }),
 );
 

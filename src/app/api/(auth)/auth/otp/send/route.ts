@@ -6,7 +6,7 @@ import { mailer } from "@/config/node-mailer";
 import { generateOtpHtml } from "@/lib/html/otp-email";
 import bcrypt from "bcryptjs";
 import { isInCooldown, setCooldown } from "@/lib/services/redis.service";
-import { OTP_TYPES } from "@/constants/common";
+import { OTP_TYPES } from "@/constants/common.const";
 
 // Generate a random 6-digit OTP
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { OtpType } from "@/constants/common";
+import { OtpType } from "@/constants/common.const";
 
 export const otpService = {
   /**

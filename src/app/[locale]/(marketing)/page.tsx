@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { LandingPage } from "@/components/home/page";
-import { type AppLocale } from "@/constants/common";
+import { type AppLocale } from "@/constants/common.const";
 
 interface Props {
   params: Promise<{ locale: AppLocale }>;

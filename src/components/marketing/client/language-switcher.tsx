@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "@/i18n/routing";
 import { useLocale } from "next-intl";
 import { Globe } from "lucide-react";
-import { APP_LOCALES } from "@/constants/common";
+import { APP_LOCALES } from "@/constants/common.const";
 
 export function LanguageSwitcher() {
   const locale = useLocale();

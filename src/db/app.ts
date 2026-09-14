@@ -17,6 +17,8 @@ import {
 import { sql } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import { files } from './media';
+import { UserRole, USER_ROLES, OtpType, OTP_TYPES, AuditLogActorRole, ReportCategory, REPORT_CATEGORIES, ReportStatus, REPORT_STATUSES, TodoPriority, TODO_PRIORITIES } from '@/constants/db/users.const';
+import { BillingPeriod, BILLING_PERIODS, SubscriptionStatus, SUBSCRIPTION_STATUSES, PaymentMethod, PAYMENT_METHODS, PlatformAccountType, PLATFORM_ACCOUNT_TYPES } from '@/constants/db/subscriptions.const';
 
 // ─── Users ─────────────────────────────────────────────────────────────────
 // Core auth table. role='user' for boat operators, role='admin' for platform
@@ -35,13 +37,13 @@ export const users = pgTable(
     role: varchar('role', { length: 10 })
       .notNull()
       .default('user')
-      .$type<'user' | 'admin'>(),
+      .$type<UserRole>(),
     avatarFileId: integer('avatar_file_id').references((): AnyPgColumn => files.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   },
   (t) => ({
-    roleCheck: check('users_role_check', sql`${t.role} IN ('user', 'admin')`),
+    roleCheck: check('users_role_check', sql`${t.role} IN (${sql.raw(Object.values(USER_ROLES).map(s => `'${s}'`).join(', '))})`),
     publicIdIdx: index('idx_users_public_id').on(t.publicId),
     roleIdx: index('idx_users_role').on(t.role),
   }),
@@ -112,7 +114,7 @@ export const otps = pgTable(
     codeHash: text('code_hash').notNull(), // bcrypt hash of the raw OTP — raw code is never stored
     type: varchar('type', { length: 50 })
       .notNull()
-      .$type<'user_forgot_password' | 'admin_forgot_password' | 'user_password_change' | 'email_verification'>(),
+      .$type<OtpType>(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     isUsed: boolean('is_used').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -120,7 +122,7 @@ export const otps = pgTable(
   (t) => ({
     typeCheck: check(
       'otps_type_check',
-      sql`${t.type} IN ('user_forgot_password', 'admin_forgot_password', 'user_password_change', 'email_verification')`,
+      sql`${t.type} IN (${sql.raw(Object.values(OTP_TYPES).map(s => `'${s}'`).join(', '))})`,
     ),
     emailIdx: index('idx_otps_email').on(t.email),
     expiresAtIdx: index('idx_otps_expires_at').on(t.expiresAt),
@@ -163,7 +165,7 @@ export const subscriptionPlans = pgTable(
     billingPeriod: varchar('billing_period', { length: 20 })
       .notNull()
       .default('monthly')
-      .$type<'monthly' | 'yearly'>(),
+      .$type<BillingPeriod>(),
     maxBoats: integer('max_boats'), // null = unlimited
     maxTripsPerMonth: integer('max_trips_per_month'), // null = unlimited
     features: text('features').array().$type<string[]>(),
@@ -175,7 +177,7 @@ export const subscriptionPlans = pgTable(
   (t) => ({
     billingPeriodCheck: check(
       'subscription_plans_billing_period_check',
-      sql`${t.billingPeriod} IN ('monthly', 'yearly')`,
+      sql`${t.billingPeriod} IN (${sql.raw(Object.values(BILLING_PERIODS).map(s => `'${s}'`).join(', '))})`,
     ),
     sectorIdx: index('idx_subscription_plans_sector').on(t.sectorId),
     isActiveIdx: index('idx_subscription_plans_is_active').on(t.isActive),
@@ -199,12 +201,10 @@ export const userSubscriptions = pgTable(
     status: varchar('status', { length: 20 })
       .notNull()
       .default('pending')
-      .$type<'active' | 'expired' | 'cancelled' | 'pending'>(),
+      .$type<SubscriptionStatus>(),
     startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
     endsAt: timestamp('ends_at', { withTimezone: true }), // null = no fixed expiry
-    paymentMethod: varchar('payment_method', { length: 20 }).$type<
-      'bkash' | 'nagad' | 'rocket' | 'manual'
-    >(),
+    paymentMethod: varchar('payment_method', { length: 20 }).$type<PaymentMethod>(),
     paymentReference: varchar('payment_reference', { length: 255 }), // mobile-money txn ID
     amountPaidTk: numeric('amount_paid_tk', { precision: 10, scale: 2 }),
     note: text('note'), // admin notes for manual payments
@@ -213,11 +213,11 @@ export const userSubscriptions = pgTable(
   (t) => ({
     statusCheck: check(
       'user_subscriptions_status_check',
-      sql`${t.status} IN ('active', 'expired', 'cancelled', 'pending')`,
+      sql`${t.status} IN (${sql.raw(Object.values(SUBSCRIPTION_STATUSES).map(s => `'${s}'`).join(', '))})`,
     ),
     paymentMethodCheck: check(
       'user_subscriptions_payment_method_check',
-      sql`${t.paymentMethod} IS NULL OR ${t.paymentMethod} IN ('bkash', 'nagad', 'rocket', 'manual')`,
+      sql`${t.paymentMethod} IS NULL OR ${t.paymentMethod} IN (${sql.raw(Object.values(PAYMENT_METHODS).map(s => `'${s}'`).join(', '))})`,
     ),
     userIdx: index('idx_user_subscriptions_user').on(t.userId),
     statusIdx: index('idx_user_subscriptions_status').on(t.status),
@@ -235,7 +235,7 @@ export const platformAccounts = pgTable(
     label: varchar('label', { length: 100 }).notNull(), // e.g. "Main bKash"
     accountType: varchar('account_type', { length: 20 })
       .notNull()
-      .$type<'bkash' | 'nagad' | 'rocket' | 'bank'>(),
+      .$type<PlatformAccountType>(),
     accountNumber: varchar('account_number', { length: 50 }).notNull(),
     accountName: varchar('account_name', { length: 255 }),
     isActive: boolean('is_active').notNull().default(true),
@@ -246,7 +246,7 @@ export const platformAccounts = pgTable(
   (t) => ({
     accountTypeCheck: check(
       'platform_accounts_type_check',
-      sql`${t.accountType} IN ('bkash', 'nagad', 'rocket', 'bank')`,
+      sql`${t.accountType} IN (${sql.raw(Object.values(PLATFORM_ACCOUNT_TYPES).map(s => `'${s}'`).join(', '))})`,
     ),
     isActiveIdx: index('idx_platform_accounts_is_active').on(t.isActive),
   }),
@@ -347,7 +347,7 @@ export const auditLogs = pgTable(
   {
     id: serial('id').primaryKey(),
     actorId: integer('actor_id').references(() => users.id, { onDelete: 'set null' }),
-    actorRole: varchar('actor_role', { length: 10 }).$type<'user' | 'admin' | 'system'>(),
+    actorRole: varchar('actor_role', { length: 10 }).$type<AuditLogActorRole>(),
     action: varchar('action', { length: 100 }).notNull(), // e.g. 'user.blocked'
     entityType: varchar('entity_type', { length: 50 }), // e.g. 'user', 'boat', 'sand_trip'
     entityId: integer('entity_id'),
@@ -381,13 +381,13 @@ export const reports = pgTable(
       .references(() => users.id, { onDelete: 'restrict' }),
     category: varchar('category', { length: 50 })
       .notNull()
-      .$type<'bug' | 'billing' | 'feature_request' | 'other'>(),
+      .$type<ReportCategory>(),
     title: varchar('title', { length: 255 }).notNull(),
     description: text('description'),
     status: varchar('status', { length: 20 })
       .notNull()
-      .default('open')
-      .$type<'open' | 'in_review' | 'resolved' | 'closed'>(),
+      .default(REPORT_STATUSES.OPEN)
+      .$type<ReportStatus>(),
     adminReply: text('admin_reply'),
     resolvedBy: integer('resolved_by').references(() => users.id, { onDelete: 'set null' }),
     resolvedAt: timestamp('resolved_at', { withTimezone: true }),
@@ -397,11 +397,11 @@ export const reports = pgTable(
   (t) => ({
     categoryCheck: check(
       'reports_category_check',
-      sql`${t.category} IN ('bug', 'billing', 'feature_request', 'other')`,
+      sql`${t.category} IN (${sql.raw(Object.values(REPORT_CATEGORIES).map(s => `'${s}'`).join(', '))})`,
     ),
     statusCheck: check(
       'reports_status_check',
-      sql`${t.status} IN ('open', 'in_review', 'resolved', 'closed')`,
+      sql`${t.status} IN (${sql.raw(Object.values(REPORT_STATUSES).map(s => `'${s}'`).join(', '))})`,
     ),
     publicIdIdx: index('idx_reports_public_id').on(t.publicId),
     userIdx: index('idx_reports_user').on(t.userId),
@@ -449,15 +449,15 @@ export const todos = pgTable(
     dueDate: date('due_date'),
     priority: varchar('priority', { length: 10 })
       .notNull()
-      .default('normal')
-      .$type<'low' | 'normal' | 'high'>(),
+      .default(TODO_PRIORITIES.NORMAL)
+      .$type<TodoPriority>(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   },
   (t) => ({
     priorityCheck: check(
       'todos_priority_check',
-      sql`${t.priority} IN ('low', 'normal', 'high')`,
+      sql`${t.priority} IN (${sql.raw(Object.values(TODO_PRIORITIES).map(s => `'${s}'`).join(', '))})`,
     ),
     publicIdIdx: index('idx_todos_public_id').on(t.publicId),
     userIdx: index('idx_todos_user').on(t.userId),

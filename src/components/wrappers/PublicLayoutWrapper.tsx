@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/layout/nav/Navbar";
 import { Footer } from "@/components/layout/footer/Footer";
-import { type AppLocale } from "@/constants/common";
+import { type AppLocale } from "@/constants/common.const";
 
 export function PublicLayoutWrapper({
   children,

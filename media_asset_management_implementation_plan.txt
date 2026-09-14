@@ -1,0 +1,1798 @@
+MEDIA ASSET MANAGEMENT — PRODUCTION IMPLEMENTATION PLAN
+===============================================================
+
+Purpose
+-------
+Build a reusable, array-based media asset management system for a Next.js App Router + TypeScript + PostgreSQL + Drizzle + Cloudinary application.
+
+The system must support:
+- Single-file and multi-file uploads through the same service/API.
+- Images, PDF, DOCX, and future media types.
+- Maximum 2 MB final file size policy.
+- Client-side validation before upload.
+- SHA-256 based deduplication.
+- Direct browser -> Cloudinary upload for new assets.
+- Server-side verification and metadata persistence.
+- Asset -> File separation.
+- Soft deletion of old File references when a business record replaces media.
+- Race-condition-safe asset creation.
+- Partial success for bulk uploads: one failed item must not fail the entire batch.
+- Per-item status/error reporting.
+- Reusable APIs and services.
+- No Base64 for normal uploads.
+- Production-grade security and consistency.
+
+IMPORTANT DESIGN PRINCIPLE
+--------------------------
+Do not build separate upload systems for:
+1. profile image
+2. gallery images
+3. documents
+4. PDFs
+5. other attachments
+
+Build ONE generic media pipeline that accepts an array of upload intents/items.
+
+A single upload can internally be represented as an array of one item.
+
+Example:
+    processMediaAssets([profileImage])
+
+Multiple:
+    processMediaAssets([image1, image2, pdf1, docx1])
+
+The business feature decides what each item is used for; the media subsystem only manages assets/files and lifecycle.
+
+================================================================
+1. CORE DATA MODEL
+================================================================
+
+Keep the existing conceptual separation:
+
+Asset
+-----
+Represents the unique physical Cloudinary resource.
+
+File
+----
+Represents one logical usage/reference of an Asset.
+
+Relationship:
+
+    File -> Asset -> Cloudinary resource
+
+Example:
+
+    Asset #10
+      SHA256 = ABC...
+      Cloudinary Public ID = media/abc...
+      URL = https://...
+          ↑
+          |
+    File #101 (profile image)
+    File #102 (gallery image)
+    File #103 (article image)
+
+If the same physical file is uploaded again:
+- Do NOT upload to Cloudinary.
+- Reuse the existing Asset.
+- Create a new File.
+- Return the new File ID and Asset Cloudinary URL.
+
+Existing schema:
+
+assets:
+- id
+- cloudinaryPublicId
+- cloudinaryUrl
+- assetType
+- mimeType
+- sizeBytes
+- fileHash
+- createdAt
+
+files:
+- id
+- assetId
+- uploadedBy
+- originalFileName
+- description
+- deletedAt
+- createdAt
+
+Recommended improvements:
+
+assets:
+- id
+- cloudinaryPublicId
+- cloudinaryUrl
+- assetType
+- mimeType
+- sizeBytes
+- fileHash
+- status
+- cloudinaryResourceType
+- cloudinaryFormat
+- width (nullable)
+- height (nullable)
+- createdAt
+- updatedAt
+
+Recommended asset status:
+- pending
+- ready
+- failed
+
+If adding status creates unnecessary complexity, at minimum only persist a completed Asset after Cloudinary confirms successful upload.
+
+Files:
+- id
+- assetId
+- uploadedBy
+- originalFileName
+- description
+- deletedAt
+- createdAt
+- updatedAt
+
+Do not physically delete an Asset merely because one File is soft-deleted.
+
+Asset should only become a cleanup candidate when it has no active File references.
+
+================================================================
+2. DEDUPLICATION RULE
+================================================================
+
+Current unique key:
+
+    UNIQUE(fileHash, assetType)
+
+This is valid if assetType has semantic meaning.
+
+If exact byte-level deduplication should be universal across all media categories, prefer:
+
+    UNIQUE(fileHash)
+
+However, make this decision based on business requirements.
+
+Important:
+The SHA-256 hash must be calculated from the ORIGINAL file bytes, before any client-side transformation.
+
+If compression/transformation changes the bytes, the compressed output gets a different hash.
+
+Recommended rule:
+
+    original file
+        ↓
+    validate
+        ↓
+    calculate SHA-256
+        ↓
+    dedup lookup
+        ↓
+    if new -> compress/normalize image if needed
+        ↓
+    upload resulting file
+        ↓
+    persist metadata
+
+BUT:
+If the requirement is that identical original files always reuse the same Cloudinary asset, compression must be deterministic.
+
+For image compression, two important strategies exist:
+
+Strategy A — hash original bytes
+--------------------------------
+Pros:
+- Exact duplicate source detection.
+- Simple.
+
+Cons:
+- If two different source images compress to the same visual result, they will still be separate assets.
+- Stored Cloudinary bytes differ from the hash source.
+
+Strategy B — hash normalized/compressed output
+---------------------------------------------
+Pros:
+- Deduplication is based on what is actually stored.
+
+Cons:
+- Browser must normalize/compress first.
+- PDF/DOCX do not follow the same pipeline.
+
+Recommended for this project:
+Use original-file SHA-256 as the primary deduplication key because it is predictable and works for every supported file type.
+
+Optionally add:
+- normalizedHash
+- processedSizeBytes
+
+later if required.
+
+================================================================
+3. 2 MB SIZE POLICY
+================================================================
+
+Define one centralized constant:
+
+MAX_MEDIA_SIZE_BYTES = 2 * 1024 * 1024
+
+Do NOT duplicate "2MB" across components.
+
+Client validation:
+- file exists
+- valid MIME/type
+- valid extension where appropriate
+- original size <= 2 MB
+
+Server validation:
+- repeat validation
+- never trust client validation
+- enforce maximum size independently
+
+Important distinction:
+"maximum 2 MB" should normally mean the final file uploaded/stored by the system is <= 2 MB.
+
+For images, if original image is > 2 MB:
+- Decide whether the system should reject it or attempt compression.
+
+The requested behavior suggests:
+1. Validate it is a valid supported image.
+2. Apply lossless/near-lossless compression where possible.
+3. Ensure final output <= 2 MB.
+4. If it still cannot meet the limit, return an item-specific error.
+
+Do NOT silently destroy quality just to meet 2 MB.
+
+For PDF/DOCX:
+- Do not apply image compression logic.
+- If > 2 MB, reject unless a dedicated document optimization pipeline is intentionally introduced.
+
+================================================================
+4. IMAGE COMPRESSION POLICY
+================================================================
+
+Important terminology:
+"Lossless" compression and "reduce file size significantly" are not always compatible.
+
+PNG:
+- Can use lossless optimization.
+- File-size reduction may be limited.
+
+JPEG:
+- True lossless recompression is usually not useful for substantial size reduction.
+- Re-encoding can introduce loss.
+
+WebP:
+- Can be lossless or lossy.
+- Excellent for web delivery.
+
+Recommended architecture:
+- Preserve originalFileName and original MIME metadata.
+- For images, normalize to a web-friendly format only if product requirements allow it.
+- Use a deterministic compression policy.
+- Never compress PDFs/DOCX through the image pipeline.
+
+A robust browser-side approach can use a client image processing library if required, but the server must still enforce the final limits.
+
+Recommended quality strategy:
+- If image <= 2 MB: no compression unless normalization is required.
+- If image > 2 MB: resize only if dimensions are excessive, then compress progressively.
+- Stop once final output <= 2 MB.
+- Never reduce dimensions below a configured minimum.
+- If it cannot reach 2 MB within acceptable quality constraints, reject with:
+  "Image is too large to process within the 2 MB limit."
+
+Do not assume "lossless" can guarantee a target file size.
+
+Potential image processing library:
+- Browser-side: a maintained image compression library.
+- Server-side: Sharp if server-side processing is required.
+
+However, direct browser -> Cloudinary remains preferred for upload transport.
+
+================================================================
+5. FILE FLOW — NEW IMAGE
+================================================================
+
+Example: profile image.
+
+STEP 1
+------
+User selects image.
+
+Browser obtains:
+
+    File
+
+STEP 2
+------
+Validate:
+
+- file type
+- MIME type
+- extension
+- size
+- image can actually be decoded
+- maximum dimensions if required
+
+Do not trust only file.name or MIME type.
+
+STEP 3
+------
+If image processing is required:
+- compress/normalize
+- produce processed File/Blob
+- ensure final size <= 2 MB
+
+If the original is already acceptable:
+- use original File.
+
+STEP 4
+------
+Calculate SHA-256 from the bytes that are used for deduplication.
+
+Recommended:
+- Calculate hash from the exact upload candidate.
+
+If the implementation uses original-byte hash:
+- hash original File.
+
+If it uses processed-byte hash:
+- hash processed File.
+
+Do not mix the two rules.
+
+STEP 5
+------
+Send a request to Next.js:
+
+POST /api/media/assets/prepare
+
+Body concept:
+
+{
+  items: [
+    {
+      clientId: "local-item-1",
+      fileHash: "...",
+      assetType: "image",
+      mimeType: "image/webp",
+      sizeBytes: 184321,
+      originalFileName: "profile.jpg"
+    }
+  ]
+}
+
+The API should:
+- authenticate user
+- validate payload
+- check allowed media type
+- check size
+- query Assets by hash
+- return per-item result.
+
+Example response:
+
+{
+  items: [
+    {
+      clientId: "local-item-1",
+      status: "EXISTS",
+      fileId: 501,
+      assetId: 10,
+      cloudinaryUrl: "https://..."
+    }
+  ]
+}
+
+If Asset does not exist:
+
+{
+  clientId: "local-item-1",
+  status: "UPLOAD_REQUIRED",
+  upload: {
+    cloudName: "...",
+    apiKey: "...",
+    timestamp: 1234567890,
+    signature: "...",
+    folder: "media"
+  }
+}
+
+NEVER return Cloudinary API secret to the browser.
+
+================================================================
+6. SIGNED CLOUDINARY UPLOAD
+================================================================
+
+For production, prefer signed uploads.
+
+Browser:
+    asks Next.js for upload authorization
+
+Next.js:
+    authenticates user
+    validates upload intent
+    generates Cloudinary signature
+
+Browser:
+    uploads actual File directly to Cloudinary
+
+Cloudinary:
+    returns upload result
+
+Browser:
+    sends Cloudinary result to Next.js
+
+Next.js:
+    verifies result
+    creates/reuses Asset
+    creates File
+
+The browser should NEVER upload the file through the Next.js server as Base64.
+
+Cloudinary receives multipart FormData containing the File.
+
+================================================================
+7. FINALIZE API
+================================================================
+
+Endpoint concept:
+
+POST /api/media/assets/finalize
+
+Request:
+
+{
+  items: [
+    {
+      clientId: "local-item-1",
+      fileHash: "...",
+      assetType: "image",
+      originalFileName: "profile.jpg",
+      mimeType: "image/webp",
+      sizeBytes: 184321,
+      cloudinary: {
+        publicId: "...",
+        secureUrl: "...",
+        resourceType: "image",
+        format: "webp",
+        bytes: 184321,
+        width: 512,
+        height: 512
+      }
+    }
+  ]
+}
+
+Server MUST:
+- authenticate
+- validate all fields
+- validate size <= 2 MB
+- validate allowed type
+- verify Cloudinary response as much as practical
+- never trust arbitrary publicUrl/publicId submitted by the client
+- ensure the Cloudinary resource belongs to the expected upload context/folder
+- re-check Asset by hash
+- handle race conditions
+- create Asset only when needed
+- create File reference
+- return File ID and Cloudinary URL.
+
+================================================================
+8. RACE CONDITION HANDLING
+================================================================
+
+Critical scenario:
+
+Request A:
+    checks hash -> no Asset
+
+Request B:
+    checks hash -> no Asset
+
+Both upload same file.
+
+Both attempt:
+
+    INSERT Asset
+
+Database unique constraint must reject one.
+
+Therefore:
+- Keep the unique DB constraint.
+- Do not rely only on "SELECT then INSERT".
+
+Recommended transaction logic:
+
+1. Begin transaction.
+2. SELECT Asset by unique key.
+3. If exists:
+       create File referencing it.
+4. If not:
+       INSERT Asset.
+5. If unique conflict occurs:
+       fetch existing Asset.
+       create File referencing existing Asset.
+6. Commit.
+
+Important:
+Do not leave a transaction holding locks while waiting for Cloudinary network upload.
+
+Cloudinary upload should happen BEFORE the short DB transaction.
+
+This creates a possible orphan Cloudinary object if the DB insert loses a race.
+
+Handle this safely with cleanup.
+
+================================================================
+9. ORPHAN CLOUDINARY RESOURCE HANDLING
+================================================================
+
+Scenario:
+
+Browser uploads to Cloudinary.
+Then two clients finalize the same hash.
+
+One wins DB Asset creation.
+The other loses because Asset already exists.
+
+The losing Cloudinary upload is now an orphan.
+
+Solution:
+- Generate deterministic or traceable public IDs.
+- Mark unused uploads for cleanup.
+- After detecting duplicate during finalize, enqueue/delete the losing Cloudinary resource.
+- Never immediately delete a Cloudinary resource that might belong to the winning Asset.
+
+Alternative:
+Use deterministic Cloudinary public_id derived from hash.
+
+Example:
+
+    media/assets/{hash}
+
+But verify Cloudinary behavior and overwrite/versioning settings carefully before implementation.
+
+A background cleanup worker is recommended for orphan cleanup.
+
+================================================================
+10. FILE SOFT DELETE
+================================================================
+
+When a business entity replaces an image:
+
+Old:
+    File #100 -> Asset #10
+
+New:
+    File #200 -> Asset #20
+
+Operation:
+
+    File #100.deletedAt = now()
+
+Then create/use File #200.
+
+Never delete Asset #10 immediately.
+
+Why:
+Asset #10 may still be referenced by:
+- another business record
+- another user
+- another gallery item
+- another File
+
+Asset cleanup should happen asynchronously.
+
+================================================================
+11. REPLACE MEDIA API
+================================================================
+
+Do not make every feature manually implement:
+
+1. create new File
+2. delete old File
+
+Create a reusable service:
+
+    replaceFileReference({
+      oldFileId,
+      newFileId,
+      userId,
+      ...
+    })
+
+Or, preferably, keep replacement inside the business transaction where the business row changes.
+
+Example:
+
+Transaction:
+
+    UPDATE profile
+       SET profileImageFileId = newFileId
+
+    UPDATE files
+       SET deletedAt = now()
+     WHERE id = oldFileId
+
+Both should succeed or fail together.
+
+Important:
+The media service should not blindly soft-delete a File without checking authorization/ownership.
+
+================================================================
+12. MULTI-ASSET UPLOAD
+================================================================
+
+Client input:
+
+File[]
+
+Example:
+
+[
+  image1,
+  image2,
+  pdf1,
+  docx1
+]
+
+Assign each item a temporary clientId:
+
+    upload-1
+    upload-2
+    upload-3
+    upload-4
+
+Process each independently.
+
+Per-item state:
+
+    validating
+    hashing
+    checking
+    upload_required
+    uploading
+    finalizing
+    success
+    error
+
+Example final result:
+
+{
+  items: [
+    {
+      clientId: "upload-1",
+      status: "success",
+      fileId: 101,
+      cloudinaryUrl: "..."
+    },
+    {
+      clientId: "upload-2",
+      status: "error",
+      code: "FILE_TOO_LARGE",
+      message: "File exceeds the 2 MB limit."
+    },
+    {
+      clientId: "upload-3",
+      status: "success",
+      fileId: 103,
+      cloudinaryUrl: "..."
+    },
+    {
+      clientId: "upload-4",
+      status: "error",
+      code: "UNSUPPORTED_FILE_TYPE",
+      message: "DOCX files are not supported here."
+    }
+  ]
+}
+
+The entire batch must NOT fail because one item fails.
+
+================================================================
+13. CONCURRENCY
+================================================================
+
+Do NOT use:
+
+    Promise.all(files.map(...))
+
+for an unbounded number of files.
+
+Use controlled concurrency.
+
+Example configuration:
+
+    MEDIA_UPLOAD_CONCURRENCY = 3 or 4
+
+Hashing and Cloudinary upload should be limited separately if needed.
+
+Potential pipeline:
+
+    validation
+       ↓
+    hashing
+       ↓
+    prepare API
+       ↓
+    existing assets -> immediate File creation
+       ↓
+    new assets -> controlled Cloudinary uploads
+       ↓
+    finalize API
+       ↓
+    success/error per item
+
+The client can process 3-5 active uploads at a time.
+
+================================================================
+14. SINGLE UPLOAD SUPPORT
+================================================================
+
+A profile image should use exactly the same array API.
+
+Instead of:
+
+    POST /api/profile-image
+
+doing all media work itself,
+
+the profile feature should call the generic media service with:
+
+    items: [profileImage]
+
+The profile business operation then receives:
+
+    fileId
+    cloudinaryUrl
+
+and stores the File ID.
+
+This keeps the media system reusable.
+
+================================================================
+15. BUSINESS TABLE DESIGN
+================================================================
+
+Business tables should reference File ID, not Cloudinary URL.
+
+Example:
+
+users:
+    profileImageFileId -> files.id
+
+boat:
+    registrationDocumentFileId -> files.id
+
+tour:
+    coverImageFileId -> files.id
+
+article:
+    featuredImageFileId -> files.id
+
+gallery:
+    fileId -> files.id
+
+Never make business tables store:
+    cloudinaryUrl
+
+The URL is obtained through:
+
+    business record
+       -> fileId
+       -> File
+       -> assetId
+       -> Asset
+       -> cloudinaryUrl
+
+================================================================
+16. API STRUCTURE
+================================================================
+
+Suggested routes:
+
+src/app/api/media/
+    assets/
+        prepare/
+            route.ts
+        finalize/
+            route.ts
+    files/
+        [fileId]/
+            route.ts
+        [fileId]/
+            restore/
+                route.ts
+        [fileId]/
+            delete/
+                route.ts
+
+Optional:
+
+    assets/
+        [assetId]/
+            route.ts
+
+Do not expose unnecessary direct Asset mutation APIs.
+
+Business-specific APIs should call the media service rather than duplicate its logic.
+
+================================================================
+17. SERVICE STRUCTURE
+================================================================
+
+Suggested:
+
+src/
+  app/
+    api/
+      media/
+        assets/
+          prepare/
+            route.ts
+          finalize/
+            route.ts
+        files/
+          [fileId]/
+            route.ts
+          [fileId]/
+            delete/
+              route.ts
+
+  modules/
+    media/
+      constants/
+        media.constants.ts
+
+      types/
+        media.types.ts
+
+      schemas/
+        media.schema.ts
+
+      validators/
+        media.validator.ts
+
+      services/
+        media-prepare.service.ts
+        media-finalize.service.ts
+        media-file.service.ts
+        media-replace.service.ts
+        media-cleanup.service.ts
+
+      repositories/
+        asset.repository.ts
+        file.repository.ts
+
+      utils/
+        calculate-sha256.ts
+        media-type.ts
+        cloudinary.ts
+        upload-concurrency.ts
+
+      config/
+        media.config.ts
+
+  lib/
+    cloudinary/
+      cloudinary.server.ts
+
+Use the project's existing architecture/conventions if different. Do not create duplicate utility systems.
+
+================================================================
+18. TYPE DEFINITIONS
+================================================================
+
+Avoid any.
+
+Define explicit types.
+
+Examples:
+
+type MediaAssetType =
+  | "image"
+  | "pdf"
+  | "docx"
+  | "other";
+
+type MediaUploadStatus =
+  | "validating"
+  | "hashing"
+  | "checking"
+  | "upload_required"
+  | "uploading"
+  | "finalizing"
+  | "success"
+  | "error";
+
+type MediaErrorCode =
+  | "FILE_TOO_LARGE"
+  | "UNSUPPORTED_FILE_TYPE"
+  | "INVALID_FILE"
+  | "HASH_FAILED"
+  | "UPLOAD_FAILED"
+  | "FINALIZE_FAILED"
+  | "UNAUTHORIZED"
+  | "VALIDATION_FAILED"
+  | "UNKNOWN_ERROR";
+
+Create request/response schemas with the project's existing validation library, preferably Zod if already used.
+
+================================================================
+19. SECURITY
+================================================================
+
+Client validation is UX.
+
+Server validation is security.
+
+Server must validate:
+- authenticated user
+- authorization
+- fileHash format
+- MIME type
+- size
+- allowed assetType
+- filename length
+- description length
+- Cloudinary upload information
+- ownership of existing File before replacement/deletion
+
+Never trust:
+- client-provided URL
+- client-provided publicId
+- client-provided size
+- client-provided MIME type
+
+Cloudinary API secret:
+- server only
+- never NEXT_PUBLIC_
+- never sent to browser
+
+Use signed uploads.
+
+Restrict Cloudinary folder/path based on application rules.
+
+Consider rate limiting media preparation/finalization APIs.
+
+================================================================
+20. CLOUDINARY METADATA
+================================================================
+
+Store useful metadata returned by Cloudinary:
+
+cloudinaryPublicId
+cloudinaryUrl / secureUrl
+cloudinaryResourceType
+cloudinaryFormat
+sizeBytes
+width
+height
+
+Do not store huge Cloudinary responses.
+
+Cloudinary URL should be treated as delivery information, not the identity of the asset.
+
+Cloudinary publicId is the canonical resource identifier.
+
+================================================================
+21. ERROR HANDLING
+================================================================
+
+Every media item must have its own error.
+
+Do not return:
+
+    "Upload failed"
+
+for a batch.
+
+Return:
+
+    clientId
+    error code
+    user-friendly message
+
+Example:
+
+Image 1:
+    success
+
+Image 2:
+    FILE_TOO_LARGE
+
+Image 3:
+    success
+
+Image 4:
+    UPLOAD_FAILED
+
+The UI should be able to retry only failed items.
+
+Never expose:
+- database errors
+- Cloudinary secrets
+- internal stack traces
+
+to users.
+
+Log detailed internal errors server-side.
+
+================================================================
+22. RETRY STRATEGY
+================================================================
+
+Client should retry transient Cloudinary/network errors.
+
+Do not blindly retry:
+- invalid file
+- unsupported type
+- file too large
+- authorization failure
+
+Retry:
+- network interruption
+- temporary Cloudinary failure
+- temporary 5xx response
+
+Use limited retries with backoff.
+
+Example:
+
+    attempt 1
+    wait 500ms
+    attempt 2
+    wait 1s
+    attempt 3
+
+Then mark item as failed.
+
+================================================================
+23. IDEMPOTENCY
+================================================================
+
+Bulk upload requests can be retried.
+
+The system should avoid creating duplicate File records unintentionally when the exact same finalize request is submitted twice.
+
+Consider a client-generated upload/session ID.
+
+Example:
+
+    uploadSessionId
+    clientId
+
+For stronger idempotency, create a media upload session/table.
+
+Optional table:
+
+media_uploads:
+- id
+- sessionId
+- clientId
+- userId
+- fileHash
+- status
+- assetId
+- fileId
+- createdAt
+- updatedAt
+
+This is especially useful for:
+- large batches
+- resumable uploads
+- progress tracking
+- retries
+- debugging
+
+If the application does not need resumability initially, this table can be postponed.
+
+================================================================
+24. RECOMMENDED PHASE 1 DATABASE MODEL
+================================================================
+
+Keep it simple initially:
+
+assets
+files
+
+Add:
+- asset status
+- Cloudinary resource metadata
+- timestamps
+
+Use unique constraint on the chosen deduplication key.
+
+Do NOT introduce a large upload-session subsystem unless current requirements need it.
+
+================================================================
+25. OPTIONAL PHASE 2 UPLOAD SESSION
+================================================================
+
+If bulk uploads become complex, add:
+
+media_upload_sessions
+---------------------
+id
+userId
+status
+totalItems
+successfulItems
+failedItems
+createdAt
+completedAt
+
+media_upload_items
+------------------
+id
+sessionId
+clientId
+fileHash
+assetType
+originalFileName
+status
+assetId
+fileId
+errorCode
+errorMessage
+createdAt
+updatedAt
+
+This supports:
+- resumable bulk upload
+- progress
+- retry failed items
+- audit/debugging
+- background workflows
+
+Do not implement this merely for the sake of complexity.
+
+================================================================
+26. CLEANUP WORKER
+================================================================
+
+Use a background worker for asynchronous cleanup.
+
+Potential jobs:
+
+media:cleanup-orphan
+media:cleanup-unused-asset
+media:delete-cloudinary-resource
+media:verify-asset
+
+Example lifecycle:
+
+File soft-deleted
+      ↓
+Asset still has active references?
+      ↓
+YES -> do nothing
+      ↓
+NO
+      ↓
+enqueue cleanup job
+      ↓
+worker waits/grace period
+      ↓
+re-check active references
+      ↓
+delete Cloudinary resource
+      ↓
+delete/retire Asset
+
+The second reference check is important because a new File may have been created after the first check.
+
+================================================================
+27. CLOUDINARY ORPHAN CLEANUP
+================================================================
+
+Possible orphan cases:
+- Cloudinary upload succeeds but finalize API fails.
+- Database transaction fails.
+- Another request wins the deduplication race.
+- User closes browser after Cloudinary upload.
+- Network failure occurs after Cloudinary accepted upload.
+
+Recommended:
+- use a recognizable folder/prefix
+- store upload timestamps
+- optionally maintain an upload session
+- periodic worker identifies resources not associated with a ready Asset
+- cleanup only after a safe grace period.
+
+Never run immediate aggressive deletion.
+
+================================================================
+28. TRANSACTION BOUNDARIES
+================================================================
+
+Do not put external Cloudinary HTTP calls inside DB transactions.
+
+Bad:
+
+    BEGIN
+      upload Cloudinary
+      INSERT Asset
+      INSERT File
+    COMMIT
+
+This keeps a database transaction open during network I/O.
+
+Better:
+
+    validate
+       ↓
+    Cloudinary upload
+       ↓
+    short DB transaction
+       ├── find Asset
+       ├── create/reuse Asset
+       └── create File
+       ↓
+    commit
+
+If transaction loses a race:
+- reuse existing Asset
+- cleanup duplicate Cloudinary resource asynchronously.
+
+================================================================
+29. CLIENT COMPONENT STRUCTURE
+================================================================
+
+Suggested:
+
+src/components/shared/media/
+    media-uploader.tsx
+    media-upload-item.tsx
+    media-upload-list.tsx
+    media-upload-progress.tsx
+    media-upload-error.tsx
+
+Hooks:
+
+src/hooks/media/
+    use-media-upload.ts
+
+Utilities:
+
+src/lib/media/
+    calculate-sha256.ts
+    validate-media-file.ts
+    compress-image.ts
+    upload-to-cloudinary.ts
+    upload-concurrency.ts
+
+The UI should not contain database or business logic.
+
+================================================================
+30. CLIENT UPLOAD ALGORITHM
+================================================================
+
+Pseudo-flow:
+
+function uploadMediaFiles(files):
+
+    create upload items with clientId
+
+    for each item:
+        validate
+
+        if invalid:
+            mark error
+            continue
+
+        process image if required
+
+        calculate SHA-256
+
+    call prepare API for valid items
+
+    for each prepared item:
+        if EXISTING:
+            mark success with returned File ID/URL
+
+        if UPLOAD_REQUIRED:
+            put into upload queue
+
+    upload queue:
+        controlled concurrency
+
+        upload File directly to Cloudinary
+
+        on success:
+            send finalize information
+
+        on failure:
+            mark only that item failed
+
+    return complete result array
+
+================================================================
+31. PROFILE IMAGE REPLACEMENT FLOW
+================================================================
+
+User has:
+
+    profileImageFileId = 50
+
+User selects new image.
+
+Pipeline:
+
+1. validate new image
+2. compress/normalize if needed
+3. calculate SHA-256
+4. prepare API
+5. if duplicate Asset exists:
+       create new File -> existing Asset
+6. otherwise:
+       signed Cloudinary upload
+7. finalize:
+       create Asset
+       create File
+8. business transaction:
+       update user.profileImageFileId -> new File ID
+       soft-delete File #50
+9. return new File ID + URL
+
+Important:
+If the new image fails at any step, File #50 must remain active.
+
+Never soft-delete the old File before the new File is successfully created.
+
+================================================================
+32. MULTIPLE GALLERY FLOW
+================================================================
+
+For 3 images:
+
+    [A, B, C]
+
+A:
+    existing Asset -> new File -> success
+
+B:
+    new Asset -> Cloudinary -> File -> success
+
+C:
+    invalid > 2MB -> error
+
+Final:
+
+    A success
+    B success
+    C failed
+
+Do NOT roll back A and B just because C failed.
+
+This is intentionally partial-success behavior.
+
+================================================================
+33. DIFFERENT FILE TYPES
+================================================================
+
+Example:
+
+    profile.jpg
+    boat-photo.png
+    ownership.pdf
+    registration.docx
+
+Each item:
+- has its own assetType
+- has its own validation
+- has its own SHA-256
+- has its own dedup lookup
+- may reuse an Asset
+- may upload independently
+- may succeed/fail independently.
+
+Allowed types should be configured centrally.
+
+Example:
+
+IMAGE:
+    image/jpeg
+    image/png
+    image/webp
+
+PDF:
+    application/pdf
+
+DOCX:
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+Do not accept arbitrary MIME types just because the browser sends them.
+
+================================================================
+34. VALIDATION LAYERS
+================================================================
+
+Layer 1 — UI validation
+-----------------------
+Fast feedback.
+
+Layer 2 — browser file inspection
+----------------------------------
+Check:
+- actual readable File
+- image decoding
+- dimensions
+- extension
+- MIME
+
+Layer 3 — API validation
+------------------------
+Validate JSON payload.
+
+Layer 4 — Cloudinary upload constraints
+----------------------------------------
+Use signed configuration/preset restrictions.
+
+Layer 5 — finalize validation
+-----------------------------
+Verify returned metadata and enforce business rules.
+
+================================================================
+35. HASHING
+================================================================
+
+Browser SHA-256:
+
+    File
+      ↓
+    arrayBuffer()
+      ↓
+    crypto.subtle.digest("SHA-256", buffer)
+      ↓
+    hex string
+
+No Base64 conversion is required.
+
+For current <= 2 MB files this is reasonable.
+
+If later supporting very large files:
+- use streaming/chunked hashing
+- use chunked/resumable Cloudinary upload
+- avoid loading huge files fully into memory.
+
+================================================================
+36. API RESPONSE CONTRACT
+================================================================
+
+Use one consistent response structure.
+
+Example:
+
+{
+  "items": [
+    {
+      "clientId": "upload-1",
+      "status": "success",
+      "fileId": 101,
+      "assetId": 20,
+      "cloudinaryUrl": "..."
+    },
+    {
+      "clientId": "upload-2",
+      "status": "error",
+      "error": {
+        "code": "FILE_TOO_LARGE",
+        "message": "Maximum allowed file size is 2 MB."
+      }
+    }
+  ]
+}
+
+Do not make callers interpret different response shapes for single vs multiple uploads.
+
+A single upload simply has one item.
+
+================================================================
+37. TESTING PLAN
+================================================================
+
+Unit tests:
+- SHA-256 calculation
+- file type validation
+- size validation
+- image compression
+- error mapping
+- asset dedup lookup
+- cleanup eligibility
+
+Integration tests:
+- create new Asset
+- reuse existing Asset
+- create File
+- soft delete File
+- replace File
+- unique constraint race
+- finalize duplicate
+- unauthorized File replacement
+
+E2E tests:
+- single profile upload
+- profile replacement
+- three-image upload
+- mixed image/PDF/DOCX batch
+- one invalid item among valid items
+- network upload failure
+- duplicate upload
+- old File remains active if new upload fails.
+
+================================================================
+38. OBSERVABILITY
+================================================================
+
+Log:
+- request ID
+- user ID
+- upload session ID if used
+- clientId
+- fileHash (safe to log carefully; avoid unnecessary sensitive data)
+- assetId
+- fileId
+- Cloudinary publicId
+- duration
+- error code
+
+Metrics:
+- upload success rate
+- upload failure rate
+- average upload time
+- Cloudinary failures
+- duplicate/reuse rate
+- orphan cleanup count
+- compression ratio
+- average final size
+
+Never log:
+- Cloudinary API secret
+- signed secret
+- full request bodies containing sensitive data.
+
+================================================================
+39. IMPORTANT EDGE CASES
+================================================================
+
+Case: same image uploaded twice
+--------------------------------
+Expected:
+- one Asset
+- two Files
+
+Case: same file uploaded by two users
+--------------------------------------
+Expected:
+- one Asset
+- two Files
+unless business policy intentionally isolates assets per tenant.
+
+Case: user replaces image with identical image
+------------------------------------------------
+Can reuse the same Asset.
+Create a new File if logical File history/reference matters.
+
+Case: old File soft-deleted
+----------------------------
+Asset remains if another File references it.
+
+Case: new upload fails
+----------------------
+Old File remains active.
+
+Case: Cloudinary upload succeeds but DB fails
+----------------------------------------------
+Cleanup worker eventually removes orphan.
+
+Case: two requests create same Asset
+-------------------------------------
+DB unique constraint resolves race.
+
+Case: one item fails in a batch
+--------------------------------
+Other valid items continue.
+
+Case: file is exactly 2 MB
+--------------------------
+Accept if policy means <= 2 MiB.
+
+Case: file is 2 MB decimal vs binary
+-------------------------------------
+Define explicitly:
+    2 MiB = 2 * 1024 * 1024 bytes
+
+Use the same definition everywhere.
+
+================================================================
+40. RECOMMENDED IMPLEMENTATION ORDER
+================================================================
+
+Phase 1
+-------
+Finalize media constants/types/schema.
+
+Phase 2
+-------
+Implement validation.
+
+Phase 3
+-------
+Implement SHA-256 utility.
+
+Phase 4
+-------
+Implement Cloudinary server configuration/signature generation.
+
+Phase 5
+-------
+Implement prepare API.
+
+Phase 6
+-------
+Implement direct browser Cloudinary upload.
+
+Phase 7
+-------
+Implement finalize API.
+
+Phase 8
+-------
+Implement race-safe Asset/File persistence.
+
+Phase 9
+-------
+Implement reusable client upload hook with controlled concurrency.
+
+Phase 10
+--------
+Implement profile image replacement.
+
+Phase 11
+--------
+Implement generic multi-asset UI.
+
+Phase 12
+--------
+Implement File soft-delete.
+
+Phase 13
+--------
+Implement background cleanup worker.
+
+Phase 14
+--------
+Add tests and observability.
+
+================================================================
+41. IMPORTANT DECISIONS FOR ANTIGRAVITY TO ANALYZE
+================================================================
+
+Before implementation, Antigravity must inspect the existing project and answer:
+
+1. What ORM/database structure already exists?
+2. What validation library is already used?
+3. What API response/error-handler convention exists?
+4. What authentication system is used?
+5. What authorization pattern exists?
+6. How are services/repositories currently organized?
+7. Is there already a Cloudinary utility?
+8. Is there already a file/media component?
+9. Is there already a worker/Redis/BullMQ setup?
+10. Is there already a transaction helper?
+11. Is there already a logging system?
+12. What naming conventions are already established?
+13. Should media code follow an existing module/domain structure instead of the proposed folders?
+14. Does the current Asset schema need migration or can it be extended safely?
+15. Does the application use multi-tenancy, and if so, must Asset/File ownership be tenant-scoped?
+16. Which image processing approach fits the current application?
+17. Does Cloudinary configuration already enforce upload folders/resource types?
+18. Is signed upload already available?
+19. Does the existing UI use a particular toast/error convention?
+20. Is a worker necessary now, or only for cleanup/retry jobs?
+
+Antigravity must NOT blindly implement this document.
+
+It should:
+- inspect the entire relevant existing code
+- identify conflicts
+- preserve existing conventions
+- identify missing pieces
+- propose its own implementation plan
+- explain any architectural changes it recommends
+- identify migrations required
+- identify risks before coding.
+
+================================================================
+42. FINAL TARGET ARCHITECTURE
+================================================================
+
+                    USER
+                      |
+                      v
+                Browser File[]
+                      |
+                      v
+              Client Validation
+                      |
+                      v
+             Image Processing
+             (images only)
+                      |
+                      v
+                SHA-256
+                      |
+                      v
+          POST /media/assets/prepare
+                      |
+              +-------+-------+
+              |               |
+          Asset exists      New Asset
+              |               |
+              v               v
+         Create File     Get signed params
+              |               |
+              |               v
+              |        Browser -> Cloudinary
+              |               |
+              |               v
+              |        Cloudinary result
+              |               |
+              |               v
+              |       POST /media/assets/finalize
+              |               |
+              |               v
+              |          Create Asset
+              |               |
+              +-------+-------+
+                      |
+                      v
+                  Create File
+                      |
+                      v
+              Return File ID + URL
+                      |
+                      v
+              Business transaction
+                      |
+                      v
+          Old File soft-deleted
+          only after new File succeeds
+                      |
+                      v
+             Background cleanup
+                      |
+                      v
+          Unused Asset -> Cloudinary
+          resource cleanup
+
+================================================================
+43. KEY RULES — DO NOT BREAK THESE
+================================================================
+
+1. No Base64 for normal uploads.
+2. Browser uploads directly to Cloudinary.
+3. Server owns authorization and persistence.
+4. Never expose Cloudinary API secret.
+5. Validate on both client and server.
+6. SHA-256 is used for deduplication.
+7. Keep Asset and File separate.
+8. Business tables reference File IDs, not URLs.
+9. Use DB unique constraints for race-condition protection.
+10. Do not hold DB transactions during Cloudinary network calls.
+11. Old File is soft-deleted only after new File succeeds.
+12. One failed bulk item must not fail unrelated items.
+13. Use controlled upload concurrency.
+14. Keep errors item-specific.
+15. Use a worker for orphan/unused-asset cleanup.
+16. Do not blindly implement this plan; first analyze the existing project.
+17. Keep the architecture generic so one item and many items use the same pipeline.
+18. Never use `any` or `as any`; use explicit TypeScript types, `unknown`, schemas, and type guards where necessary.
+19. Keep the implementation production-oriented but avoid unnecessary infrastructure.
+20. The final implementation should follow the project's existing conventions where they are sound.
+
+END OF IMPLEMENTATION PLAN

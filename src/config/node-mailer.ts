@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 
 /**
  * Mailer
- * Automatically uses Gmail if EMAIL_AUTH and PASSWORD_AUTH are in env,
+ * Automatically uses Gmail if SMTP_USER and SMTP_PASSWORD are in env,
  * otherwise falls back to Ethereal testing mailer.
  */
 export const mailer = async (
@@ -12,14 +12,14 @@ export const mailer = async (
 ): Promise<boolean> => {
     try {
         let transporter;
-        const useRealEmail = process.env.EMAIL_AUTH && process.env.PASSWORD_AUTH;
+        const useRealEmail = process.env.SMTP_USER && process.env.SMTP_PASSWORD;
         
         if (useRealEmail) {
             transporter = nodemailer.createTransport({
                 service: "Gmail",
                 auth: {
-                    user: process.env.EMAIL_AUTH,
-                    pass: process.env.PASSWORD_AUTH,
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD,
                 },
             });
         } else {
@@ -37,7 +37,7 @@ export const mailer = async (
         }
 
         const info = await transporter.sendMail({
-            from: `"Nouka Hishab" <${process.env.EMAIL_AUTH || 'test@noukahishab.com'}>`,
+            from: `"Nouka Hishab" <${process.env.SMTP_USER || 'test@noukahishab.com'}>`,
             to: To,
             subject,
             html,

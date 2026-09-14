@@ -1,16 +1,13 @@
-import { auth } from "@/lib/auth/auth";
+import { requireAuthPublicId } from "@/lib/auth/utils";
 import { db } from "@/config/db";
 import { users } from "@/db/app";
 import { eq } from "drizzle-orm";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
-import { UpdatePasswordPayload } from "@/types/profile";
+import { UpdatePasswordPayload } from "@/types/profile.types";
 import bcrypt from "bcryptjs";
 
 export const PATCH = withErrorHandler<null, [Request]>(async (req: Request) => {
-  const session = await auth();
-  if (!session?.user?.id) throw new ApiError("Unauthorized", 401);
-
-  const userId = parseInt(session.user.id);
+  const publicId = await requireAuthPublicId();
   const payload: UpdatePasswordPayload = await req.json();
 
   if (!payload.currentPassword || !payload.newPassword) {
@@ -20,7 +17,7 @@ export const PATCH = withErrorHandler<null, [Request]>(async (req: Request) => {
   // Use transaction to ensure consistency
   await db.transaction(async (tx) => {
     const user = await tx.query.users.findFirst({
-      where: eq(users.id, userId)
+      where: eq(users.publicId, publicId)
     });
 
     if (!user) throw new ApiError("User not found", 404);
@@ -33,7 +30,7 @@ export const PATCH = withErrorHandler<null, [Request]>(async (req: Request) => {
     await tx.update(users).set({
       passwordHash: newPasswordHash,
       updatedAt: new Date(),
-    }).where(eq(users.id, userId));
+    }).where(eq(users.publicId, publicId));
   });
 
   return {

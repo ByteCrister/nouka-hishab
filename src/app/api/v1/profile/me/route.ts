@@ -1,18 +1,15 @@
-import { auth } from "@/lib/auth/auth";
+import { requireAuthPublicId } from "@/lib/auth/utils";
 import { db } from "@/config/db";
 import { users } from "@/db/app";
 import { eq } from "drizzle-orm";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
-import { UserProfileData } from "@/types/profile";
+import { UserProfileData } from "@/types/profile.types";
 
 export const GET = withErrorHandler<UserProfileData, [Request]>(async () => {
-  const session = await auth();
-  if (!session?.user?.id) throw new ApiError("Unauthorized", 401);
-
-  const userId = parseInt(session.user.id);
+  const publicId = await requireAuthPublicId();
 
   const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
+    where: eq(users.publicId, publicId),
     with: {
       profile: true,
       avatarFile: {
