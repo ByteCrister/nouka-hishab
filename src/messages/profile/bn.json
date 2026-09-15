@@ -30,5 +30,6 @@
   "cancel": "বাতিল করুন",
   "uploading": "আপলোড হচ্ছে...",
   "imageUploadedSuccessfully": "ছবি সফলভাবে আপলোড হয়েছে",
-  "uploadFailed": "আপলোড ব্যর্থ হয়েছে"
+  "uploadFailed": "আপলোড ব্যর্থ হয়েছে",
+  "home": "হোম"
 }

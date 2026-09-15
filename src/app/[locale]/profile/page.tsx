@@ -1,4 +1,5 @@
 import { ProfileView } from "@/components/profile/ProfileView";
+import { Breadcrumbs } from "@/components/shared/Breadcrumbs";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { type AppLocale } from "@/constants/common.const";
 
@@ -23,6 +24,12 @@ export default async function ProfilePage({ params }: Props) {
   return (
     <div className="w-full relative">
       <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10">
+        <Breadcrumbs 
+          items={[
+            { label: t("home"), href: "/", isHome: true },
+            { label: t("pageTitle") }
+          ]} 
+        />
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-[var(--color-ink-900)]">{t("pageTitle")}</h1>
           <p className="text-[var(--color-ink-500)] mt-2">{t("pageDescription")}</p>

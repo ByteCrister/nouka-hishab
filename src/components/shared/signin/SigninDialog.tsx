@@ -12,7 +12,7 @@ import { z } from "zod";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { signIn } from "next-auth/react";
 import axios from "axios";
-import { otpService } from "@/utils/auth/otp-service";
+import { otpService } from "@/utils/services/otp-service";
 import { OTP_TYPES } from "@/constants/common.const";
 
 // ─── Wavy SVG Decorations ───────────────────────────────────────────────────

@@ -51,14 +51,13 @@ export type FinalizeItem =
       cloudinaryFormat?: string;
       width?: number;
       height?: number;
-      oldFileId?: number;
     };
 
 export function useMediaUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState<{ [key: string]: number }>({});
 
-  const uploadMedia = async (files: File[], oldFileId?: number): Promise<UploadResult[]> => {
+  const uploadMedia = async (files: File[]): Promise<UploadResult[]> => {
     setIsUploading(true);
     setProgress({});
 
@@ -145,7 +144,6 @@ export function useMediaUpload() {
                 cloudinaryFormat: data.format,
                 width: data.width,
                 height: data.height,
-                oldFileId,
                 isExists: false,
               });
             });

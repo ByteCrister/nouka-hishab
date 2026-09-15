@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSandDashboardStore } from '@/store/useSandDashboardStore';
+import { useSandDashboardStore } from '@/store/sand/useSandDashboardStore';
 import { Ship, TrendingUp, Wrench, Map, AlertCircle, RefreshCcw, PlusCircle, Navigation, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';

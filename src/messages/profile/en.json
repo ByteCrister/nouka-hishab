@@ -30,5 +30,6 @@
   "cancel": "Cancel",
   "uploading": "Uploading...",
   "imageUploadedSuccessfully": "Image uploaded successfully",
-  "uploadFailed": "Upload failed"
+  "uploadFailed": "Upload failed",
+  "home": "Home"
 }

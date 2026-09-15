@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import api, { extractErrorMessage } from '@/utils/axios';
 import { toast } from 'sonner';
-import { SandDashboardMetrics } from '@/types/sand.types';
+import { SandDashboardMetrics } from '@/types/sand/sand-dashboard.types';
 
 const getTTL = () => {
-  const ttlStr = process.env.NEXT_PUBLIC_DASHBOARD_TTL;
+  const ttlStr = process.env.NEXT_PUBLIC_TTL;
   const ttl = parseInt(ttlStr || '300000', 10);
-  return isNaN(ttl) ? 300000 : ttl; // fallback to 5 minutes
+  return isNaN(ttl) ? 300000 : ttl;
 };
 
 export interface SandDashboardStore {
@@ -19,6 +19,7 @@ export interface SandDashboardStore {
   fetchDashboard: (force?: boolean) => Promise<void>;
   invalidateDashboard: () => void;
 }
+
 
 export const useSandDashboardStore = create<SandDashboardStore>((set, get) => ({
   metrics: null,
@@ -43,7 +44,7 @@ export const useSandDashboardStore = create<SandDashboardStore>((set, get) => ({
     set(isInitial ? { isLoading: true, error: null } : { isRefreshing: true, error: null });
 
     try {
-      const response = await axios.get('/api/v1/sand/dashboard');
+      const response = await api.get('/sand/dashboard');
       set({
         metrics: response.data.data,
         lastFetched: Date.now(),
@@ -51,9 +52,7 @@ export const useSandDashboardStore = create<SandDashboardStore>((set, get) => ({
         isRefreshing: false,
       });
     } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.error || error.message
-        : 'Failed to fetch dashboard metrics';
+      const message = extractErrorMessage(error);
       set({ isLoading: false, isRefreshing: false, error: message });
       toast.error(message);
     }

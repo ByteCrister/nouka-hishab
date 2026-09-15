@@ -25,7 +25,6 @@ const finalizeItemSchema = z.object({
   cloudinaryFormat: z.string().optional(),
   width: z.number().int().optional(),
   height: z.number().int().optional(),
-  oldFileId: z.number().int().optional(),
 });
 
 const finalizeSchema = z.object({
@@ -77,14 +76,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           })
           .returning();
         assetId = newAsset.id;
-      }
-
-      // 2. If it's an update, soft-delete the old file
-      if (item.oldFileId) {
-        await tx
-          .update(files)
-          .set({ deletedAt: new Date() })
-          .where(eq(files.id, item.oldFileId));
       }
 
       // 3. Create the new file reference

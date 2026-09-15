@@ -5,7 +5,7 @@ import { boats, boatMaintenanceLogs } from "@/db/boat";
 import { sectors } from "@/db/app";
 import { eq, isNull, and, sql, sum, count, desc } from "drizzle-orm";
 import { withErrorHandler } from "@/lib/helpers/withErrorHandler";
-import { SandDashboardMetrics } from "@/types/sand.types";
+import { SandDashboardMetrics } from "@/types/sand/sand-dashboard.types";
 import { BOAT_STATUSES } from "@/constants/db/boats.const";
 import { SAND_TRIP_STATUSES } from "@/constants/db/sand.const";
 

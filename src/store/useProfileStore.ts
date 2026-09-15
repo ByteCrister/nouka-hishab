@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import api, { extractErrorMessage } from '@/utils/axios';
 import { toast } from 'sonner';
 import {
   ProfileStore,
@@ -21,12 +21,10 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      const response = await axios.get('/api/v1/profile/me');
+      const response = await api.get('/profile/me');
       set({ profile: response.data.data, isLoading: false });
     } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.error || error.message
-        : 'Failed to fetch profile';
+      const message = extractErrorMessage(error, 'Failed to fetch profile');
       set({ error: message, isLoading: false });
       toast.error(message);
     }
@@ -55,16 +53,14 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     });
 
     try {
-      const response = await axios.patch('/api/v1/profile/details', payload);
+      const response = await api.patch('/profile/details', payload);
       set({ profile: response.data.data, isUpdating: false });
       toast.success('Profile updated successfully');
     } catch (error) {
       // Revert optimistic update on failure
       set({ profile: previousProfile, isUpdating: false });
 
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.error || error.message
-        : 'Failed to update profile';
+      const message = extractErrorMessage(error, 'Failed to update profile');
       toast.error(message);
       throw error;
     }
@@ -75,14 +71,12 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
 
     set({ isUpdating: true, error: null });
     try {
-      await axios.patch('/api/v1/profile/password', payload);
+      await api.patch('/profile/password', payload);
       set({ isUpdating: false });
       toast.success('Password updated successfully');
     } catch (error) {
       set({ isUpdating: false });
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.error || error.message
-        : 'Failed to update password';
+      const message = extractErrorMessage(error, 'Failed to update password');
       toast.error(message);
       throw error;
     }
@@ -109,16 +103,14 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     });
 
     try {
-      const response = await axios.patch('/api/v1/profile/image', payload);
+      const response = await api.patch('/profile/image', payload);
       set({ profile: response.data.data, isUpdating: false });
       toast.success('Profile image updated successfully');
     } catch (error) {
       // Revert optimistic update
       set({ profile: previousProfile, isUpdating: false });
 
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.error || error.message
-        : 'Failed to update profile image';
+      const message = extractErrorMessage(error, 'Failed to update profile image');
       toast.error(message);
       throw error;
     }

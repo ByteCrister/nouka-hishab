@@ -1,10 +1,12 @@
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { db } from "@/config/db";
 import { users } from "@/db/app";
+import { files } from "@/db/media";
 import { eq } from "drizzle-orm";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
 import { UpdateProfileImagePayload, UserProfileData } from "@/types/profile.types";
 import { withTransaction } from "@/lib/helpers/withTransaction";
+import { rateLimit } from "@/lib/services/redis.service";
 
 export const PATCH = withErrorHandler<UserProfileData, [Request]>(async (req: Request) => {
   const publicId = await requireAuthPublicId();
@@ -16,6 +18,12 @@ export const PATCH = withErrorHandler<UserProfileData, [Request]>(async (req: Re
 
   if (!currentUser) throw new ApiError("User not found", 404);
   const userId = currentUser.id;
+
+  const isAllowed = await rateLimit(`profile:image:${userId}`, 3, 3600); // 3 uploads per hour
+  
+  if (!isAllowed) {
+    throw new ApiError("Too many profile image updates. Please try again later.", 429);
+  }
 
   if (payload.avatarFileId === undefined) {
     throw new ApiError("avatarFileId is required", 400);
@@ -33,10 +41,19 @@ export const PATCH = withErrorHandler<UserProfileData, [Request]>(async (req: Re
       }
     }
 
+    const currentAvatarFileId = currentUser.avatarFileId;
+
     await tx.update(users).set({
       avatarFileId: payload.avatarFileId,
       updatedAt: new Date(),
     }).where(eq(users.id, userId));
+
+    // Soft delete the old avatar if it exists and is different from the new one
+    if (currentAvatarFileId && currentAvatarFileId !== payload.avatarFileId) {
+      await tx.update(files).set({
+        deletedAt: new Date(),
+      }).where(eq(files.id, currentAvatarFileId));
+    }
   });
   const updatedUser = await db.query.users.findFirst({
     where: eq(users.id, userId),

@@ -12,12 +12,13 @@ export default getRequestConfig(async ({ requestLocale }) => {
   // Each page folder has its own en.json / bn.json.
   // We merge all page messages into one flat messages object so
   // useTranslations() works across layouts and pages in the same tree.
-  const [home, howItWorks, stories, profile, sand] = await Promise.all([
+  const [home, howItWorks, stories, profile, sand, sandBoats] = await Promise.all([
     import(`@/messages/home/${locale}.json`),
     import(`@/messages/how-it-works/${locale}.json`),
     import(`@/messages/stories/${locale}.json`),
     import(`@/messages/profile/${locale}.json`),
     import(`@/messages/sand/${locale}.json`),
+    import(`@/messages/sand/boats/${locale}.json`),
   ]);
 
   return {
@@ -27,7 +28,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
       howItWorks: howItWorks.default,
       stories: stories.default,
       profile: profile.default,
-      sand: sand.default,
+      sand: {
+        ...sand.default,
+        boatsPage: sandBoats.default,
+      }
     },
   };
 });
