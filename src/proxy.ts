@@ -17,7 +17,7 @@ const SESSION_COOKIE =
     ? "__Secure-authjs.session-token"
     : "authjs.session-token";
 
-const PROTECTED_PREFIXES = ["/profile", "/sand"];
+const PROTECTED_PREFIXES = ["/profile", "/sand", "/boats", "/reports", "/recyclebin", "/maintenance"];
 
 function isProtected(pathnameWithoutLocale: string): boolean {
   return PROTECTED_PREFIXES.some(

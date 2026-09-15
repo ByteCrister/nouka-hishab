@@ -31,13 +31,9 @@ export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
 
   const sandLinks = [
     { href: "/sand", label: t("dashboard"), icon: LayoutDashboard },
-    { href: "/sand/boats", label: t("boats"), icon: Ship },
     { href: "/sand/trips", label: t("trips"), icon: Anchor },
     { href: "/sand/sales", label: t("sales"), icon: CircleDollarSign },
     { href: "/sand/payments", label: t("payments"), icon: Wallet },
-    { href: "/sand/maintenance", label: t("maintenance"), icon: Wrench },
-    { href: "/sand/reports", label: t("reports"), icon: FileSpreadsheet },
-    { href: "/sand/recyclebin", label: t("recyclebin"), icon: Trash2 },
   ];
 
   return (
@@ -70,6 +66,22 @@ export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
             <>
               <Separator />
               <div className="flex flex-col space-y-4">
+                <Link href="/boats" onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-bold text-ink-700 hover:text-river-500 transition-colors uppercase tracking-wider">
+                  <Ship className="w-5 h-5 opacity-70" />
+                  {t("boats")}
+                </Link>
+                <Link href="/sand/reports" onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-bold text-ink-700 hover:text-river-500 transition-colors uppercase tracking-wider">
+                  <FileSpreadsheet className="w-5 h-5 opacity-70" />
+                  {t("reports")}
+                </Link>
+                <Link href="/recyclebin" onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-bold text-ink-700 hover:text-river-500 transition-colors uppercase tracking-wider">
+                  <Trash2 className="w-5 h-5 opacity-70" />
+                  {t("recyclebin")}
+                </Link>
+                <Link href="/maintenance" onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-bold text-ink-700 hover:text-river-500 transition-colors uppercase tracking-wider">
+                  <Wrench className="w-5 h-5 opacity-70" />
+                  {t("maintenance")}
+                </Link>
                 <button 
                   onClick={() => setIsSandOpen(!isSandOpen)}
                   className="flex items-center justify-between w-full text-sm font-bold text-ink-400 uppercase tracking-wider outline-none"

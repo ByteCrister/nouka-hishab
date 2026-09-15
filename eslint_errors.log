@@ -1,0 +1,12 @@
+
+F:\g-drive\Projects\nouka-hishab\src\app\api\v1\boats\[publicId]\route.ts
+  118:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+F:\g-drive\Projects\nouka-hishab\src\components\boats\detail\EditBoatSheet.tsx
+  104:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+F:\g-drive\Projects\nouka-hishab\src\components\boats\new\NewBoatForm.tsx
+  68:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 3 problems (3 errors, 0 warnings)
+

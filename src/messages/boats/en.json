@@ -1,0 +1,26 @@
+{
+  "title": "Sand Boats",
+  "subtitle": "Manage and track all boats for sand operations.",
+  "addBoat": "Add New Boat",
+  "totalBoats": "Total Boats",
+  "searchPlaceholder": "Search boats by name...",
+  "status": {
+    "all": "All Statuses",
+    "active": "Active",
+    "maintenance": "Maintenance",
+    "inactive": "Inactive"
+  },
+  "grid": "Grid View",
+  "list": "List View",
+  "capacity": "Capacity",
+  "totalTrips": "Total Trips",
+  "kpis": {
+    "totalBoats": "Total Boats",
+    "activeBoats": "Active Boats",
+    "maintenanceBoats": "Under Maintenance",
+    "inactiveBoats": "Inactive Boats",
+    "totalFleetCapacity": "Total Fleet Capacity",
+    "totalFleetValue": "Total Fleet Value"
+  },
+  "noBoats": "No boats found matching your criteria."
+}

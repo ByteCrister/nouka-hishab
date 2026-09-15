@@ -1,0 +1,26 @@
+{
+  "title": "বালির নৌকা",
+  "subtitle": "বালি ব্যবসার জন্য সমস্ত নৌকা পরিচালনা এবং ট্র্যাক করুন।",
+  "addBoat": "নতুন নৌকা যোগ করুন",
+  "totalBoats": "মোট নৌকা",
+  "searchPlaceholder": "নৌকার নাম দিয়ে খুঁজুন...",
+  "status": {
+    "all": "সব স্ট্যাটাস",
+    "active": "সক্রিয়",
+    "maintenance": "রক্ষণাবেক্ষণ",
+    "inactive": "নিষ্ক্রিয়"
+  },
+  "grid": "গ্রিড ভিউ",
+  "list": "লিস্ট ভিউ",
+  "capacity": "ধারণক্ষমতা",
+  "totalTrips": "মোট ট্রিপ",
+  "kpis": {
+    "totalBoats": "মোট নৌকা",
+    "activeBoats": "সক্রিয় নৌকা",
+    "maintenanceBoats": "রক্ষণাবেক্ষণাধীন",
+    "inactiveBoats": "নিষ্ক্রিয় নৌকা",
+    "totalFleetCapacity": "মোট ফ্লিট ক্যাপাসিটি",
+    "totalFleetValue": "মোট ফ্লিট মূল্য"
+  },
+  "noBoats": "আপনার খোঁজার সাথে মিলে এমন কোনো নৌকা পাওয়া যায়নি।"
+}

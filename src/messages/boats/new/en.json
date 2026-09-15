@@ -1,0 +1,32 @@
+{
+  "form": {
+    "name": "Boat Name",
+    "namePlaceholder": "Enter boat name",
+    "nameRequired": "Boat name is required",
+    "nameTooLong": "Boat name is too long",
+    "sector": "Sector",
+    "sectorPlaceholder": "Select sector",
+    "sectorRequired": "Sector is required",
+    "capacityValue": "Capacity",
+    "capacityValuePlaceholder": "Enter capacity (optional)",
+    "capacityMustBePositive": "Capacity must be positive",
+    "capacityUnitRequired": "Capacity unit is required if capacity is provided",
+    "capacityUnit": "Unit",
+    "capacityUnitPlaceholder": "Select unit",
+    "status": "Status",
+    "statusPlaceholder": "Select status",
+    "notes": "Notes",
+    "notesPlaceholder": "Enter any notes about this boat (optional)",
+    "notesTooLong": "Notes are too long",
+    "submit": "Create Boat",
+    "submitting": "Creating...",
+    "cancel": "Cancel",
+    "success": "Boat created successfully",
+    "error": "Failed to create boat"
+  },
+  "new": {
+    "title": "Add New Boat",
+    "subtitle": "Create a new boat for sand operations.",
+    "back": "Back to Boats"
+  }
+}

@@ -19,6 +19,7 @@ import { ulid } from 'ulid';
 import { files } from './media';
 import { UserRole, USER_ROLES, OtpType, OTP_TYPES, AuditLogActorRole, ReportCategory, REPORT_CATEGORIES, ReportStatus, REPORT_STATUSES, TodoPriority, TODO_PRIORITIES } from '@/constants/db/users.const';
 import { BillingPeriod, BILLING_PERIODS, SubscriptionStatus, SUBSCRIPTION_STATUSES, PaymentMethod, PAYMENT_METHODS, PlatformAccountType, PLATFORM_ACCOUNT_TYPES } from '@/constants/db/subscriptions.const';
+import { SECTORS, type SectorName } from '@/constants/db/app.const';
 
 // ─── Users ─────────────────────────────────────────────────────────────────
 // Core auth table. role='user' for boat operators, role='admin' for platform
@@ -129,26 +130,6 @@ export const otps = pgTable(
   }),
 );
 
-// ─── Sectors ───────────────────────────────────────────────────────────────
-// Business categories. Admin adds them as the platform grows.
-// e.g. "Sand", "Limestone", "Package Cargo".
-// Each sector will eventually have its own trip table (sand_trips, etc.).
-export const sectors = pgTable(
-  'sectors',
-  {
-    id: serial('id').primaryKey(),
-    nameEn: varchar('name_en', { length: 100 }).unique().notNull(),
-    nameBn: varchar('name_bn', { length: 100 }),
-    slug: varchar('slug', { length: 100 }).unique().notNull(), // url-safe key e.g. 'sand'
-    description: text('description'),
-    isActive: boolean('is_active').notNull().default(true),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (t) => ({
-    isActiveIdx: index('idx_sectors_is_active').on(t.isActive),
-  }),
-);
-
 // ─── Subscription Plans ────────────────────────────────────────────────────
 // Admin-managed catalogue of plans. Soft-deleted via deleted_at so existing
 // subscriptions referencing old plans are never broken.
@@ -156,9 +137,10 @@ export const subscriptionPlans = pgTable(
   'subscription_plans',
   {
     id: serial('id').primaryKey(),
-    sectorId: integer('sector_id')
+    sector: varchar('sector', { length: 50 })
       .notNull()
-      .references(() => sectors.id, { onDelete: 'restrict' }),
+      .default(SECTORS.SAND)
+      .$type<SectorName>(),
     name: varchar('name', { length: 100 }).notNull(),
     description: text('description'),
     priceTk: numeric('price_tk', { precision: 10, scale: 2 }).notNull(),
@@ -179,7 +161,11 @@ export const subscriptionPlans = pgTable(
       'subscription_plans_billing_period_check',
       sql`${t.billingPeriod} IN (${sql.raw(Object.values(BILLING_PERIODS).map(s => `'${s}'`).join(', '))})`,
     ),
-    sectorIdx: index('idx_subscription_plans_sector').on(t.sectorId),
+    sectorCheck: check(
+      'subscription_plans_sector_check',
+      sql`${t.sector} IN (${sql.raw(Object.values(SECTORS).map(s => `'${s}'`).join(', '))})`,
+    ),
+    sectorIdx: index('idx_subscription_plans_sector').on(t.sector),
     isActiveIdx: index('idx_subscription_plans_is_active').on(t.isActive),
     deletedAtIdx: index('idx_subscription_plans_deleted_at').on(t.deletedAt),
   }),
@@ -479,7 +465,7 @@ export type NewSubscriptionPlan = typeof subscriptionPlans.$inferInsert;
 export type UserSubscription = typeof userSubscriptions.$inferSelect;
 export type NewUserSubscription = typeof userSubscriptions.$inferInsert;
 export type PlatformAccount = typeof platformAccounts.$inferSelect;
-export type Sector = typeof sectors.$inferSelect;
+
 export type Division = typeof divisions.$inferSelect;
 export type NewDivision = typeof divisions.$inferInsert;
 export type District = typeof districts.$inferSelect;

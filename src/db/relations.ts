@@ -5,7 +5,7 @@ import {
   adminDetails,
   subscriptionPlans,
   userSubscriptions,
-  sectors,
+
   divisions,
   districts,
   upazilas,
@@ -81,11 +81,7 @@ export const otpsRelations = relations(otps, ({ one }) => ({
 }));
 
 // ─── Subscription Plans ────────────────────────────────────────────────────
-export const subscriptionPlansRelations = relations(subscriptionPlans, ({ one, many }) => ({
-  sector: one(sectors, {
-    fields: [subscriptionPlans.sectorId],
-    references: [sectors.id],
-  }),
+export const subscriptionPlansRelations = relations(subscriptionPlans, ({ many }) => ({
   userSubscriptions: many(userSubscriptions),
 }));
 
@@ -99,12 +95,6 @@ export const userSubscriptionsRelations = relations(userSubscriptions, ({ one })
     fields: [userSubscriptions.planId],
     references: [subscriptionPlans.id],
   }),
-}));
-
-// ─── Sectors ───────────────────────────────────────────────────────────────
-export const sectorsRelations = relations(sectors, ({ many }) => ({
-  boats: many(boats),
-  subscriptionPlans: many(subscriptionPlans),
 }));
 
 // ─── Divisions ───────────────────────────────────────────────────────────────
@@ -141,11 +131,7 @@ export const ghatsRelations = relations(ghats, ({ one, many }) => ({
 }));
 
 // ─── Boats ─────────────────────────────────────────────────────────────────
-export const boatsRelations = relations(boats, ({ one, many }) => ({
-  sector: one(sectors, {
-    fields: [boats.sectorId],
-    references: [sectors.id],
-  }),
+export const boatsRelations = relations(boats, ({ many }) => ({
   maintenanceLogs: many(boatMaintenanceLogs),
   images: many(boatImages),
   documents: many(boatDocuments),

@@ -22,7 +22,23 @@ export function Navbar({ locale }: { locale: AppLocale }) {
         <div className="flex items-center gap-8">
           <Logo />
           <nav className="hidden items-center gap-8 md:flex">
-            {isAuthenticated && <SandMegaMenu />}
+            {isAuthenticated && (
+              <>
+                <Link href="/boats" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
+                  {t.nav.boats}
+                </Link>
+                <Link href="/sand/reports" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
+                  {t.nav.reports}
+                </Link>
+                <Link href="/recyclebin" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
+                  {t.nav.recyclebin}
+                </Link>
+                <Link href="/maintenance" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
+                  {t.nav.maintenance}
+                </Link>
+                <SandMegaMenu />
+              </>
+            )}
             <Link href="/how-it-works" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
               {t.nav.howItWorks}
             </Link>

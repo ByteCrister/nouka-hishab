@@ -2,7 +2,6 @@ import { requireAuthPublicId } from "@/lib/auth/utils";
 import { db } from "@/config/db";
 import { sandTrips } from "@/db/sand";
 import { boats, boatMaintenanceLogs } from "@/db/boat";
-import { sectors } from "@/db/app";
 import { eq, isNull, and, sql, sum, count, desc } from "drizzle-orm";
 import { withErrorHandler } from "@/lib/helpers/withErrorHandler";
 import { SandDashboardMetrics } from "@/types/sand/sand-dashboard.types";
@@ -46,8 +45,7 @@ export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () =>
         ).mapWith(Number),
       })
       .from(boats)
-      .innerJoin(sectors, eq(boats.sectorId, sectors.id))
-      .where(and(isNull(boats.deletedAt), eq(sectors.slug, 'sand'))),
+      .where(and(isNull(boats.deletedAt), eq(boats.sector, 'sand'))),
 
     db
       .select({
@@ -55,8 +53,7 @@ export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () =>
       })
       .from(boatMaintenanceLogs)
       .innerJoin(boats, eq(boatMaintenanceLogs.boatId, boats.id))
-      .innerJoin(sectors, eq(boats.sectorId, sectors.id))
-      .where(and(isNull(boatMaintenanceLogs.deletedAt), eq(sectors.slug, 'sand'))),
+      .where(and(isNull(boatMaintenanceLogs.deletedAt), eq(boats.sector, 'sand'))),
 
     db
       .select({

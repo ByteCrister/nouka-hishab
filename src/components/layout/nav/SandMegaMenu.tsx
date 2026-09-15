@@ -2,15 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { 
+import {
   ChevronDown, 
   LayoutDashboard, 
-  Ship, 
   Anchor, 
   Wallet, 
-  Wrench, 
-  FileSpreadsheet,
-  Trash2,
   CircleDollarSign
 } from "lucide-react";
 
@@ -19,13 +15,9 @@ export function SandMegaMenu() {
 
   const sandLinks = [
     { href: "/sand", label: t("dashboard"), icon: LayoutDashboard },
-    { href: "/sand/boats", label: t("boats"), icon: Ship },
     { href: "/sand/trips", label: t("trips"), icon: Anchor },
     { href: "/sand/sales", label: t("sales"), icon: CircleDollarSign },
     { href: "/sand/payments", label: t("payments"), icon: Wallet },
-    { href: "/sand/maintenance", label: t("maintenance"), icon: Wrench },
-    { href: "/sand/reports", label: t("reports"), icon: FileSpreadsheet },
-    { href: "/sand/recyclebin", label: t("recyclebin"), icon: Trash2 },
   ];
 
   return (

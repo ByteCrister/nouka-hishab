@@ -104,7 +104,7 @@ export function SandDashboardClient() {
             <h2 className="text-lg font-semibold tracking-tight">{t('actions.title')}</h2>
           </div>
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            <Link href="/sand/boats/new" className="flex-1 sm:flex-none">
+            <Link href="/boats/new" className="flex-1 sm:flex-none">
               <Button variant="secondary" className="w-full bg-orange-100/50 hover:bg-orange-100 dark:bg-orange-900/20 dark:hover:bg-orange-900/40 text-orange-700 dark:text-orange-400">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 {t('actions.addBoat')}
