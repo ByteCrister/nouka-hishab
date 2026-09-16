@@ -5,7 +5,7 @@ import { boats, boatImages } from "@/db/boat";
 import { files, assets } from "@/db/media";
 import { sandTrips } from "@/db/sand";
 import { eq, and, or, ilike, isNull, desc, asc, sql, count, sum } from "drizzle-orm";
-import { requireAuthPublicId } from "@/lib/auth/utils";
+import { requireAuthUserId } from "@/lib/auth/utils";
 import { withErrorHandler } from "@/lib/helpers/withErrorHandler";
 import {
     BoatListResponse,
@@ -30,7 +30,7 @@ const getBoatsSchema = z.object({
 
 
 export const GET = withErrorHandler<BoatListResponse, [NextRequest]>(async (req) => {
-    await requireAuthPublicId();
+    const userId = await requireAuthUserId();
 
     const { searchParams } = new URL(req.url);
     const query = getBoatsSchema.parse(Object.fromEntries(searchParams));
@@ -38,7 +38,8 @@ export const GET = withErrorHandler<BoatListResponse, [NextRequest]>(async (req)
     const offset = (query.page - 1) * query.limit;
 
     const baseConditions = [
-        isNull(boats.deletedAt)
+        isNull(boats.deletedAt),
+        eq(boats.createdBy, userId),
     ];
 
     if (query.sector && query.sector !== 'all') {
@@ -148,7 +149,7 @@ export const GET = withErrorHandler<BoatListResponse, [NextRequest]>(async (req)
 });
 
 export const POST = withErrorHandler<unknown, [NextRequest]>(async (req) => {
-    await requireAuthPublicId();
+    const userId = await requireAuthUserId();
 
     const body = await req.json();
     const payload = createBoatSchema.parse(body);
@@ -162,6 +163,7 @@ export const POST = withErrorHandler<unknown, [NextRequest]>(async (req) => {
             capacityUnit: payload.capacityUnit || undefined,
             status: payload.status || BOAT_STATUSES.ACTIVE,
             notes: payload.notes || null,
+            createdBy: userId,
         })
         .returning();
 

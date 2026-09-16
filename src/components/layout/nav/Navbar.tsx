@@ -27,7 +27,7 @@ export function Navbar({ locale }: { locale: AppLocale }) {
                 <Link href="/boats" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
                   {t.nav.boats}
                 </Link>
-                <Link href="/sand/reports" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
+                <Link href="/reports" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
                   {t.nav.reports}
                 </Link>
                 <Link href="/recyclebin" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">

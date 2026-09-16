@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useDebounce } from 'use-debounce';
-import { useBoatsListStore } from '@/store/useBoatStore';
+import { useBoatFiltersStore } from '@/store/useBoatFiltersStore';
 import { useTranslations } from 'next-intl';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,8 @@ import { SECTORS, type SectorName } from '@/constants/db/app.const';
 
 export function BoatsToolbar() {
   const t = useTranslations('boatsPage');
-  const { filters, setSearch, setStatus, setSector } = useBoatsListStore();
+  const sharedT = useTranslations('shared');
+  const { listFilters: filters, setSearch, setStatus, setSector } = useBoatFiltersStore();
   const [localSearch, setLocalSearch] = useState(filters.search || '');
 
   const [debouncedSearch] = useDebounce(localSearch, 400);
@@ -33,14 +34,14 @@ export function BoatsToolbar() {
 
   return (
     <FadeInUp delay={0.1}>
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row gap-4 mb-2">
         <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input 
           placeholder={t('searchPlaceholder')}
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
-          className="pl-9 h-11 bg-card border-border/50 focus-visible:ring-primary/20"
+          className="pl-9 h-11 bg-card/50 backdrop-blur-sm border-border/50 focus-visible:ring-primary/20 rounded-xl transition-all shadow-sm focus:shadow-md"
         />
       </div>
       
@@ -49,14 +50,14 @@ export function BoatsToolbar() {
           value={filters.sector || 'all'} 
           onValueChange={(val: string) => setSector(val as SectorName | 'all')}
         >
-          <SelectTrigger className="h-11 bg-card border-border/50 font-medium">
-            <SelectValue placeholder="All Sectors" />
+          <SelectTrigger className="h-11 bg-card/50 backdrop-blur-sm border-border/50 font-medium rounded-xl shadow-sm hover:border-primary/30 transition-all">
+            <SelectValue placeholder={sharedT('sectors.all')} />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Sectors</SelectItem>
-            <SelectItem value={SECTORS.SAND}>Sand</SelectItem>
-            <SelectItem value={SECTORS.LIME_STONE}>Stone</SelectItem>
-            <SelectItem value={SECTORS.BRICK}>Brick</SelectItem>
+          <SelectContent className="rounded-xl shadow-lg border-border/50">
+            <SelectItem value="all" className="rounded-lg">{sharedT('sectors.all')}</SelectItem>
+            <SelectItem value={SECTORS.SAND} className="rounded-lg">{sharedT('sectors.sand')}</SelectItem>
+            <SelectItem value={SECTORS.LIME_STONE} className="rounded-lg">{sharedT('sectors.stone')}</SelectItem>
+            <SelectItem value={SECTORS.BRICK} className="rounded-lg">{sharedT('sectors.brick')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -66,14 +67,14 @@ export function BoatsToolbar() {
           value={filters.status || 'all'} 
           onValueChange={(val: string) => setStatus(val as BoatStatus | 'all')}
         >
-          <SelectTrigger className="h-11 bg-card border-border/50 font-medium">
+          <SelectTrigger className="h-11 bg-card/50 backdrop-blur-sm border-border/50 font-medium rounded-xl shadow-sm hover:border-primary/30 transition-all">
             <SelectValue placeholder={t('status.all')} />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t('status.all')}</SelectItem>
-            <SelectItem value="active">{t('status.active')}</SelectItem>
-            <SelectItem value="maintenance">{t('status.maintenance')}</SelectItem>
-            <SelectItem value="inactive">{t('status.inactive')}</SelectItem>
+          <SelectContent className="rounded-xl shadow-lg border-border/50">
+            <SelectItem value="all" className="rounded-lg">{t('status.all')}</SelectItem>
+            <SelectItem value="active" className="rounded-lg">{t('status.active')}</SelectItem>
+            <SelectItem value="maintenance" className="rounded-lg">{t('status.maintenance')}</SelectItem>
+            <SelectItem value="inactive" className="rounded-lg">{t('status.inactive')}</SelectItem>
           </SelectContent>
         </Select>
       </div>

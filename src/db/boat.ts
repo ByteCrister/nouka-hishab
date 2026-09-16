@@ -20,8 +20,8 @@ import { BoatCapacityUnit, BoatStatus, BOAT_CAPACITY_UNITS, BOAT_STATUSES } from
 import { SECTORS, type SectorName } from '@/constants/db/app.const';
 
 // ─── Boats ─────────────────────────────────────────────────────────────────
-// Steel boat registry. No owner FK — the logged-in user manages their own
-// boats. Ownership/partnership is handled outside the DB for now.
+// Steel boat registry.
+// created_by references the user who created/owns the boat.
 // capacity_value + capacity_unit replaces the old single capacityTon field.
 // boat_value_tk is informational (e.g. for insurance / maintenance budgeting).
 export const boats = pgTable(
@@ -54,6 +54,9 @@ export const boats = pgTable(
       .default(BOAT_STATUSES.ACTIVE)
       .$type<BoatStatus>(),
     notes: text('notes'),
+    createdBy: integer('created_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
@@ -74,6 +77,7 @@ export const boats = pgTable(
     ),
     sectorIdx: index('idx_boats_sector').on(t.sector),
     statusIdx: index('idx_boats_status').on(t.status),
+    createdByIdx: index('idx_boats_created_by').on(t.createdBy),
   }),
 );
 

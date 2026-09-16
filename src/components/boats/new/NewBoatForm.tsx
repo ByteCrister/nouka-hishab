@@ -4,7 +4,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useBoatStore } from "@/store/useBoatStore";
+import { useCreateBoat } from "@/hooks/mutations/useBoatMutations";
 import { createBoatSchema } from "@/utils/zod/boats.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export function NewBoatForm() {
   const t = useTranslations("boatsPage");
   const router = useRouter();
-  const { createBoat, isSubmitting } = useBoatStore();
+  const { mutateAsync: createBoat, isPending: isSubmitting } = useCreateBoat();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -72,12 +72,8 @@ export function NewBoatForm() {
         notes: validData.notes || null,
       });
 
-      if (newBoat) {
-        toast.success(t("form.success"));
-        router.push(`/boats/${newBoat.publicId}`);
-      } else {
-        toast.error(t("form.error"));
-      }
+      toast.success(t("form.success"));
+      router.push(`/boats/${newBoat.publicId}`);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};

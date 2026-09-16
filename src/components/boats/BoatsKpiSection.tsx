@@ -1,12 +1,15 @@
 "use client";
 
-import { useBoatsListStore } from '@/store/useBoatStore';
+import { useBoatFiltersStore } from '@/store/useBoatFiltersStore';
+import { useBoats } from '@/hooks/queries/useBoatsQueries';
 import { useTranslations } from 'next-intl';
 import { Ship, CheckCircle2, Wrench, PauseCircle, Package, Banknote } from 'lucide-react';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
 
 export function BoatsKpiSection() {
-  const { kpis, isLoading } = useBoatsListStore();
+  const { listFilters } = useBoatFiltersStore();
+  const { data, isLoading } = useBoats(listFilters);
+  const kpis = data?.kpis;
   const t = useTranslations('boatsPage.kpis');
 
   if (isLoading && !kpis) {
@@ -74,9 +77,9 @@ export function BoatsKpiSection() {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
       {kpiItems.map((item, idx) => (
         <FadeInUp key={idx} delay={item.delay}>
-          <div className="rounded-xl border border-border/50 bg-card p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+          <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5 shadow-sm hover:shadow-md hover:border-primary/20 transition-all relative overflow-hidden group">
             <div className="flex items-center space-x-3 mb-3">
-              <div className={`p-2 rounded-lg ${item.bg}`}>
+              <div className={`p-2 rounded-xl ${item.bg}`}>
                 {item.icon}
               </div>
               <h3 className="font-medium text-muted-foreground text-sm leading-tight">

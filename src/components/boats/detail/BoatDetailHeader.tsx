@@ -7,7 +7,7 @@ import { FadeInUp } from '@/components/wrappers/motion-wrappers';
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import { Badge } from '@/components/ui/badge';
 import type { BoatDetail } from '@/types/boats.types';
-import { useBoatStore } from '@/store/useBoatStore';
+import { useDeleteBoat } from '@/hooks/mutations/useBoatMutations';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { EditBoatSheet } from './EditBoatSheet';
@@ -32,7 +32,7 @@ export function BoatDetailHeader({ boat }: BoatDetailHeaderProps) {
   const tSand = useTranslations('sand');
   const tBoats = useTranslations('boatsPage');
   const router = useRouter();
-  const { deleteBoat, isDeleting } = useBoatStore();
+  const { mutateAsync: deleteBoat, isPending: isDeleting } = useDeleteBoat();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const getStatusColor = (status: string) => {
@@ -47,9 +47,11 @@ export function BoatDetailHeader({ boat }: BoatDetailHeaderProps) {
   };
 
   const handleDelete = async () => {
-    const success = await deleteBoat(boat.publicId);
-    if (success) {
+    try {
+      await deleteBoat(boat.publicId);
       router.push('/boats');
+    } catch {
+      // error handled by mutation
     }
   };
 

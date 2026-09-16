@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
-import { useBoatStore } from '@/store/useBoatStore';
+import { useBoatFiltersStore } from '@/store/useBoatFiltersStore';
 import { Search, ListFilter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 
 export function BoatTripsToolbar() {
   const t = useTranslations('boatsPage.detail.trips');
-  const { tripsFilters, setTripsSearch, setTripsStatus, resetTripsFilters } = useBoatStore();
+  const { tripsFilters, setTripsSearch, setTripsStatus, resetTripsFilters } = useBoatFiltersStore();
   const [localSearch, setLocalSearch] = useState(tripsFilters.search);
   const [debouncedSearch] = useDebounce(localSearch, 500);
 

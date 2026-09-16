@@ -3,9 +3,9 @@ import { z } from "zod";
 import { db } from "@/config/db";
 import { boats } from "@/db/boat";
 import { sandTrips } from "@/db/sand";
-import { ghats } from "@/db/app";
+import { locations } from "@/db/app";
 import { eq, and, or, ilike, isNull, desc, asc, count, gte, lte } from "drizzle-orm";
-import { requireAuthPublicId } from "@/lib/auth/utils";
+import { requireAuthUserId } from "@/lib/auth/utils";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
 import {
     BoatTripsResponse,
@@ -27,7 +27,7 @@ const getTripsSchema = z.object({
 });
 
 export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: Promise<{ publicId: string }> }]>(async (req, { params }) => {
-    await requireAuthPublicId();
+    const userId = await requireAuthUserId();
 
     const { publicId } = await params;
 
@@ -36,11 +36,11 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
 
     const offset = (query.page - 1) * query.limit;
 
-    // First find the boat id
+    // Find the boat and verify ownership in one step
     const boatResult = await db
         .select({ id: boats.id })
         .from(boats)
-        .where(and(eq(boats.publicId, publicId), isNull(boats.deletedAt)))
+        .where(and(eq(boats.publicId, publicId), isNull(boats.deletedAt), eq(boats.createdBy, userId)))
         .limit(1);
 
     if (!boatResult.length) {
@@ -48,8 +48,8 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
     }
     const boatId = boatResult[0].id;
 
-    const sourceGhats = alias(ghats, 'sourceGhats');
-    const destGhats = alias(ghats, 'destGhats');
+    const sourceLocations = alias(locations, 'sourceLocations');
+    const destLocations = alias(locations, 'destLocations');
 
     const baseConditions = [
         eq(sandTrips.boatId, boatId),
@@ -64,8 +64,8 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
     if (query.search) {
         baseConditions.push(
             or(
-                ilike(sourceGhats.nameEn, `%${query.search}%`),
-                ilike(destGhats.nameEn, `%${query.search}%`)
+                ilike(sourceLocations.name, `%${query.search}%`),
+                ilike(destLocations.name, `%${query.search}%`)
             )!
         );
     }
@@ -92,8 +92,8 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
         db
             .select({ count: count() })
             .from(sandTrips)
-            .leftJoin(sourceGhats, eq(sandTrips.sourceGhatId, sourceGhats.id))
-            .leftJoin(destGhats, eq(sandTrips.destGhatId, destGhats.id))
+            .leftJoin(sourceLocations, eq(sandTrips.sourceLocationId, sourceLocations.id))
+            .leftJoin(destLocations, eq(sandTrips.destLocationId, destLocations.id))
             .where(whereClause),
 
         db
@@ -101,8 +101,8 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
                 id: sandTrips.id,
                 publicId: sandTrips.publicId,
                 boatId: sandTrips.boatId,
-                sourceGhatName: sourceGhats.nameEn,
-                destGhatName: destGhats.nameEn,
+                sourceLocationName: sourceLocations.name,
+                destLocationName: destLocations.name,
                 departureTime: sandTrips.departureTime,
                 arrivalTime: sandTrips.arrivalTime,
                 cargoValue: sandTrips.cargoValue,
@@ -112,8 +112,8 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
                 status: sandTrips.status,
             })
             .from(sandTrips)
-            .leftJoin(sourceGhats, eq(sandTrips.sourceGhatId, sourceGhats.id))
-            .leftJoin(destGhats, eq(sandTrips.destGhatId, destGhats.id))
+            .leftJoin(sourceLocations, eq(sandTrips.sourceLocationId, sourceLocations.id))
+            .leftJoin(destLocations, eq(sandTrips.destLocationId, destLocations.id))
             .where(whereClause)
             .orderBy(orderByClause)
             .limit(query.limit)
@@ -126,8 +126,8 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
         id: item.id,
         publicId: item.publicId,
         boatId: item.boatId,
-        sourceGhatName: item.sourceGhatName || null,
-        destGhatName: item.destGhatName || null,
+        sourceLocationName: item.sourceLocationName || null,
+        destLocationName: item.destLocationName || null,
         departureTime: item.departureTime.toISOString(),
         arrivalTime: item.arrivalTime ? item.arrivalTime.toISOString() : null,
         cargoValue: item.cargoValue ? Number(item.cargoValue) : null,

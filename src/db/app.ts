@@ -17,9 +17,9 @@ import {
 import { sql } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import { files } from './media';
-import { UserRole, USER_ROLES, OtpType, OTP_TYPES, AuditLogActorRole, ReportCategory, REPORT_CATEGORIES, ReportStatus, REPORT_STATUSES, TodoPriority, TODO_PRIORITIES } from '@/constants/db/users.const';
+import { UserRole, USER_ROLES, OtpType, OTP_TYPES } from '@/constants/db/users.const';
 import { BillingPeriod, BILLING_PERIODS, SubscriptionStatus, SUBSCRIPTION_STATUSES, PaymentMethod, PAYMENT_METHODS, PlatformAccountType, PLATFORM_ACCOUNT_TYPES } from '@/constants/db/subscriptions.const';
-import { SECTORS, type SectorName } from '@/constants/db/app.const';
+import { AuditLogActorRole, ReportCategory, REPORT_CATEGORIES, ReportStatus, REPORT_STATUSES, TodoPriority, TODO_PRIORITIES } from '@/constants/db/app.const';
 
 // ─── Users ─────────────────────────────────────────────────────────────────
 // Core auth table. role='user' for boat operators, role='admin' for platform
@@ -37,7 +37,7 @@ export const users = pgTable(
     passwordHash: text('password_hash').notNull(),
     role: varchar('role', { length: 10 })
       .notNull()
-      .default('user')
+      .default(USER_ROLES.USER)
       .$type<UserRole>(),
     avatarFileId: integer('avatar_file_id').references((): AnyPgColumn => files.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -137,16 +137,12 @@ export const subscriptionPlans = pgTable(
   'subscription_plans',
   {
     id: serial('id').primaryKey(),
-    sector: varchar('sector', { length: 50 })
-      .notNull()
-      .default(SECTORS.SAND)
-      .$type<SectorName>(),
     name: varchar('name', { length: 100 }).notNull(),
     description: text('description'),
     priceTk: numeric('price_tk', { precision: 10, scale: 2 }).notNull(),
     billingPeriod: varchar('billing_period', { length: 20 })
       .notNull()
-      .default('monthly')
+      .default(BILLING_PERIODS.MONTHLY)
       .$type<BillingPeriod>(),
     maxBoats: integer('max_boats'), // null = unlimited
     maxTripsPerMonth: integer('max_trips_per_month'), // null = unlimited
@@ -161,11 +157,6 @@ export const subscriptionPlans = pgTable(
       'subscription_plans_billing_period_check',
       sql`${t.billingPeriod} IN (${sql.raw(Object.values(BILLING_PERIODS).map(s => `'${s}'`).join(', '))})`,
     ),
-    sectorCheck: check(
-      'subscription_plans_sector_check',
-      sql`${t.sector} IN (${sql.raw(Object.values(SECTORS).map(s => `'${s}'`).join(', '))})`,
-    ),
-    sectorIdx: index('idx_subscription_plans_sector').on(t.sector),
     isActiveIdx: index('idx_subscription_plans_is_active').on(t.isActive),
     deletedAtIdx: index('idx_subscription_plans_deleted_at').on(t.deletedAt),
   }),
@@ -186,7 +177,7 @@ export const userSubscriptions = pgTable(
       .references(() => subscriptionPlans.id, { onDelete: 'restrict' }),
     status: varchar('status', { length: 20 })
       .notNull()
-      .default('pending')
+      .default(SUBSCRIPTION_STATUSES.PENDING)
       .$type<SubscriptionStatus>(),
     startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
     endsAt: timestamp('ends_at', { withTimezone: true }), // null = no fixed expiry
@@ -238,6 +229,30 @@ export const platformAccounts = pgTable(
   }),
 );
 
+// ─── Locations ─────────────────────────────────────────────────────────────
+// Physical points with coordinates, used for trip sources and destinations.
+// Completely independent entity with its own lat/lng.
+export const locations = pgTable(
+  'locations',
+  {
+    id: serial('id').primaryKey(),
+    publicId: varchar('public_id', { length: 26 })
+      .unique()
+      .notNull()
+      .$defaultFn(() => ulid()), // safe URL param
+    name: varchar('name', { length: 255 }).notNull(),
+    lat: numeric('lat', { precision: 10, scale: 7 }),
+    lng: numeric('lng', { precision: 10, scale: 7 }),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  },
+  (t) => ({
+    publicIdIdx: index('idx_locations_public_id').on(t.publicId),
+    isActiveIdx: index('idx_locations_is_active').on(t.isActive),
+  }),
+);
+
 // ─── Divisions ─────────────────────────────────────────────────────────────
 // Top-level Bangladesh administrative division (বিভাগ).
 // e.g. Sylhet, Dhaka, Chattogram. Admin-managed seed data.
@@ -248,6 +263,7 @@ export const divisions = pgTable(
     slug: varchar('slug', { length: 100 }).unique().notNull(), // e.g. 'sylhet'
     nameEn: varchar('name_en', { length: 100 }).unique().notNull(),
     nameBn: varchar('name_bn', { length: 100 }),
+    locationId: integer('location_id').references(() => locations.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (t) => ({
@@ -268,6 +284,7 @@ export const districts = pgTable(
       .references(() => divisions.id, { onDelete: 'restrict' }),
     nameEn: varchar('name_en', { length: 100 }).notNull(),
     nameBn: varchar('name_bn', { length: 100 }),
+    locationId: integer('location_id').references(() => locations.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (t) => ({
@@ -290,37 +307,13 @@ export const upazilas = pgTable(
       .references(() => districts.id, { onDelete: 'restrict' }),
     nameEn: varchar('name_en', { length: 100 }).notNull(),
     nameBn: varchar('name_bn', { length: 100 }),
+    locationId: integer('location_id').references(() => locations.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (t) => ({
     districtIdx: index('idx_upazilas_district').on(t.districtId),
     nameUnique: unique('upazilas_name_district_unique').on(t.nameEn, t.districtId),
     slugUnique: unique('upazilas_slug_district_unique').on(t.slug, t.districtId),
-  }),
-);
-
-// ─── Ghats ─────────────────────────────────────────────────────────────────
-// Physical river loading / unloading points. Admin inputs, user selects.
-// Linked to upazila (which gives district → division chain via JOIN).
-// lat/lng stored with 7 decimal places ≈ 1 cm precision.
-export const ghats = pgTable(
-  'ghats',
-  {
-    id: serial('id').primaryKey(),
-    slug: varchar('slug', { length: 100 }).notNull(), // e.g. 'sunamganj-ghat', unique within upazila
-    upazilaId: integer('upazila_id').references(() => upazilas.id, { onDelete: 'restrict' }),
-    nameEn: varchar('name_en', { length: 255 }).notNull(),
-    nameBn: varchar('name_bn', { length: 255 }),
-    riverName: varchar('river_name', { length: 100 }),
-    lat: numeric('lat', { precision: 10, scale: 7 }),
-    lng: numeric('lng', { precision: 10, scale: 7 }),
-    isActive: boolean('is_active').notNull().default(true),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (t) => ({
-    upazilaIdx: index('idx_ghats_upazila').on(t.upazilaId),
-    isActiveIdx: index('idx_ghats_is_active').on(t.isActive),
-    slugUnique: unique('ghats_slug_upazila_unique').on(t.slug, t.upazilaId),
   }),
 );
 
@@ -472,8 +465,8 @@ export type District = typeof districts.$inferSelect;
 export type NewDistrict = typeof districts.$inferInsert;
 export type Upazila = typeof upazilas.$inferSelect;
 export type NewUpazila = typeof upazilas.$inferInsert;
-export type Ghat = typeof ghats.$inferSelect;
-export type NewGhat = typeof ghats.$inferInsert;
+export type Location = typeof locations.$inferSelect;
+export type NewLocation = typeof locations.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type Report = typeof reports.$inferSelect;
 export type NewReport = typeof reports.$inferInsert;

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { useBoatStore } from '@/store/useBoatStore';
+import { useUploadBoatDocument, useDeleteBoatDocument } from '@/hooks/mutations/useBoatMutations';
 import { useMediaUpload } from '@/hooks/media/use-media-upload';
 import { FileText, Loader2, Trash2, Upload, FileSignature, Calendar, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,8 @@ export function BoatDocumentsSection({ boat }: BoatDocumentsSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { uploadMedia, isUploading } = useMediaUpload();
-  const { uploadBoatDocument, deleteBoatDocument } = useBoatStore();
+  const { mutateAsync: uploadBoatDocument, isPending: isUploadingDoc } = useUploadBoatDocument();
+  const { mutateAsync: deleteBoatDocument, isPending: isDeletingDoc } = useDeleteBoatDocument();
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -58,18 +59,19 @@ export function BoatDocumentsSection({ boat }: BoatDocumentsSectionProps) {
       const results = await uploadMedia([selectedFile]);
       if (results.length > 0) {
         const { fileId } = results[0];
-        const success = await uploadBoatDocument(boat.publicId, {
-          fileId,
-          documentType: formData.documentType,
-          description: formData.description || undefined,
-          expiryDate: formData.expiryDate || undefined,
+        await uploadBoatDocument({
+          publicId: boat.publicId,
+          payload: {
+            fileId,
+            documentType: formData.documentType,
+            description: formData.description || undefined,
+            expiryDate: formData.expiryDate || undefined,
+          },
         });
-        if (success) {
-          toast.success(t('documentUploaded') || 'Document uploaded successfully');
-          setIsDialogOpen(false);
-          setSelectedFile(null);
-          setFormData({ documentType: '', description: '', expiryDate: '' });
-        }
+        toast.success(t('documentUploaded') || 'Document uploaded successfully');
+        setIsDialogOpen(false);
+        setSelectedFile(null);
+        setFormData({ documentType: '', description: '', expiryDate: '' });
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Upload failed');
@@ -83,14 +85,14 @@ export function BoatDocumentsSection({ boat }: BoatDocumentsSectionProps) {
     if (!confirm(t('deleteConfirmDesc') || 'Are you sure you want to delete this document?')) return;
     try {
       setIsProcessing(true);
-      const success = await deleteBoatDocument(boat.publicId, documentId);
-      if (success) toast.success(t('documentDeleted') || 'Document deleted successfully');
+      await deleteBoatDocument({ publicId: boat.publicId, documentId });
+      toast.success(t('documentDeleted') || 'Document deleted successfully');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const showLoader = isUploading || isProcessing;
+  const showLoader = isUploading || isUploadingDoc || isDeletingDoc || isProcessing;
 
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return 'N/A';

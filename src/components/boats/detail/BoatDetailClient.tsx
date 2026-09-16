@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useBoatStore } from '@/store/useBoatStore';
+import { useBoatDetail } from '@/hooks/queries/useBoatsQueries';
 import { useTranslations } from 'next-intl';
 import { BoatDetailHeader } from './BoatDetailHeader';
 import { BoatDetailKpis } from './BoatDetailKpis';
@@ -18,40 +17,11 @@ interface BoatDetailClientProps {
 }
 
 export function BoatDetailClient({ publicId }: BoatDetailClientProps) {
-  const { 
-    boat, 
-    kpis, 
-    isLoading, 
-    error, 
-    fetchBoat, 
-    fetchTrips, 
-    reset,
-    tripsFilters
-  } = useBoatStore();
-
+  const { data, isLoading, error } = useBoatDetail(publicId);
   const t = useTranslations('boatsPage.detail');
 
-  // Load initial data
-  useEffect(() => {
-    fetchBoat(publicId);
-    return () => reset();
-  }, [publicId, fetchBoat, reset]);
-
-  // Load trips when filters change
-  useEffect(() => {
-    fetchTrips(publicId);
-  }, [
-    publicId, 
-    fetchTrips, 
-    tripsFilters.page, 
-    tripsFilters.limit, 
-    tripsFilters.search, 
-    tripsFilters.status, 
-    tripsFilters.fromDate, 
-    tripsFilters.toDate, 
-    tripsFilters.sortBy, 
-    tripsFilters.sortOrder
-  ]);
+  const boat = data?.boat ?? null;
+  const kpis = data?.kpis ?? null;
 
   if (isLoading && !boat) {
     return <BoatDetailSkeleton />;
@@ -65,7 +35,7 @@ export function BoatDetailClient({ publicId }: BoatDetailClientProps) {
           <div>
             <h3 className="font-semibold mb-1">Error</h3>
             <p className="text-sm">
-              {error || 'Failed to load boat details. The boat may not exist.'}
+              {error?.message ?? 'Failed to load boat details. The boat may not exist.'}
             </p>
           </div>
         </div>
@@ -79,13 +49,13 @@ export function BoatDetailClient({ publicId }: BoatDetailClientProps) {
       <BoatDetailKpis kpis={kpis} />
       <BoatImageGallery boat={boat} />
       <BoatDocumentsSection boat={boat} />
-      
+
       <div className="mt-12 bg-card rounded-2xl shadow-sm border border-border/50 p-6">
         <h2 className="text-2xl font-bold tracking-tight text-foreground mb-6">
           {t('trips.title')}
         </h2>
         <BoatTripsToolbar />
-        <BoatTripsList />
+        <BoatTripsList publicId={publicId} />
       </div>
     </div>
   );

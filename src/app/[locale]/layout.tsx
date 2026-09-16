@@ -5,6 +5,7 @@ import { CustomToaster } from "@/components/shared/client/custom-toaster";
 import { AuthWrapper } from "@/components/wrappers/AuthWrapper";
 import { PublicLayoutWrapper } from "@/components/wrappers/PublicLayoutWrapper";
 import { APP_LOCALES, type AppLocale } from "@/constants/common.const";
+import { QueryProvider } from "@/providers/QueryProvider";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -41,12 +42,14 @@ export default async function RootLayout({
     >
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <AuthWrapper>
-            <PublicLayoutWrapper locale={locale}>
-              {children}
-            </PublicLayoutWrapper>
-            <CustomToaster />
-          </AuthWrapper>
+          <QueryProvider>
+            <AuthWrapper>
+              <PublicLayoutWrapper locale={locale}>
+                {children}
+              </PublicLayoutWrapper>
+              <CustomToaster />
+            </AuthWrapper>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

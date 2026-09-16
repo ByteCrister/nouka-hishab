@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useBoatStore } from '@/store/useBoatStore';
+import { useUploadBoatImage, useDeleteBoatImage } from '@/hooks/mutations/useBoatMutations';
 import { useMediaUpload } from '@/hooks/media/use-media-upload';
 import { Camera, Image as ImageIcon, Loader2, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { uploadMedia, isUploading } = useMediaUpload();
-  const { uploadBoatImage, deleteBoatImage } = useBoatStore();
+  const { mutateAsync: uploadBoatImage, isPending: isUploadingImage } = useUploadBoatImage();
+  const { mutateAsync: deleteBoatImage, isPending: isDeletingImage } = useDeleteBoatImage();
   
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -30,13 +31,9 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
       const results = await uploadMedia([file]);
       if (results.length > 0) {
         const { fileId } = results[0];
-        // If it's the first image, make it primary automatically
         const isPrimary = boat.images.length === 0;
-        
-        const success = await uploadBoatImage(boat.publicId, fileId, isPrimary);
-        if (success) {
-          toast.success(t('imageUploaded'));
-        }
+        await uploadBoatImage({ publicId: boat.publicId, fileId, isPrimary });
+        toast.success(t('imageUploaded'));
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Upload failed');
@@ -49,8 +46,8 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
   const handleSetPrimary = async (fileId: number) => {
     try {
       setIsProcessing(true);
-      const success = await uploadBoatImage(boat.publicId, fileId, true);
-      if (success) toast.success(t('primarySet'));
+      await uploadBoatImage({ publicId: boat.publicId, fileId, isPrimary: true });
+      toast.success(t('primarySet'));
     } finally {
       setIsProcessing(false);
     }
@@ -60,14 +57,14 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
     if (!confirm('Are you sure you want to delete this image?')) return;
     try {
       setIsProcessing(true);
-      const success = await deleteBoatImage(boat.publicId, fileId);
-      if (success) toast.success(t('imageDeleted'));
+      await deleteBoatImage({ publicId: boat.publicId, fileId });
+      toast.success(t('imageDeleted'));
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const showLoader = isUploading || isProcessing;
+  const showLoader = isUploading || isUploadingImage || isDeletingImage || isProcessing;
 
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">

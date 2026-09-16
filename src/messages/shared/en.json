@@ -1,0 +1,30 @@
+{
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "showing": "Showing {start} to {end} of {total} items"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "noData": "No data found",
+    "search": "Search...",
+    "filter": "Filter",
+    "clearFilters": "Clear Filters"
+  },
+  "sectors": {
+    "all": "All Sectors",
+    "sand": "Sand",
+    "stone": "Stone",
+    "brick": "Brick"
+  }
+}

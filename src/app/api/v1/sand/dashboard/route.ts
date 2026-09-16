@@ -1,4 +1,4 @@
-import { requireAuthPublicId } from "@/lib/auth/utils";
+import { requireAuthUserId } from "@/lib/auth/utils";
 import { db } from "@/config/db";
 import { sandTrips } from "@/db/sand";
 import { boats, boatMaintenanceLogs } from "@/db/boat";
@@ -9,10 +9,9 @@ import { BOAT_STATUSES } from "@/constants/db/boats.const";
 import { SAND_TRIP_STATUSES } from "@/constants/db/sand.const";
 
 export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () => {
-  // Ensure user is authenticated
-  await requireAuthPublicId();
+  const userId = await requireAuthUserId();
 
-  // Run all independent queries in parallel
+  // Run all independent queries in parallel, all scoped to the authenticated user
   const [
     tripStatsResult,
     boatStatsResult,
@@ -35,7 +34,8 @@ export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () =>
         ).mapWith(Number),
       })
       .from(sandTrips)
-      .where(isNull(sandTrips.deletedAt)),
+      .innerJoin(boats, eq(sandTrips.boatId, boats.id))
+      .where(and(isNull(sandTrips.deletedAt), eq(boats.createdBy, userId))),
 
     db
       .select({
@@ -45,7 +45,7 @@ export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () =>
         ).mapWith(Number),
       })
       .from(boats)
-      .where(and(isNull(boats.deletedAt), eq(boats.sector, 'sand'))),
+      .where(and(isNull(boats.deletedAt), eq(boats.sector, 'sand'), eq(boats.createdBy, userId))),
 
     db
       .select({
@@ -53,7 +53,7 @@ export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () =>
       })
       .from(boatMaintenanceLogs)
       .innerJoin(boats, eq(boatMaintenanceLogs.boatId, boats.id))
-      .where(and(isNull(boatMaintenanceLogs.deletedAt), eq(boats.sector, 'sand'))),
+      .where(and(isNull(boatMaintenanceLogs.deletedAt), eq(boats.sector, 'sand'), eq(boats.createdBy, userId))),
 
     db
       .select({
@@ -65,8 +65,8 @@ export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () =>
         date: sandTrips.departureTime,
       })
       .from(sandTrips)
-      .leftJoin(boats, eq(sandTrips.boatId, boats.id))
-      .where(isNull(sandTrips.deletedAt))
+      .innerJoin(boats, eq(sandTrips.boatId, boats.id))
+      .where(and(isNull(sandTrips.deletedAt), eq(boats.createdBy, userId)))
       .orderBy(desc(sandTrips.departureTime))
       .limit(5),
 
@@ -79,8 +79,8 @@ export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () =>
         date: boatMaintenanceLogs.maintenanceDate,
       })
       .from(boatMaintenanceLogs)
-      .leftJoin(boats, eq(boatMaintenanceLogs.boatId, boats.id))
-      .where(isNull(boatMaintenanceLogs.deletedAt))
+      .innerJoin(boats, eq(boatMaintenanceLogs.boatId, boats.id))
+      .where(and(isNull(boatMaintenanceLogs.deletedAt), eq(boats.createdBy, userId)))
       .orderBy(desc(boatMaintenanceLogs.maintenanceDate))
       .limit(5),
   ]);
@@ -132,3 +132,4 @@ export const GET = withErrorHandler<SandDashboardMetrics, [Request]>(async () =>
     },
   };
 });
+

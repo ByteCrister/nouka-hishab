@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { useBoatStore } from "@/store/useBoatStore";
+import { useUpdateBoat } from "@/hooks/mutations/useBoatMutations";
 import { updateBoatSchema } from "@/utils/zod/boats.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ interface EditBoatSheetProps {
 
 export function EditBoatSheet({ boat, open, onOpenChange }: EditBoatSheetProps) {
   const t = useTranslations("boatsPage.detail");
-  const { updateBoat, isSubmitting } = useBoatStore();
+  const { mutateAsync: updateBoat, isPending: isSubmitting } = useUpdateBoat();
 
   const [formData, setFormData] = useState({
     name: boat.name,
@@ -99,29 +99,27 @@ export function EditBoatSheet({ boat, open, onOpenChange }: EditBoatSheetProps) 
     try {
       const validData = updateBoatSchema.parse(formData);
       
-      const updatedBoat = await updateBoat(boat.publicId, {
-        name: validData.name,
-        sector: validData.sector as SectorName,
-        registrationNumber: validData.registrationNumber || null,
-        capacityValue: validData.capacityValue ? Number(validData.capacityValue) : null,
-        capacityUnit: validData.capacityUnit || null,
-        lengthM: validData.lengthM ? Number(validData.lengthM) : null,
-        widthM: validData.widthM ? Number(validData.widthM) : null,
-        draftM: validData.draftM ? Number(validData.draftM) : null,
-        engineMake: validData.engineMake || null,
-        engineHp: validData.engineHp ? Number(validData.engineHp) : null,
-        engineNotes: validData.engineNotes || null,
-        boatValueTk: validData.boatValueTk ? Number(validData.boatValueTk) : null,
-        status: validData.status,
-        notes: validData.notes || null,
+      await updateBoat({
+        publicId: boat.publicId,
+        payload: {
+          name: validData.name,
+          sector: validData.sector as SectorName,
+          registrationNumber: validData.registrationNumber || null,
+          capacityValue: validData.capacityValue ? Number(validData.capacityValue) : null,
+          capacityUnit: validData.capacityUnit || null,
+          lengthM: validData.lengthM ? Number(validData.lengthM) : null,
+          widthM: validData.widthM ? Number(validData.widthM) : null,
+          draftM: validData.draftM ? Number(validData.draftM) : null,
+          engineMake: validData.engineMake || null,
+          engineHp: validData.engineHp ? Number(validData.engineHp) : null,
+          engineNotes: validData.engineNotes || null,
+          boatValueTk: validData.boatValueTk ? Number(validData.boatValueTk) : null,
+          status: validData.status,
+          notes: validData.notes || null,
+        },
       });
-
-      if (updatedBoat) {
-        toast.success(t("save") + " successfully");
-        onOpenChange(false);
-      } else {
-        toast.error("Error updating boat");
-      }
+      toast.success(t("save") + " successfully");
+      onOpenChange(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};

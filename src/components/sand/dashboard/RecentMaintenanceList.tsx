@@ -21,7 +21,7 @@ export function RecentMaintenanceList({ maintenance }: Props) {
             <CardTitle className="text-lg">{t('maintenanceTitle')}</CardTitle>
             <CardDescription>{t('maintenanceDesc')}</CardDescription>
           </div>
-          <Link href="/sand/reports" className="text-sm font-medium text-primary hover:underline">
+          <Link href="/reports" className="text-sm font-medium text-primary hover:underline">
             {t('viewAll')}
           </Link>
         </div>

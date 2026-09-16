@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations, useFormatter } from 'next-intl';
-import { useBoatStore } from '@/store/useBoatStore';
+import { useBoatFiltersStore } from '@/store/useBoatFiltersStore';
+import { useBoatTrips } from '@/hooks/queries/useBoatsQueries';
 import {
   Table,
   TableBody,
@@ -17,11 +18,19 @@ import { useRouter } from 'next/navigation';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
 import type { SandTripStatus } from '@/constants/db/sand.const';
 
-export function BoatTripsList() {
+interface BoatTripsListProps {
+  publicId: string;
+}
+
+export function BoatTripsList({ publicId }: BoatTripsListProps) {
   const t = useTranslations('boatsPage.detail.trips');
   const format = useFormatter();
   const router = useRouter();
-  const { trips, tripsMeta, isTripsLoading, setTripsPage } = useBoatStore();
+  const { tripsFilters, setTripsPage } = useBoatFiltersStore();
+  const { data, isLoading: isTripsLoading } = useBoatTrips(publicId, tripsFilters);
+
+  const trips = data?.items ?? [];
+  const tripsMeta = data?.meta ?? null;
 
   const getStatusBadge = (status: SandTripStatus) => {
     switch (status) {
@@ -90,7 +99,7 @@ export function BoatTripsList() {
                 >
                   <TableCell>
                     <div className="font-medium text-foreground">
-                      {trip.sourceGhatName || '-'} → {trip.destGhatName || '-'}
+                      {trip.sourceLocationName || '-'} → {trip.destLocationName || '-'}
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">

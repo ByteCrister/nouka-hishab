@@ -9,7 +9,7 @@ import {
   divisions,
   districts,
   upazilas,
-  ghats,
+  locations,
   auditLogs,
   reports,
   reportAttachments,
@@ -98,8 +98,12 @@ export const userSubscriptionsRelations = relations(userSubscriptions, ({ one })
 }));
 
 // ─── Divisions ───────────────────────────────────────────────────────────────
-export const divisionsRelations = relations(divisions, ({ many }) => ({
+export const divisionsRelations = relations(divisions, ({ one, many }) => ({
   districts: many(districts),
+  location: one(locations, {
+    fields: [divisions.locationId],
+    references: [locations.id],
+  }),
 }));
 
 // ─── Districts ───────────────────────────────────────────────────────────────
@@ -109,6 +113,10 @@ export const districtsRelations = relations(districts, ({ one, many }) => ({
     references: [divisions.id],
   }),
   upazilas: many(upazilas),
+  location: one(locations, {
+    fields: [districts.locationId],
+    references: [locations.id],
+  }),
 }));
 
 // ─── Upazilas ───────────────────────────────────────────────────────────────
@@ -117,17 +125,21 @@ export const upazilasRelations = relations(upazilas, ({ one, many }) => ({
     fields: [upazilas.districtId],
     references: [districts.id],
   }),
-  ghats: many(ghats),
+  location: one(locations, {
+    fields: [upazilas.locationId],
+    references: [locations.id],
+  }),
+  sandTripsAsSource: many(sandTrips, { relationName: 'sandTripSourceUpazila' }),
+  sandTripsAsDest: many(sandTrips, { relationName: 'sandTripDestUpazila' }),
 }));
 
-// ─── Ghats ─────────────────────────────────────────────────────────────────
-export const ghatsRelations = relations(ghats, ({ one, many }) => ({
-  upazila: one(upazilas, {
-    fields: [ghats.upazilaId],
-    references: [upazilas.id],
-  }),
-  sandTripsAsSource: many(sandTrips, { relationName: 'sandTripSourceGhat' }),
-  sandTripsAsDest: many(sandTrips, { relationName: 'sandTripDestGhat' }),
+// ─── Locations ─────────────────────────────────────────────────────────────
+export const locationsRelations = relations(locations, ({ many }) => ({
+  sandTripsAsSource: many(sandTrips, { relationName: 'sandTripSourceLocation' }),
+  sandTripsAsDest: many(sandTrips, { relationName: 'sandTripDestLocation' }),
+  divisions: many(divisions),
+  districts: many(districts),
+  upazilas: many(upazilas),
 }));
 
 // ─── Boats ─────────────────────────────────────────────────────────────────
@@ -180,15 +192,25 @@ export const sandTripsRelations = relations(sandTrips, ({ one, many }) => ({
     fields: [sandTrips.boatId],
     references: [boats.id],
   }),
-  sourceGhat: one(ghats, {
-    fields: [sandTrips.sourceGhatId],
-    references: [ghats.id],
-    relationName: 'sandTripSourceGhat',
+  sourceLocation: one(locations, {
+    fields: [sandTrips.sourceLocationId],
+    references: [locations.id],
+    relationName: 'sandTripSourceLocation',
   }),
-  destGhat: one(ghats, {
-    fields: [sandTrips.destGhatId],
-    references: [ghats.id],
-    relationName: 'sandTripDestGhat',
+  destLocation: one(locations, {
+    fields: [sandTrips.destLocationId],
+    references: [locations.id],
+    relationName: 'sandTripDestLocation',
+  }),
+  sourceUpazila: one(upazilas, {
+    fields: [sandTrips.sourceUpazilaId],
+    references: [upazilas.id],
+    relationName: 'sandTripSourceUpazila',
+  }),
+  destUpazila: one(upazilas, {
+    fields: [sandTrips.destUpazilaId],
+    references: [upazilas.id],
+    relationName: 'sandTripDestUpazila',
   }),
   expenses: many(sandTripExpenses),
   attachments: many(sandTripAttachments),

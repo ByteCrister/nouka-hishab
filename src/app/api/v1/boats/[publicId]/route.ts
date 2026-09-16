@@ -4,7 +4,7 @@ import { boats, boatImages, boatMaintenanceLogs, boatDocuments } from "@/db/boat
 import { files, assets } from "@/db/media";
 import { sandTrips } from "@/db/sand";
 import { eq, and, isNull, sql, max, sum, count } from "drizzle-orm";
-import { requireAuthPublicId } from "@/lib/auth/utils";
+import { requireAuthUserId } from "@/lib/auth/utils";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
 import { BoatDetailResponse, BoatDetail, BoatImage, BoatDetailKpis, BoatDocument } from "@/types/boats.types";
 import { SAND_TRIP_STATUSES } from "@/constants/db/sand.const";
@@ -12,7 +12,7 @@ import { updateBoatSchema } from "@/utils/zod/boats.schema";
 import { type SectorName } from "@/constants/db/app.const";
 
 export const GET = withErrorHandler<BoatDetailResponse, [NextRequest, { params: Promise<{ publicId: string }> }]>(async (req, { params }) => {
-    await requireAuthPublicId();
+    const userId = await requireAuthUserId();
 
     const { publicId } = await params;
 
@@ -51,7 +51,7 @@ export const GET = withErrorHandler<BoatDetailResponse, [NextRequest, { params: 
         ))
         .leftJoin(files, eq(boatImages.fileId, files.id))
         .leftJoin(assets, eq(files.assetId, assets.id))
-        .where(and(eq(boats.publicId, publicId), isNull(boats.deletedAt)))
+        .where(and(eq(boats.publicId, publicId), isNull(boats.deletedAt), eq(boats.createdBy, userId)))
         .limit(1);
 
     if (!boatResult) {
@@ -197,7 +197,7 @@ export const GET = withErrorHandler<BoatDetailResponse, [NextRequest, { params: 
 });
 
 export const PATCH = withErrorHandler<unknown, [NextRequest, { params: Promise<{ publicId: string }> }]>(async (req, { params }) => {
-    await requireAuthPublicId();
+    const userId = await requireAuthUserId();
 
     const { publicId } = await params;
     const body = await req.json();
@@ -222,7 +222,7 @@ export const PATCH = withErrorHandler<unknown, [NextRequest, { params: Promise<{
     const [updatedBoat] = await db
         .update(boats)
         .set(updateData)
-        .where(and(eq(boats.publicId, publicId), isNull(boats.deletedAt)))
+        .where(and(eq(boats.publicId, publicId), isNull(boats.deletedAt), eq(boats.createdBy, userId)))
         .returning();
 
     if (!updatedBoat) {
@@ -235,14 +235,14 @@ export const PATCH = withErrorHandler<unknown, [NextRequest, { params: Promise<{
 });
 
 export const DELETE = withErrorHandler<boolean, [NextRequest, { params: Promise<{ publicId: string }> }]>(async (req, { params }) => {
-    await requireAuthPublicId();
-    
+    const userId = await requireAuthUserId();
+
     const { publicId } = await params;
 
     const [deletedBoat] = await db
         .update(boats)
         .set({ deletedAt: new Date() })
-        .where(and(eq(boats.publicId, publicId), isNull(boats.deletedAt)))
+        .where(and(eq(boats.publicId, publicId), isNull(boats.deletedAt), eq(boats.createdBy, userId)))
         .returning();
 
     if (!deletedBoat) {

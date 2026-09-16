@@ -1,75 +1,91 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useBoatsListStore } from '@/store/useBoatStore';
+import { useBoatFiltersStore } from '@/store/useBoatFiltersStore';
+import { useBoats } from '@/hooks/queries/useBoatsQueries';
 import { BoatsHeader } from './BoatsHeader';
 import { BoatsKpiSection } from './BoatsKpiSection';
 import { BoatsToolbar } from './BoatsToolbar';
 import { BoatsList } from './BoatsList';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { FadeInUp, StaggerContainer, StaggerItem } from '../wrappers/motion-wrappers';
 
 export function BoatsPageClient() {
-  const { fetchBoats, meta, setPage, filters } = useBoatsListStore();
-
-  useEffect(() => {
-    fetchBoats({ silent: false });
-  }, [fetchBoats, filters.page, filters.limit, filters.search, filters.status]);
+  const { listFilters, setPage } = useBoatFiltersStore();
+  const { data } = useBoats(listFilters);
+  const sharedT = useTranslations('shared');
+  const meta = data?.meta;
 
   return (
     <div className="space-y-6 pb-12">
-      <BoatsHeader />
-      <BoatsKpiSection />
+      <FadeInUp>
+        <BoatsHeader />
+      </FadeInUp>
       
-      <div className="rounded-2xl border border-border/50 bg-card/30 p-6 backdrop-blur-xl">
-        <BoatsToolbar />
-        <BoatsList />
-        
-        {/* Pagination Controls */}
-        {meta && meta.totalPages > 1 && (
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
-            <div className="text-sm text-muted-foreground">
-              Showing {(meta.page - 1) * meta.limit + 1} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} boats
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(meta.page - 1)}
-                disabled={meta.page === 1}
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Previous
-              </Button>
-              
-              <div className="flex items-center gap-1">
-                {Array.from({ length: meta.totalPages }).map((_, i) => (
-                  <Button
-                    key={i + 1}
-                    variant={meta.page === i + 1 ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setPage(i + 1)}
-                    className="w-8 h-8 p-0"
-                  >
-                    {i + 1}
-                  </Button>
-                ))}
+      <FadeInUp delay={0.1}>
+        <BoatsKpiSection />
+      </FadeInUp>
+
+      <FadeInUp delay={0.2}>
+        <div className="rounded-3xl border border-border/50 bg-card/40 p-6 sm:p-8 backdrop-blur-xl shadow-sm">
+          <BoatsToolbar />
+          <div className="mt-6">
+            <BoatsList />
+          </div>
+
+          {/* Pagination Controls */}
+          {meta && meta.totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t border-border/50 gap-4">
+              <div className="text-sm text-muted-foreground font-medium">
+                {sharedT('pagination.showing', {
+                  start: (meta.page - 1) * meta.limit + 1,
+                  end: Math.min(meta.page * meta.limit, meta.total),
+                  total: meta.total
+                })}
               </div>
               
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(meta.page + 1)}
-                disabled={meta.page === meta.totalPages}
-              >
-                Next
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
+              <div className="flex items-center gap-2 bg-muted/30 p-1.5 rounded-xl border border-border/40">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPage(meta.page - 1)}
+                  disabled={meta.page === 1}
+                  className="rounded-lg hover:bg-background/80"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  {sharedT('pagination.previous')}
+                </Button>
+                
+                <div className="flex items-center gap-1 px-2 border-x border-border/50">
+                  {Array.from({ length: meta.totalPages }).map((_, i) => (
+                    <Button
+                      key={i + 1}
+                      variant={meta.page === i + 1 ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setPage(i + 1)}
+                      className={`w-8 h-8 p-0 rounded-lg ${meta.page === i + 1 ? 'shadow-md' : 'hover:bg-background/80'}`}
+                    >
+                      {i + 1}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPage(meta.page + 1)}
+                  disabled={meta.page === meta.totalPages}
+                  className="rounded-lg hover:bg-background/80"
+                >
+                  {sharedT('pagination.next')}
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </FadeInUp>
     </div>
   );
 }

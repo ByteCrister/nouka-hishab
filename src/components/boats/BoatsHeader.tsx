@@ -6,20 +6,22 @@ import { Link } from '@/i18n/routing';
 import { PlusCircle, RefreshCcw } from 'lucide-react';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
-import { useBoatsListStore } from '@/store/useBoatStore';
+import { useQueryClient, useIsFetching } from '@tanstack/react-query';
+import { boatKeys } from '@/hooks/queries/useBoatsQueries';
 
 export function BoatsHeader() {
   const t = useTranslations('boatsPage');
   const tSand = useTranslations('sand');
-  const { fetchBoats, isRefreshing, isLoading } = useBoatsListStore();
+  
+  const queryClient = useQueryClient();
+  const isFetching = useIsFetching({ queryKey: boatKeys.lists() }) > 0;
 
   const handleRefresh = () => {
-    fetchBoats({ silent: false });
+    queryClient.invalidateQueries({ queryKey: boatKeys.lists() });
   };
 
   const breadcrumbItems = [
     { label: tSand('home'), href: '/', isHome: true },
-    { label: tSand('title'), href: '/sand/dashboard' },
     { label: t('title') }
   ];
 
@@ -43,14 +45,14 @@ export function BoatsHeader() {
               variant="outline" 
               size="sm" 
               onClick={handleRefresh} 
-              disabled={isRefreshing || isLoading}
-              className="flex-1 sm:flex-none h-10"
+              disabled={isFetching}
+              className="flex-1 sm:flex-none h-11 rounded-xl bg-background/50 backdrop-blur-sm border-border/50 hover:bg-background/80"
             >
-              <RefreshCcw className={`w-4 h-4 mr-2 ${(isRefreshing || isLoading) ? 'animate-spin' : ''}`} />
+              <RefreshCcw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">{tSand('refresh')}</span>
             </Button>
             
-            <Button asChild className="flex-1 sm:flex-none h-10 shadow-lg shadow-primary/20">
+            <Button asChild className="flex-1 sm:flex-none h-11 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
               <Link href="/boats/new">
                 <PlusCircle className="w-4 h-4 mr-2" />
                 {t('addBoat')}

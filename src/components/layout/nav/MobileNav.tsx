@@ -70,7 +70,7 @@ export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
                   <Ship className="w-5 h-5 opacity-70" />
                   {t("boats")}
                 </Link>
-                <Link href="/sand/reports" onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-bold text-ink-700 hover:text-river-500 transition-colors uppercase tracking-wider">
+                <Link href="/reports" onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-bold text-ink-700 hover:text-river-500 transition-colors uppercase tracking-wider">
                   <FileSpreadsheet className="w-5 h-5 opacity-70" />
                   {t("reports")}
                 </Link>

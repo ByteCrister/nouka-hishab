@@ -14,7 +14,7 @@ import {
 import { sql } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import { files } from './media';
-import { users, ghats } from './app';
+import { users, locations, upazilas } from './app';
 import { boats } from './boat';
 import { 
   SandCargoUnit, 
@@ -55,12 +55,18 @@ export const sandTrips = pgTable(
       .references(() => boats.id, { onDelete: 'restrict' }),
 
     // ── Source location ──────────────────────────────────────────────────
-    sourceGhatId: integer('source_ghat_id').references(() => ghats.id, {
+    sourceLocationId: integer('source_location_id').references(() => locations.id, {
+      onDelete: 'restrict',
+    }),
+    sourceUpazilaId: integer('source_upazila_id').references(() => upazilas.id, {
       onDelete: 'restrict',
     }),
 
     // ── Destination location ─────────────────────────────────────────────
-    destGhatId: integer('dest_ghat_id').references(() => ghats.id, {
+    destLocationId: integer('dest_location_id').references(() => locations.id, {
+      onDelete: 'restrict',
+    }),
+    destUpazilaId: integer('dest_upazila_id').references(() => upazilas.id, {
       onDelete: 'restrict',
     }),
 
@@ -125,8 +131,10 @@ export const sandTrips = pgTable(
     publicIdIdx: index('idx_sand_trips_public_id').on(t.publicId),
     statusIdx: index('idx_sand_trips_status').on(t.status),
     departureIdx: index('idx_sand_trips_departure').on(t.departureTime),
-    sourceGhatIdx: index('idx_sand_trips_source_ghat').on(t.sourceGhatId),
-    destGhatIdx: index('idx_sand_trips_dest_ghat').on(t.destGhatId),
+    sourceLocationIdx: index('idx_sand_trips_source_location').on(t.sourceLocationId),
+    sourceUpazilaIdx: index('idx_sand_trips_source_upazila').on(t.sourceUpazilaId),
+    destLocationIdx: index('idx_sand_trips_dest_location').on(t.destLocationId),
+    destUpazilaIdx: index('idx_sand_trips_dest_upazila').on(t.destUpazilaId),
   }),
 );
 
