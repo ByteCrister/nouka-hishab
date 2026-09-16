@@ -17,21 +17,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Edit3, CheckCircle2, X, Receipt, AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Props {
   tripPublicId: string;
   expenses: SandTripExpenseItem[];
 }
-
-const CATEGORY_LABELS: Record<SandTripExpenseCategory, string> = {
-  [SAND_TRIP_EXPENSE_CATEGORIES.FUEL]: 'Fuel',
-  [SAND_TRIP_EXPENSE_CATEGORIES.LABOUR]: 'Labour',
-  [SAND_TRIP_EXPENSE_CATEGORIES.MAINTENANCE]: 'Maintenance',
-  [SAND_TRIP_EXPENSE_CATEGORIES.TOLL_PAYMENT]: 'Toll Payment',
-  [SAND_TRIP_EXPENSE_CATEGORIES.LOADING_FEE]: 'Loading Fee',
-  [SAND_TRIP_EXPENSE_CATEGORIES.ENGINE_REPAIR]: 'Engine Repair',
-  [SAND_TRIP_EXPENSE_CATEGORIES.OTHER]: 'Other',
-};
 
 const CATEGORY_COLORS: Record<SandTripExpenseCategory, string> = {
   [SAND_TRIP_EXPENSE_CATEGORIES.FUEL]: 'bg-orange-500/10 text-orange-500',
@@ -53,6 +44,7 @@ type ExpenseForm = {
 const emptyForm: ExpenseForm = { category: SAND_TRIP_EXPENSE_CATEGORIES.FUEL, description: '', amountTk: '', expenseDate: '' };
 
 export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
+  const t = useTranslations('sandTripsDetail');
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<ExpenseForm>(emptyForm);
@@ -118,12 +110,16 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
 
   const total = expenses.reduce((s, e) => s + Number(e.amountTk), 0);
 
+  // Category keys map DB values (e.g. 'toll_payment') → translation path
+  const getCategoryLabel = (cat: string) =>
+    t(`expenses.categories.${cat}` as Parameters<typeof t>[0], { fallback: cat });
+
   return (
     <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Receipt className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold">Expenses</h3>
+          <h3 className="font-semibold">{t('expenses.title')}</h3>
           {expenses.length > 0 && (
             <Badge variant="outline" className="text-xs">{expenses.length}</Badge>
           )}
@@ -131,12 +127,12 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
         <div className="flex items-center gap-3">
           {expenses.length > 0 && (
             <span className="text-sm font-semibold text-foreground">
-              Total: ৳ {total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              {t('expenses.total')} ৳ {total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
             </span>
           )}
           {!showAdd && (
             <Button size="sm" onClick={() => setShowAdd(true)} className="h-8 px-3 rounded-lg text-xs">
-              <Plus className="w-3.5 h-3.5 mr-1" />Add Expense
+              <Plus className="w-3.5 h-3.5 mr-1" />{t('expenses.addExpense')}
             </Button>
           )}
         </div>
@@ -145,18 +141,18 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
       {/* Add/Edit Form */}
       {showAdd && (
         <div className="mb-5 p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
-          <p className="text-sm font-medium">{editId ? 'Edit Expense' : 'New Expense'}</p>
+          <p className="text-sm font-medium">{editId ? t('expenses.editExpense') : t('expenses.newExpense')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Category */}
             <div className="space-y-1">
-              <Label className="text-xs">Category *</Label>
+              <Label className="text-xs">{t('expenses.category')} *</Label>
               <Select value={form.category} onValueChange={(v) => set('category', v)}>
                 <SelectTrigger className="h-9 rounded-lg text-sm bg-background/50">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  {Object.values(SAND_TRIP_EXPENSE_CATEGORIES).map((k) => (
+                    <SelectItem key={k} value={k}>{getCategoryLabel(k)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -165,13 +161,13 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
 
             {/* Amount */}
             <div className="space-y-1">
-              <Label className="text-xs">Amount (৳) *</Label>
+              <Label className="text-xs">{t('expenses.amount')} *</Label>
               <Input
                 type="number"
                 step="any"
                 value={form.amountTk}
                 onChange={(e) => set('amountTk', e.target.value)}
-                placeholder="e.g. 5000"
+                placeholder={t('expenses.amountPlaceholder')}
                 className={`h-9 rounded-lg text-sm bg-background/50 ${errors.amountTk ? 'border-destructive' : ''}`}
               />
               {renderError('amountTk')}
@@ -179,7 +175,7 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
 
             {/* Date */}
             <div className="space-y-1">
-              <Label className="text-xs">Date</Label>
+              <Label className="text-xs">{t('expenses.date')}</Label>
               <Input
                 type="date"
                 value={form.expenseDate}
@@ -190,11 +186,11 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
 
             {/* Description */}
             <div className="space-y-1">
-              <Label className="text-xs">Description</Label>
+              <Label className="text-xs">{t('expenses.description')}</Label>
               <Input
                 value={form.description}
                 onChange={(e) => set('description', e.target.value)}
-                placeholder="Optional note"
+                placeholder={t('expenses.descriptionPlaceholder')}
                 className="h-9 rounded-lg text-sm bg-background/50"
               />
             </div>
@@ -202,13 +198,13 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
 
           <div className="flex gap-2 justify-end pt-1">
             <Button variant="ghost" size="sm" onClick={cancelForm} className="h-8 rounded-lg">
-              <X className="w-3.5 h-3.5 mr-1" />Cancel
+              <X className="w-3.5 h-3.5 mr-1" />{t('expenses.cancel')}
             </Button>
             <Button size="sm" onClick={handleSubmit} disabled={isCreating || isUpdating} className="h-8 rounded-lg">
               {(isCreating || isUpdating) ? (
                 <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />{editId ? 'Update' : 'Save'}</>
+                <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />{editId ? t('expenses.update') : t('expenses.save')}</>
               )}
             </Button>
           </div>
@@ -219,7 +215,7 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
       {expenses.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground">
           <Receipt className="w-8 h-8 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">No expenses recorded yet.</p>
+          <p className="text-sm">{t('expenses.noExpenses')}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -227,7 +223,7 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
             <div key={exp.publicId} className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border/40 bg-background/40 hover:bg-background/70 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
                 <Badge variant="outline" className={`border-0 text-xs shrink-0 ${CATEGORY_COLORS[exp.category]}`}>
-                  {CATEGORY_LABELS[exp.category]}
+                  {getCategoryLabel(exp.category)}
                 </Badge>
                 <div className="min-w-0">
                   {exp.description && <p className="text-xs text-muted-foreground truncate">{exp.description}</p>}

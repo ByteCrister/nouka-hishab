@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "description": "Sand trip details, expenses and attachments"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "sand": "Sand",
+    "trips": "Trips",
+    "tripDetails": "Trip Details"
+  },
+  "notFound": "Trip not found.",
+  "backToTrips": "Back to Trips",
+  "back": "Back",
+  "delete": "Delete",
+  "confirm": "Confirm",
+  "status": {
+    "scheduled": "Scheduled",
+    "loading": "Loading",
+    "in_transit": "In Transit",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "profit": {
+    "netProfit": "Net Profit",
+    "sale": "Sale",
+    "totalCost": "Total Cost"
+  },
+  "sections": {
+    "routeTiming": "Route & Timing",
+    "cargo": "Cargo",
+    "financials": "Financials",
+    "notes": "Notes"
+  },
+  "labels": {
+    "source": "Source",
+    "destination": "Destination",
+    "departure": "Departure",
+    "arrival": "Arrival",
+    "volume": "Volume",
+    "buyerName": "Buyer Name",
+    "buyerPhone": "Buyer Phone",
+    "saleAmount": "Sale Amount",
+    "purchaseCost": "Purchase Cost",
+    "purchaseRatePerUnit": "Purchase Rate / Unit",
+    "govtRoyalty": "Govt Royalty",
+    "royaltyRatePerUnit": "Royalty Rate / Unit",
+    "localToll": "Local Toll",
+    "tollRatePerUnit": "Toll Rate / Unit",
+    "operatingCosts": "Operating Costs"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "addExpense": "Add Expense",
+    "editExpense": "Edit Expense",
+    "newExpense": "New Expense",
+    "noExpenses": "No expenses recorded yet.",
+    "total": "Total:",
+    "category": "Category",
+    "amount": "Amount (৳)",
+    "date": "Date",
+    "description": "Description",
+    "descriptionPlaceholder": "Optional note",
+    "amountPlaceholder": "e.g. 5000",
+    "save": "Save",
+    "update": "Update",
+    "cancel": "Cancel",
+    "categories": {
+      "fuel": "Fuel",
+      "labour": "Labour",
+      "maintenance": "Maintenance",
+      "toll_payment": "Toll Payment",
+      "loading_fee": "Loading Fee",
+      "engine_repair": "Engine Repair",
+      "other": "Other"
+    }
+  },
+  "attachments": {
+    "title": "Attachments",
+    "attachFile": "Attach File",
+    "attachFileById": "Attach File by ID",
+    "attachFileByIdDesc": "Enter the numeric file ID from the uploaded file record.",
+    "noAttachments": "No attachments yet.",
+    "fileId": "File ID",
+    "fileIdPlaceholder": "e.g. 42",
+    "description": "Description",
+    "descriptionPlaceholder": "Optional label",
+    "attach": "Attach",
+    "cancel": "Cancel"
+  }
+}

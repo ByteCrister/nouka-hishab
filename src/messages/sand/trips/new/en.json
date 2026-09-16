@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "title": "New Sand Trip",
+    "description": "Log a new sand transport trip"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "sand": "Sand",
+    "trips": "Trips",
+    "newTrip": "New Trip"
+  },
+  "header": {
+    "title": "New Sand Trip",
+    "subtitle": "Log a new sand cargo transport run"
+  },
+  "back": "Back",
+  "cancel": "Cancel",
+  "saveTrip": "Save Trip",
+  "saving": "Saving...",
+  "sections": {
+    "tripInfo": "Trip Information",
+    "locations": "Locations",
+    "source": "Source",
+    "destination": "Destination",
+    "cargo": "Cargo",
+    "financials": "Financials",
+    "notes": "Notes"
+  },
+  "fields": {
+    "boat": "Boat",
+    "boatPlaceholder": "Select a boat...",
+    "status": "Status",
+    "departureTime": "Departure Time",
+    "arrivalTime": "Arrival Time",
+    "locationName": "Location Name",
+    "sourcePlaceholder": "e.g. Sylhet Ghat",
+    "destPlaceholder": "e.g. Dhaka Terminal",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "cargoValue": "Cargo Value",
+    "cargoUnit": "Cargo Unit",
+    "saleAmount": "Sale Amount (৳)",
+    "buyerName": "Buyer Name",
+    "buyerNamePlaceholder": "e.g. Rahim Traders",
+    "buyerPhone": "Buyer Phone",
+    "purchaseRate": "Purchase Rate / Unit (৳)",
+    "purchaseCost": "Total Purchase Cost (৳)",
+    "govtRoyaltyRate": "Govt Royalty Rate (৳)",
+    "govtRoyaltyTotal": "Govt Royalty Total (৳)",
+    "localTollRate": "Local Toll Rate (৳)",
+    "localTollTotal": "Local Toll Total (৳)",
+    "notesPlaceholder": "Additional notes about this trip..."
+  },
+  "status": {
+    "scheduled": "Scheduled",
+    "loading": "Loading",
+    "in_transit": "In Transit",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "cargoUnit": {
+    "cubic_ft": "Cubic Ft",
+    "ton": "Ton",
+    "cubic_m": "Cubic M"
+  }
+}

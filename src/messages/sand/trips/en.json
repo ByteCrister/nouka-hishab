@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "title": "Sand Trips",
+    "description": "Manage all sand transport trips"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "sand": "Sand",
+    "trips": "Trips"
+  },
+  "header": {
+    "title": "Sand Trips",
+    "subtitle": "Track and manage all sand cargo transport operations",
+    "newTrip": "New Trip"
+  },
+  "kpi": {
+    "totalTrips": "Total Trips",
+    "totalRevenue": "Total Revenue",
+    "totalCosts": "Total Costs"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search trips...",
+    "allStatuses": "All Statuses",
+    "allBoats": "All Boats",
+    "resetFilters": "Reset filters",
+    "departureDesc": "Departure ↓",
+    "departureAsc": "Departure ↑",
+    "profitDesc": "Profit ↓",
+    "profitAsc": "Profit ↑",
+    "saleDesc": "Sale ↓",
+    "newest": "Newest"
+  },
+  "status": {
+    "scheduled": "Scheduled",
+    "loading": "Loading",
+    "in_transit": "In Transit",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "all": "All Statuses"
+  },
+  "empty": {
+    "title": "No trips found",
+    "subtitle": "Adjust your filters or log your first sand trip.",
+    "logFirst": "Log First Trip"
+  },
+  "pagination": {
+    "showing": "Showing {from}–{to} of {total} trips",
+    "previous": "Previous",
+    "next": "Next"
+  }
+}

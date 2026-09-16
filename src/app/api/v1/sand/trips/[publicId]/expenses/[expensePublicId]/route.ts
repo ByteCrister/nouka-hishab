@@ -10,11 +10,12 @@ import { updateSandTripExpenseSchema } from "@/utils/zod/sand-trips.schema";
 import { SandTripExpenseCategory } from "@/constants/db/sand.const";
 
 interface RouteContext {
-  params: { publicId: string; expensePublicId: string };
+  params: Promise<{ publicId: string; expensePublicId: string }>;
 }
 
 export const PATCH = withErrorHandler<{ success: boolean }, [NextRequest, RouteContext]>(
-  async (req, { params }): Promise<HandlerResult<{ success: boolean }>> => {
+  async (req, context): Promise<HandlerResult<{ success: boolean }>> => {
+    const params = await context.params;
     const userPublicId = await requireAuthPublicId();
 
     const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));
@@ -71,7 +72,8 @@ export const PATCH = withErrorHandler<{ success: boolean }, [NextRequest, RouteC
 );
 
 export const DELETE = withErrorHandler<{ success: boolean }, [NextRequest, RouteContext]>(
-  async (_req, { params }): Promise<HandlerResult<{ success: boolean }>> => {
+  async (_req, context): Promise<HandlerResult<{ success: boolean }>> => {
+    const params = await context.params;
     const userPublicId = await requireAuthPublicId();
 
     const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));

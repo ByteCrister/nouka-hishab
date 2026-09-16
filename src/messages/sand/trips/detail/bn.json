@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "description": "বালি ট্রিপের বিবরণ, খরচ এবং সংযুক্তি"
+  },
+  "breadcrumbs": {
+    "home": "হোম",
+    "sand": "বালু",
+    "trips": "ট্রিপ",
+    "tripDetails": "ট্রিপের বিবরণ"
+  },
+  "notFound": "ট্রিপ পাওয়া যায়নি।",
+  "backToTrips": "ট্রিপে ফিরে যান",
+  "back": "ফিরে যান",
+  "delete": "মুছুন",
+  "confirm": "নিশ্চিত করুন",
+  "status": {
+    "scheduled": "নির্ধারিত",
+    "loading": "লোড হচ্ছে",
+    "in_transit": "পথে আছে",
+    "completed": "সম্পন্ন",
+    "cancelled": "বাতিল"
+  },
+  "profit": {
+    "netProfit": "নিট মুনাফা",
+    "sale": "বিক্রয়",
+    "totalCost": "মোট খরচ"
+  },
+  "sections": {
+    "routeTiming": "রুট ও সময়",
+    "cargo": "মালামাল",
+    "financials": "আর্থিক বিবরণ",
+    "notes": "নোট"
+  },
+  "labels": {
+    "source": "উৎস",
+    "destination": "গন্তব্য",
+    "departure": "যাত্রা",
+    "arrival": "আগমন",
+    "volume": "পরিমাণ",
+    "buyerName": "ক্রেতার নাম",
+    "buyerPhone": "ক্রেতার ফোন",
+    "saleAmount": "বিক্রয় পরিমাণ",
+    "purchaseCost": "ক্রয় খরচ",
+    "purchaseRatePerUnit": "ক্রয় মূল্য / একক",
+    "govtRoyalty": "সরকারি রয়্যালটি",
+    "royaltyRatePerUnit": "রয়্যালটি হার / একক",
+    "localToll": "স্থানীয় টোল",
+    "tollRatePerUnit": "টোল হার / একক",
+    "operatingCosts": "পরিচালন খরচ"
+  },
+  "expenses": {
+    "title": "খরচ",
+    "addExpense": "খরচ যোগ করুন",
+    "editExpense": "খরচ সম্পাদনা করুন",
+    "newExpense": "নতুন খরচ",
+    "noExpenses": "এখনো কোনো খরচ রেকর্ড করা হয়নি।",
+    "total": "মোট:",
+    "category": "বিভাগ",
+    "amount": "পরিমাণ (৳)",
+    "date": "তারিখ",
+    "description": "বিবরণ",
+    "descriptionPlaceholder": "ঐচ্ছিক নোট",
+    "amountPlaceholder": "যেমন: ৫০০০",
+    "save": "সংরক্ষণ",
+    "update": "আপডেট",
+    "cancel": "বাতিল",
+    "categories": {
+      "fuel": "জ্বালানি",
+      "labour": "শ্রম",
+      "maintenance": "রক্ষণাবেক্ষণ",
+      "toll_payment": "টোল পেমেন্ট",
+      "loading_fee": "লোডিং ফি",
+      "engine_repair": "ইঞ্জিন মেরামত",
+      "other": "অন্যান্য"
+    }
+  },
+  "attachments": {
+    "title": "সংযুক্তি",
+    "attachFile": "ফাইল সংযুক্ত করুন",
+    "attachFileById": "আইডি দিয়ে ফাইল সংযুক্ত করুন",
+    "attachFileByIdDesc": "আপলোড করা ফাইল রেকর্ড থেকে সংখ্যাসূচক ফাইল আইডি লিখুন।",
+    "noAttachments": "এখনো কোনো সংযুক্তি নেই।",
+    "fileId": "ফাইল আইডি",
+    "fileIdPlaceholder": "যেমন: ৪২",
+    "description": "বিবরণ",
+    "descriptionPlaceholder": "ঐচ্ছিক লেবেল",
+    "attach": "সংযুক্ত করুন",
+    "cancel": "বাতিল"
+  }
+}

@@ -6,17 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Clock, Package, TrendingUp, Ship } from 'lucide-react';
 import Link from 'next/link';
 import { SAND_TRIP_STATUSES } from '@/constants/db/sand.const';
+import { useTranslations } from 'next-intl';
 
 interface Props {
   trip: SandTripListItem;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  [SAND_TRIP_STATUSES.SCHEDULED]: { label: 'Scheduled', cls: 'bg-sky-500/10 text-sky-500' },
-  [SAND_TRIP_STATUSES.LOADING]: { label: 'Loading', cls: 'bg-amber-500/10 text-amber-500' },
-  [SAND_TRIP_STATUSES.IN_TRANSIT]: { label: 'In Transit', cls: 'bg-blue-500/10 text-blue-500' },
-  [SAND_TRIP_STATUSES.COMPLETED]: { label: 'Completed', cls: 'bg-emerald-500/10 text-emerald-500' },
-  [SAND_TRIP_STATUSES.CANCELLED]: { label: 'Cancelled', cls: 'bg-rose-500/10 text-rose-500' },
+const STATUS_CLS: Record<string, string> = {
+  [SAND_TRIP_STATUSES.SCHEDULED]: 'bg-sky-500/10 text-sky-500',
+  [SAND_TRIP_STATUSES.LOADING]: 'bg-amber-500/10 text-amber-500',
+  [SAND_TRIP_STATUSES.IN_TRANSIT]: 'bg-blue-500/10 text-blue-500',
+  [SAND_TRIP_STATUSES.COMPLETED]: 'bg-emerald-500/10 text-emerald-500',
+  [SAND_TRIP_STATUSES.CANCELLED]: 'bg-rose-500/10 text-rose-500',
 };
 
 function fmt(num: number | null) {
@@ -29,7 +30,10 @@ function fmtDate(iso: string) {
 }
 
 export function SandTripCard({ trip }: Props) {
-  const status = STATUS_CONFIG[trip.status] ?? { label: trip.status, cls: 'bg-muted text-muted-foreground' };
+  const t = useTranslations('sandTrips');
+  const statusCls = STATUS_CLS[trip.status] ?? 'bg-muted text-muted-foreground';
+  // Map db value → translation key (e.g. 'in_transit' → 'status.in_transit')
+  const statusLabel = t(`status.${trip.status}` as Parameters<typeof t>[0], { fallback: trip.status });
   const profitPositive = (trip.netProfitTk ?? 0) >= 0;
 
   return (
@@ -44,8 +48,8 @@ export function SandTripCard({ trip }: Props) {
               </div>
               <span className="font-semibold text-sm truncate">{trip.boatName}</span>
             </div>
-            <Badge variant="outline" className={`border-0 text-xs font-medium shrink-0 ${status.cls}`}>
-              {status.label}
+            <Badge variant="outline" className={`border-0 text-xs font-medium shrink-0 ${statusCls}`}>
+              {statusLabel}
             </Badge>
           </div>
 

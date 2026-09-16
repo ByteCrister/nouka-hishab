@@ -6,6 +6,7 @@ import { useSandTripDetail } from '@/hooks/queries/useSandTripsQueries';
 import { useDeleteSandTrip, useUpdateSandTrip } from '@/hooks/mutations/useSandTripsMutations';
 import { SandTripExpensesSection } from './SandTripExpensesSection';
 import { SandTripAttachmentsSection } from './SandTripAttachmentsSection';
+import { MapPickerDialog } from '@/components/shared/MapPickerDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
@@ -18,15 +19,17 @@ import Link from 'next/link';
 import { SAND_TRIP_STATUSES } from '@/constants/db/sand.const';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SandTripStatus } from '@/constants/db/sand.const';
+import { useTranslations } from 'next-intl';
+import { isWithinBangladesh } from '@/utils/geo';
 
 interface Props { publicId: string; }
 
-const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  [SAND_TRIP_STATUSES.SCHEDULED]: { label: 'Scheduled', cls: 'bg-sky-500/10 text-sky-500 border-sky-500/20' },
-  [SAND_TRIP_STATUSES.LOADING]: { label: 'Loading', cls: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-  [SAND_TRIP_STATUSES.IN_TRANSIT]: { label: 'In Transit', cls: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-  [SAND_TRIP_STATUSES.COMPLETED]: { label: 'Completed', cls: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-  [SAND_TRIP_STATUSES.CANCELLED]: { label: 'Cancelled', cls: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
+const STATUS_CLS: Record<string, string> = {
+  [SAND_TRIP_STATUSES.SCHEDULED]: 'bg-sky-500/10 text-sky-500 border-sky-500/20',
+  [SAND_TRIP_STATUSES.LOADING]: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+  [SAND_TRIP_STATUSES.IN_TRANSIT]: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  [SAND_TRIP_STATUSES.COMPLETED]: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+  [SAND_TRIP_STATUSES.CANCELLED]: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
 };
 
 function fmt(num: string | number | null) {
@@ -49,12 +52,14 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 export function SandTripDetailClient({ publicId }: Props) {
+  const t = useTranslations('sandTripsDetail');
   const router = useRouter();
   const { data, isLoading, error } = useSandTripDetail(publicId);
   const trip = data?.trip;
   const { mutateAsync: deleteTrip, isPending: isDeleting } = useDeleteSandTrip(() => router.push('/sand/trips'));
   const { mutateAsync: updateTrip, isPending: isUpdating } = useUpdateSandTrip();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [mapPickerTarget, setMapPickerTarget] = useState<'source' | 'dest' | null>(null);
 
   if (isLoading) {
     return (
@@ -67,15 +72,16 @@ export function SandTripDetailClient({ publicId }: Props) {
   if (error || !trip) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center mt-6">
-        <p className="text-lg font-semibold text-muted-foreground">Trip not found.</p>
+        <p className="text-lg font-semibold text-muted-foreground">{t('notFound')}</p>
         <Button variant="outline" className="mt-4" asChild>
-          <Link href="/sand/trips"><ArrowLeft className="w-4 h-4 mr-2" />Back to Trips</Link>
+          <Link href="/sand/trips"><ArrowLeft className="w-4 h-4 mr-2" />{t('backToTrips')}</Link>
         </Button>
       </div>
     );
   }
 
-  const status = STATUS_CONFIG[trip.status] ?? { label: trip.status, cls: 'bg-muted text-muted-foreground' };
+  const statusCls = STATUS_CLS[trip.status] ?? 'bg-muted text-muted-foreground';
+  const statusLabel = t(`status.${trip.status}` as Parameters<typeof t>[0], { fallback: trip.status });
   const profit = Number(trip.netProfitTk ?? 0);
 
   const handleStatusChange = async (newStatus: string) => {
@@ -99,7 +105,7 @@ export function SandTripDetailClient({ publicId }: Props) {
             <div>
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold">{trip.boatName}</h1>
-                <Badge variant="outline" className={`${status.cls} border`}>{status.label}</Badge>
+                <Badge variant="outline" className={`${statusCls} border`}>{statusLabel}</Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 {trip.sourceLocation?.name ?? '—'} → {trip.destLocation?.name ?? '—'}
@@ -116,16 +122,16 @@ export function SandTripDetailClient({ publicId }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={SAND_TRIP_STATUSES.SCHEDULED}>Scheduled</SelectItem>
-                <SelectItem value={SAND_TRIP_STATUSES.LOADING}>Loading</SelectItem>
-                <SelectItem value={SAND_TRIP_STATUSES.IN_TRANSIT}>In Transit</SelectItem>
-                <SelectItem value={SAND_TRIP_STATUSES.COMPLETED}>Completed</SelectItem>
-                <SelectItem value={SAND_TRIP_STATUSES.CANCELLED}>Cancelled</SelectItem>
+                <SelectItem value={SAND_TRIP_STATUSES.SCHEDULED}>{t('status.scheduled')}</SelectItem>
+                <SelectItem value={SAND_TRIP_STATUSES.LOADING}>{t('status.loading')}</SelectItem>
+                <SelectItem value={SAND_TRIP_STATUSES.IN_TRANSIT}>{t('status.in_transit')}</SelectItem>
+                <SelectItem value={SAND_TRIP_STATUSES.COMPLETED}>{t('status.completed')}</SelectItem>
+                <SelectItem value={SAND_TRIP_STATUSES.CANCELLED}>{t('status.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Button variant="ghost" asChild className="h-9 px-3 rounded-xl hidden sm:flex">
-              <Link href="/sand/trips"><ArrowLeft className="w-4 h-4 mr-2" />Back</Link>
+              <Link href="/sand/trips"><ArrowLeft className="w-4 h-4 mr-2" />{t('back')}</Link>
             </Button>
 
             <Button
@@ -138,9 +144,9 @@ export function SandTripDetailClient({ publicId }: Props) {
               {isDeleting ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : confirmDelete ? (
-                <><CheckCircle2 className="w-4 h-4 mr-1" />Confirm</>
+                <><CheckCircle2 className="w-4 h-4 mr-1" />{t('confirm')}</>
               ) : (
-                <><Trash2 className="w-4 h-4 mr-1" />Delete</>
+                <><Trash2 className="w-4 h-4 mr-1" />{t('delete')}</>
               )}
             </Button>
           </div>
@@ -153,17 +159,17 @@ export function SandTripDetailClient({ publicId }: Props) {
           <div className="flex items-center gap-3">
             {profit >= 0 ? <TrendingUp className="w-5 h-5 text-emerald-500" /> : <TrendingDown className="w-5 h-5 text-rose-500" />}
             <div>
-              <p className="text-xs text-muted-foreground font-medium">Net Profit</p>
+              <p className="text-xs text-muted-foreground font-medium">{t('profit.netProfit')}</p>
               <p className={`text-2xl font-bold ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>{fmt(profit)}</p>
             </div>
           </div>
           <div className="flex gap-6 text-right">
             <div>
-              <p className="text-xs text-muted-foreground">Sale</p>
+              <p className="text-xs text-muted-foreground">{t('profit.sale')}</p>
               <p className="font-semibold">{fmt(trip.saleAmountTk)}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Total Cost</p>
+              <p className="text-xs text-muted-foreground">{t('profit.totalCost')}</p>
               <p className="font-semibold">{fmt(trip.totalOperatingCostTk)}</p>
             </div>
           </div>
@@ -177,12 +183,31 @@ export function SandTripDetailClient({ publicId }: Props) {
           <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Route & Timing</h3>
+              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.routeTiming')}</h3>
             </div>
-            <InfoRow label="Source" value={trip.sourceLocation ? `${trip.sourceLocation.name}${trip.sourceLocation.lat ? ` (${trip.sourceLocation.lat}, ${trip.sourceLocation.lng})` : ''}` : null} />
-            <InfoRow label="Destination" value={trip.destLocation ? `${trip.destLocation.name}${trip.destLocation.lat ? ` (${trip.destLocation.lat}, ${trip.destLocation.lng})` : ''}` : null} />
-            <InfoRow label="Departure" value={<span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-muted-foreground" />{fmtDate(trip.departureTime)}</span>} />
-            <InfoRow label="Arrival" value={fmtDate(trip.arrivalTime)} />
+            
+            <div className="flex items-start justify-between py-2.5 border-b border-border/40 gap-4">
+              <span className="text-sm text-muted-foreground shrink-0">{t('labels.source')}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-right">{trip.sourceLocation ? `${trip.sourceLocation.name}${trip.sourceLocation.lat ? ` (${trip.sourceLocation.lat}, ${trip.sourceLocation.lng})` : ''}` : '—'}</span>
+                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full shrink-0" onClick={() => setMapPickerTarget('source')} disabled={isUpdating}>
+                  <MapPin className="w-3 h-3 text-muted-foreground" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="flex items-start justify-between py-2.5 border-b border-border/40 gap-4">
+              <span className="text-sm text-muted-foreground shrink-0">{t('labels.destination')}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-right">{trip.destLocation ? `${trip.destLocation.name}${trip.destLocation.lat ? ` (${trip.destLocation.lat}, ${trip.destLocation.lng})` : ''}` : '—'}</span>
+                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full shrink-0" onClick={() => setMapPickerTarget('dest')} disabled={isUpdating}>
+                  <MapPin className="w-3 h-3 text-muted-foreground" />
+                </Button>
+              </div>
+            </div>
+
+            <InfoRow label={t('labels.departure')} value={<span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-muted-foreground" />{fmtDate(trip.departureTime)}</span>} />
+            <InfoRow label={t('labels.arrival')} value={fmtDate(trip.arrivalTime)} />
           </div>
         </FadeInUp>
 
@@ -191,11 +216,11 @@ export function SandTripDetailClient({ publicId }: Props) {
           <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Package className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Cargo</h3>
+              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.cargo')}</h3>
             </div>
-            <InfoRow label="Volume" value={trip.cargoValue != null ? `${trip.cargoValue} ${trip.cargoUnit ?? ''}` : null} />
-            <InfoRow label="Buyer Name" value={<span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-muted-foreground" />{trip.buyerName}</span>} />
-            <InfoRow label="Buyer Phone" value={<span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-muted-foreground" />{trip.buyerPhone}</span>} />
+            <InfoRow label={t('labels.volume')} value={trip.cargoValue != null ? `${trip.cargoValue} ${trip.cargoUnit ?? ''}` : null} />
+            <InfoRow label={t('labels.buyerName')} value={<span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-muted-foreground" />{trip.buyerName}</span>} />
+            <InfoRow label={t('labels.buyerPhone')} value={<span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-muted-foreground" />{trip.buyerPhone}</span>} />
           </div>
         </FadeInUp>
 
@@ -204,16 +229,16 @@ export function SandTripDetailClient({ publicId }: Props) {
           <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
             <div className="flex items-center gap-2 mb-4">
               <Banknote className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Financials</h3>
+              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.financials')}</h3>
             </div>
-            <InfoRow label="Sale Amount" value={fmt(trip.saleAmountTk)} />
-            <InfoRow label="Purchase Cost" value={fmt(trip.purchaseCostTk)} />
-            <InfoRow label="Purchase Rate / Unit" value={fmt(trip.purchaseRatePerUnitTk)} />
-            <InfoRow label="Govt Royalty" value={fmt(trip.govtRoyaltyTk)} />
-            <InfoRow label="Royalty Rate / Unit" value={fmt(trip.govtRoyaltyRateTk)} />
-            <InfoRow label="Local Toll" value={fmt(trip.localTollTk)} />
-            <InfoRow label="Toll Rate / Unit" value={fmt(trip.localTollRateTk)} />
-            <InfoRow label="Operating Costs" value={fmt(trip.totalOperatingCostTk)} />
+            <InfoRow label={t('labels.saleAmount')} value={fmt(trip.saleAmountTk)} />
+            <InfoRow label={t('labels.purchaseCost')} value={fmt(trip.purchaseCostTk)} />
+            <InfoRow label={t('labels.purchaseRatePerUnit')} value={fmt(trip.purchaseRatePerUnitTk)} />
+            <InfoRow label={t('labels.govtRoyalty')} value={fmt(trip.govtRoyaltyTk)} />
+            <InfoRow label={t('labels.royaltyRatePerUnit')} value={fmt(trip.govtRoyaltyRateTk)} />
+            <InfoRow label={t('labels.localToll')} value={fmt(trip.localTollTk)} />
+            <InfoRow label={t('labels.tollRatePerUnit')} value={fmt(trip.localTollRateTk)} />
+            <InfoRow label={t('labels.operatingCosts')} value={fmt(trip.totalOperatingCostTk)} />
           </div>
         </FadeInUp>
 
@@ -223,7 +248,7 @@ export function SandTripDetailClient({ publicId }: Props) {
             <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
               <div className="flex items-center gap-2 mb-4">
                 <FileText className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Notes</h3>
+                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.notes')}</h3>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{trip.notes}</p>
             </div>
@@ -240,6 +265,27 @@ export function SandTripDetailClient({ publicId }: Props) {
       <FadeInUp delay={0.4}>
         <SandTripAttachmentsSection tripPublicId={publicId} attachments={trip.attachments} />
       </FadeInUp>
+
+      <MapPickerDialog
+        open={!!mapPickerTarget}
+        onClose={() => setMapPickerTarget(null)}
+        initialPosition={mapPickerTarget === 'source' && trip.sourceLocation?.lat && trip.sourceLocation?.lng
+          ? [Number(trip.sourceLocation.lat), Number(trip.sourceLocation.lng)]
+          : mapPickerTarget === 'dest' && trip.destLocation?.lat && trip.destLocation?.lng
+            ? [Number(trip.destLocation.lat), Number(trip.destLocation.lng)]
+            : undefined}
+        onSelect={(lat, lng) => {
+          if (!isWithinBangladesh(lat, lng)) {
+            alert(t('errors.locationOutsideBD', { fallback: 'Location must be within Bangladesh.' }));
+            return;
+          }
+          if (mapPickerTarget === 'source') {
+            updateTrip({ publicId, payload: { sourceLocation: { name: trip.sourceLocation?.name || '', lat, lng } } });
+          } else if (mapPickerTarget === 'dest') {
+            updateTrip({ publicId, payload: { destLocation: { name: trip.destLocation?.name || '', lat, lng } } });
+          }
+        }}
+      />
     </div>
   );
 }

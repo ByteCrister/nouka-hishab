@@ -13,7 +13,7 @@ import { SandTripStatus, SandCargoUnit } from "@/constants/db/sand.const";
 import { updateSandTripSchema } from "@/utils/zod/sand-trips.schema";
 
 interface RouteContext {
-  params: { publicId: string };
+  params: Promise<{ publicId: string }>;
 }
 
 type UpdateFields = {
@@ -39,7 +39,8 @@ type UpdateFields = {
 };
 
 export const GET = withErrorHandler<SandTripDetailResponse, [NextRequest, RouteContext]>(
-  async (_req, { params }): Promise<HandlerResult<SandTripDetailResponse>> => {
+  async (_req, context): Promise<HandlerResult<SandTripDetailResponse>> => {
+    const params = await context.params;
     const userPublicId = await requireAuthPublicId();
 
     const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));
@@ -165,7 +166,8 @@ export const GET = withErrorHandler<SandTripDetailResponse, [NextRequest, RouteC
 );
 
 export const PATCH = withErrorHandler<{ success: boolean; publicId: string }, [NextRequest, RouteContext]>(
-  async (req, { params }): Promise<HandlerResult<{ success: boolean; publicId: string }>> => {
+  async (req, context): Promise<HandlerResult<{ success: boolean; publicId: string }>> => {
+    const params = await context.params;
     const userPublicId = await requireAuthPublicId();
 
     const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));
@@ -255,7 +257,8 @@ export const PATCH = withErrorHandler<{ success: boolean; publicId: string }, [N
 );
 
 export const DELETE = withErrorHandler<{ success: boolean }, [NextRequest, RouteContext]>(
-  async (_req, { params }): Promise<HandlerResult<{ success: boolean }>> => {
+  async (_req, context): Promise<HandlerResult<{ success: boolean }>> => {
+    const params = await context.params;
     const userPublicId = await requireAuthPublicId();
 
     const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));

@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Paperclip, X, CheckCircle2, ExternalLink, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface Props {
   tripPublicId: string;
@@ -23,6 +24,7 @@ type AttachForm = { fileId: string; description: string };
 const emptyForm: AttachForm = { fileId: '', description: '' };
 
 export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props) {
+  const t = useTranslations('sandTripsDetail');
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<AttachForm>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -77,14 +79,14 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Paperclip className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold">Attachments</h3>
+          <h3 className="font-semibold">{t('attachments.title')}</h3>
           {attachments.length > 0 && (
             <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-medium">{attachments.length}</span>
           )}
         </div>
         {!showAdd && (
           <Button size="sm" onClick={() => setShowAdd(true)} className="h-8 px-3 rounded-lg text-xs">
-            <Plus className="w-3.5 h-3.5 mr-1" />Attach File
+            <Plus className="w-3.5 h-3.5 mr-1" />{t('attachments.attachFile')}
           </Button>
         )}
       </div>
@@ -92,41 +94,41 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
       {/* Add Form */}
       {showAdd && (
         <div className="mb-5 p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
-          <p className="text-sm font-medium">Attach File by ID</p>
+          <p className="text-sm font-medium">{t('attachments.attachFileById')}</p>
           <p className="text-xs text-muted-foreground">
-            Enter the numeric file ID from the uploaded file record.
+            {t('attachments.attachFileByIdDesc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs">File ID *</Label>
+              <Label className="text-xs">{t('attachments.fileId')} *</Label>
               <Input
                 type="number"
                 value={form.fileId}
                 onChange={(e) => set('fileId', e.target.value)}
-                placeholder="e.g. 42"
+                placeholder={t('attachments.fileIdPlaceholder')}
                 className={`h-9 rounded-lg text-sm bg-background/50 ${errors.fileId ? 'border-destructive' : ''}`}
               />
               {renderError('fileId')}
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Description</Label>
+              <Label className="text-xs">{t('attachments.description')}</Label>
               <Input
                 value={form.description}
                 onChange={(e) => set('description', e.target.value)}
-                placeholder="Optional label"
+                placeholder={t('attachments.descriptionPlaceholder')}
                 className="h-9 rounded-lg text-sm bg-background/50"
               />
             </div>
           </div>
           <div className="flex gap-2 justify-end pt-1">
             <Button variant="ghost" size="sm" onClick={cancelForm} className="h-8 rounded-lg">
-              <X className="w-3.5 h-3.5 mr-1" />Cancel
+              <X className="w-3.5 h-3.5 mr-1" />{t('attachments.cancel')}
             </Button>
             <Button size="sm" onClick={handleSubmit} disabled={isCreating} className="h-8 rounded-lg">
               {isCreating ? (
                 <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Attach</>
+                <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />{t('attachments.attach')}</>
               )}
             </Button>
           </div>
@@ -137,7 +139,7 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
       {attachments.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground">
           <Paperclip className="w-8 h-8 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">No attachments yet.</p>
+          <p className="text-sm">{t('attachments.noAttachments')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

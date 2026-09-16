@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "title": "নতুন বালি ট্রিপ",
+    "description": "একটি নতুন বালি পরিবহন ট্রিপ যোগ করুন"
+  },
+  "breadcrumbs": {
+    "home": "হোম",
+    "sand": "বালু",
+    "trips": "ট্রিপ",
+    "newTrip": "নতুন ট্রিপ"
+  },
+  "header": {
+    "title": "নতুন বালি ট্রিপ",
+    "subtitle": "একটি নতুন বালি কার্গো পরিবহন রান যোগ করুন"
+  },
+  "back": "ফিরে যান",
+  "cancel": "বাতিল",
+  "saveTrip": "ট্রিপ সংরক্ষণ করুন",
+  "saving": "সংরক্ষণ হচ্ছে...",
+  "sections": {
+    "tripInfo": "ট্রিপের তথ্য",
+    "locations": "অবস্থান",
+    "source": "উৎস",
+    "destination": "গন্তব্য",
+    "cargo": "মালামাল",
+    "financials": "আর্থিক বিবরণ",
+    "notes": "নোট"
+  },
+  "fields": {
+    "boat": "নৌকা",
+    "boatPlaceholder": "একটি নৌকা নির্বাচন করুন...",
+    "status": "স্ট্যাটাস",
+    "departureTime": "যাত্রার সময়",
+    "arrivalTime": "আগমনের সময়",
+    "locationName": "অবস্থানের নাম",
+    "sourcePlaceholder": "যেমন: সিলেট ঘাট",
+    "destPlaceholder": "যেমন: ঢাকা টার্মিনাল",
+    "latitude": "অক্ষাংশ",
+    "longitude": "দ্রাঘিমাংশ",
+    "cargoValue": "মালের পরিমাণ",
+    "cargoUnit": "পরিমাপ একক",
+    "saleAmount": "বিক্রয় পরিমাণ (৳)",
+    "buyerName": "ক্রেতার নাম",
+    "buyerNamePlaceholder": "যেমন: রহিম ট্রেডার্স",
+    "buyerPhone": "ক্রেতার ফোন",
+    "purchaseRate": "ক্রয় মূল্য / একক (৳)",
+    "purchaseCost": "মোট ক্রয় খরচ (৳)",
+    "govtRoyaltyRate": "সরকারি রয়্যালটি হার (৳)",
+    "govtRoyaltyTotal": "মোট সরকারি রয়্যালটি (৳)",
+    "localTollRate": "স্থানীয় টোল হার (৳)",
+    "localTollTotal": "মোট স্থানীয় টোল (৳)",
+    "notesPlaceholder": "এই ট্রিপ সম্পর্কে অতিরিক্ত নোট..."
+  },
+  "status": {
+    "scheduled": "নির্ধারিত",
+    "loading": "লোড হচ্ছে",
+    "in_transit": "পথে আছে",
+    "completed": "সম্পন্ন",
+    "cancelled": "বাতিল"
+  },
+  "cargoUnit": {
+    "cubic_ft": "ঘন ফুট",
+    "ton": "টন",
+    "cubic_m": "ঘন মিটার"
+  }
+}

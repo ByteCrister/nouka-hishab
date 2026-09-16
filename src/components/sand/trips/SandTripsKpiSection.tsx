@@ -4,8 +4,10 @@ import { useSandTripsFiltersStore } from '@/store/useSandTripsFiltersStore';
 import { useSandTrips } from '@/hooks/queries/useSandTripsQueries';
 import { TrendingUp, TrendingDown, Navigation } from 'lucide-react';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
+import { useTranslations } from 'next-intl';
 
 export function SandTripsKpiSection() {
+  const t = useTranslations('sandTrips');
   const { filters } = useSandTripsFiltersStore();
   const { data, isLoading } = useSandTrips(filters);
   const kpis = data?.kpis;
@@ -28,21 +30,21 @@ export function SandTripsKpiSection() {
 
   const items = [
     {
-      title: 'Total Trips',
+      title: t('kpi.totalTrips'),
       value: kpis?.totalTrips ?? 0,
       icon: <Navigation className="w-5 h-5 text-primary" />,
       bg: 'bg-primary/10',
       delay: 0.1,
     },
     {
-      title: 'Total Revenue',
+      title: t('kpi.totalRevenue'),
       value: `৳ ${(kpis?.totalProfitTk ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
       icon: <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
       bg: 'bg-emerald-100 dark:bg-emerald-900/30',
       delay: 0.2,
     },
     {
-      title: 'Total Costs',
+      title: t('kpi.totalCosts'),
       value: `৳ ${(kpis?.totalCostTk ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
       icon: <TrendingDown className="w-5 h-5 text-rose-500 dark:text-rose-400" />,
       bg: 'bg-rose-100 dark:bg-rose-900/30',

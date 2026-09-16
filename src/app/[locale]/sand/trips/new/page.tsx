@@ -1,4 +1,4 @@
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { NewSandTripForm } from '@/components/sand/trips/new/NewSandTripForm';
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 
@@ -6,25 +6,28 @@ interface Props {
   params: Promise<{ locale: string }>;
 }
 
-export async function generateMetadata() {
+export async function generateMetadata({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'sandTripsNew' });
   return {
-    title: 'New Sand Trip | Nouka Hishab',
-    description: 'Log a new sand transport trip',
+    title: `${t('meta.title')} | Nouka Hishab`,
+    description: t('meta.description'),
   };
 }
 
 export default async function NewSandTripPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'sandTripsNew' });
 
   return (
     <main className="container mx-auto py-8 px-4 max-w-7xl">
       <Breadcrumbs
         items={[
-          { label: 'Home', href: '/', isHome: true },
-          { label: 'Sand', href: '/sand' },
-          { label: 'Trips', href: '/sand/trips' },
-          { label: 'New Trip' },
+          { label: t('breadcrumbs.home'), href: '/', isHome: true },
+          { label: t('breadcrumbs.sand'), href: '/sand' },
+          { label: t('breadcrumbs.trips'), href: '/sand/trips' },
+          { label: t('breadcrumbs.newTrip') },
         ]}
       />
       <NewSandTripForm />

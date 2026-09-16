@@ -8,11 +8,12 @@ import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult, ApiError } from "@/lib/helpers/withErrorHandler";
 
 interface RouteContext {
-  params: { publicId: string; fileId: string };
+  params: Promise<{ publicId: string; fileId: string }>;
 }
 
 export const DELETE = withErrorHandler<{ success: boolean }, [NextRequest, RouteContext]>(
-  async (_req, { params }): Promise<HandlerResult<{ success: boolean }>> => {
+  async (_req, context): Promise<HandlerResult<{ success: boolean }>> => {
+    const params = await context.params;
     const userPublicId = await requireAuthPublicId();
 
     const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));

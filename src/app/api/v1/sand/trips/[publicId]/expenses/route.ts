@@ -9,11 +9,12 @@ import { withErrorHandler, HandlerResult, ApiError } from "@/lib/helpers/withErr
 import { createSandTripExpenseSchema } from "@/utils/zod/sand-trips.schema";
 
 interface RouteContext {
-  params: { publicId: string };
+  params: Promise<{ publicId: string }>;
 }
 
 export const POST = withErrorHandler<{ success: boolean; publicId: string }, [NextRequest, RouteContext]>(
-  async (req, { params }): Promise<HandlerResult<{ success: boolean; publicId: string }>> => {
+  async (req, context): Promise<HandlerResult<{ success: boolean; publicId: string }>> => {
+    const params = await context.params;
     const userPublicId = await requireAuthPublicId();
 
     const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));
