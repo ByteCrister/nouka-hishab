@@ -99,7 +99,7 @@ export function BoatTripsList({ publicId }: BoatTripsListProps) {
                 >
                   <TableCell>
                     <div className="font-medium text-foreground">
-                      {trip.sourceLocationName || '-'} → {trip.destLocationName || '-'}
+                      {trip.source || '-'} → {trip.destination || '-'}
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">

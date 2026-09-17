@@ -1,0 +1,689 @@
+NOUKAHISHAB PDF REPORT EXPORT ARCHITECTURE
+==============================================
+
+Goal
+----
+Build a reusable PDF export system for NoukaHishab that can generate
+business reports such as:
+
+- Sand trip reports
+- Total expense reports
+- Revenue reports
+- Boat monthly reports
+- Monthly summaries
+- Other future financial/business reports
+
+Example requirement:
+A specific boat completes 40 trips in one month.
+If the configured limit is 20 rows per PDF:
+
+    PDF Part 1 -> Trips 1-20
+    PDF Part 2 -> Trips 21-40
+
+If there are 57 trips:
+
+    PDF Part 1 -> Trips 1-20
+    PDF Part 2 -> Trips 21-40
+    PDF Part 3 -> Trips 41-57
+
+
+1. HIGH-LEVEL ARCHITECTURE
+--------------------------
+
+User
+  |
+  v
+Sand Report UI
+  |
+  | Select boat, date/month, report type,
+  | rows per PDF, language, etc.
+  v
+Report API
+  |
+  v
+Dedicated Drizzle/PostgreSQL Report Query
+  |
+  v
+Report DTO
+  |
+  v
+Report Engine
+  |
+  +--> Split data into chunks
+  |    (default 20 rows per PDF)
+  |
+  +--> Generate PDF for each chunk
+  |
+  v
+PDF files
+  |
+  v
+Browser download
+
+
+2. RECOMMENDED FOLDER STRUCTURE
+-------------------------------
+
+src/
+|
++-- app/
+|   +-- api/
+|       +-- sand/
+|           +-- reports/
+|               +-- trips/
+|               |   +-- route.ts
+|               |
+|               +-- expenses/
+|               |   +-- route.ts
+|               |
+|               +-- revenue/
+|               |   +-- route.ts
+|               |
+|               +-- boat-summary/
+|                   +-- route.ts
+|
++-- components/
+|   +-- sand/
+|       +-- reports/
+|           +-- trip-report-filters.tsx
+|           +-- trip-report-preview.tsx
+|           +-- report-export-button.tsx
+|
++-- lib/
+|   +-- pdf/
+|       +-- report-engine.ts
+|       +-- trip-report.tsx
+|       +-- expense-report.tsx
+|       +-- revenue-report.tsx
+|       +-- pdf-utils.ts
+|       +-- chunk.ts
+|
++-- types/
+|   +-- reports/
+|       +-- trip-report.ts
+|       +-- expense-report.ts
+|       +-- revenue-report.ts
+|       +-- report.ts
+|
++-- db/
+    +-- schema/
+    +-- queries/
+
+
+3. CORE DATA FLOW
+-----------------
+
+Frontend sends report filters:
+
+    boatId
+    from
+    to
+    rowsPerPdf
+    language
+
+Example:
+
+    boatId = "boat_123"
+    from = "2026-08-01"
+    to = "2026-08-31"
+    rowsPerPdf = 20
+    language = "en"
+
+API:
+
+    GET /api/sand/reports/trips
+
+The API:
+
+    1. Validates request with Zod
+    2. Queries PostgreSQL through Drizzle
+    3. Selects only required report fields
+    4. Maps database results into a Report DTO
+    5. Sends data to the Report Engine
+    6. Generates PDF(s)
+    7. Returns the PDF/download result
+
+
+4. IMPORTANT: USE REPORT DTOs
+-----------------------------
+
+Do NOT send complete database records directly to the PDF generator.
+
+Example:
+
+    interface TripReportRow {
+      id: string;
+      serial: number;
+      date: Date;
+      route: string;
+      quantity: number;
+      income: number;
+      expense: number;
+      profit: number;
+    }
+
+Architecture:
+
+    PostgreSQL
+        |
+        v
+    Drizzle Query
+        |
+        v
+    TripReportRow[]
+        |
+        v
+    PDF Generator
+
+This keeps database logic and PDF presentation separate.
+
+
+5. CHUNKING / 20 ROW LIMIT
+--------------------------
+
+The 20-row limit should be configurable.
+
+Default:
+
+    const DEFAULT_ROWS_PER_PDF = 20;
+
+Reusable utility:
+
+    function chunk<T>(items: T[], size: number): T[][] {
+      const result: T[][] = [];
+
+      for (let i = 0; i < items.length; i += size) {
+        result.push(items.slice(i, i + size));
+      }
+
+      return result;
+    }
+
+Example:
+
+    40 trips + size 20
+
+    [
+      [trip 1 ... trip 20],
+      [trip 21 ... trip 40]
+    ]
+
+Example:
+
+    57 trips + size 20
+
+    [
+      [trip 1 ... trip 20],
+      [trip 21 ... trip 40],
+      [trip 41 ... trip 57]
+    ]
+
+
+6. BUSINESS ROW LIMIT VS PHYSICAL PAGE
+--------------------------------------
+
+These are different concepts.
+
+Business rule:
+
+    20 trips = one PDF report part
+
+This does NOT mean:
+
+    20 trips = exactly one physical PDF page
+
+A PDF may contain multiple physical pages.
+
+Example:
+
+    PDF Part 1
+      Page 1 -> Trips 1-12
+      Page 2 -> Trips 13-20
+
+This is acceptable.
+
+The 20-row rule controls REPORT PARTS, not physical page breaks.
+
+
+7. PDF TECHNOLOGY
+-----------------
+
+Recommended for V1:
+
+    @react-pdf/renderer
+
+Use it to create actual PDF documents containing:
+
+    - Header
+    - Boat information
+    - Report period
+    - Report title
+    - Table
+    - Totals
+    - Summary
+    - Generated date
+    - Part number
+    - Page numbers
+    - English/Bangla text where required
+
+Do NOT rely on:
+
+    - Browser screenshot
+    - html2canvas
+    - Printing the current webpage
+    - Taking a screenshot of the dashboard
+
+The PDF should be a proper business document.
+
+
+8. EXAMPLE PDF STRUCTURE
+------------------------
+
+====================================================
+                    NOUKA HISHAB
+                  SAND TRIP REPORT
+====================================================
+
+Boat       : MV Rahman
+Owner      : Abdul Karim
+Period     : August 2026
+Report     : Trip Expense Report
+Part       : 1 of 2
+
+----------------------------------------------------
+#   Date       Route        Qty     Expense   Total
+----------------------------------------------------
+1   01/08/26   Tahirpur     5000    12,000    45,000
+2   03/08/26   Tahirpur     5000    10,500    42,000
+...
+20  29/08/26   Tahirpur     5000    11,000    44,000
+
+----------------------------------------------------
+
+Total Trips       : 20
+Total Quantity     : 100,000 ft
+Total Expense      : xxx,xxx BDT
+Total Revenue      : xxx,xxx BDT
+Net Amount         : xxx,xxx BDT
+
+Generated: 17 September 2026
+
+====================================================
+
+
+9. API DESIGN
+-------------
+
+Recommended report endpoints:
+
+    /api/sand/reports/trips
+    /api/sand/reports/expenses
+    /api/sand/reports/revenue
+    /api/sand/reports/boat-summary
+    /api/sand/reports/monthly-summary
+
+Example:
+
+    GET /api/sand/reports/trips
+      ?boatId=abc123
+      &from=2026-08-01
+      &to=2026-08-31
+      &rowsPerPdf=20
+
+
+10. GENERATION STRATEGY
+-----------------------
+
+For normal reports:
+
+    Browser
+       |
+       v
+    Report API
+       |
+       v
+    Fetch all matching report rows
+       |
+       v
+    Chunk rows
+       |
+       v
+    Generate PDFs
+       |
+       v
+    Return/download PDFs
+
+Do NOT make separate database/API requests for every 20 rows.
+
+Avoid:
+
+    API -> trips 1-20 -> PDF
+    API -> trips 21-40 -> PDF
+    API -> trips 41-60 -> PDF
+
+Prefer:
+
+    API
+      -> fetch all matching rows
+      -> chunk in memory
+      -> generate all report parts
+
+
+11. MULTIPLE PDF DOWNLOAD
+-------------------------
+
+If there is only one PDF:
+
+    Download PDF directly.
+
+If there are multiple PDFs:
+
+    Option A:
+        Download each PDF separately.
+
+    Option B:
+        Generate a ZIP containing all PDFs.
+
+Recommended UX:
+
+    1 PDF  -> direct PDF download
+    2+ PDFs -> ZIP download
+
+Example ZIP:
+
+    MV-Rahman-August-2026/
+        01-MV-Rahman-August-2026.pdf
+        02-MV-Rahman-August-2026.pdf
+
+
+12. REPORT UI
+-------------
+
+Example UI:
+
+    +---------------------------------------+
+    | Trip Report                           |
+    |                                       |
+    | Boat:       [ MV Rahman          v ]  |
+    | Month:      [ August 2026        v ] |
+    |                                       |
+    | Trips found: 40                       |
+    | PDFs required: 2                      |
+    |                                       |
+    | Rows per PDF: [ 20 ]                  |
+    |                                       |
+    | [ Preview ]       [ Export PDF ]      |
+    +---------------------------------------+
+
+The UI should calculate:
+
+    totalTrips
+    numberOfPdfs
+
+Formula:
+
+    numberOfPdfs = Math.ceil(totalTrips / rowsPerPdf)
+
+
+13. REUSABLE REPORT ENGINE
+--------------------------
+
+Build the PDF system so every report follows the same pipeline:
+
+    Report Request
+        |
+        v
+    Validate filters
+        |
+        v
+    Query data
+        |
+        v
+    Convert to Report DTO
+        |
+        v
+    Chunk data
+        |
+        v
+    Generate report parts
+        |
+        v
+    Download / ZIP
+
+Conceptually:
+
+    ReportEngine
+        |
+        +-- fetchData()
+        +-- transformData()
+        +-- chunkData()
+        +-- generatePdf()
+        +-- generateZip()
+        +-- createFilename()
+
+
+14. REPORT-SPECIFIC CODE
+------------------------
+
+The shared engine should handle:
+
+    - Chunking
+    - File naming
+    - PDF generation workflow
+    - Part numbering
+    - ZIP creation
+    - Download response
+
+Individual report modules should handle:
+
+    - Trip table columns
+    - Expense calculations
+    - Revenue calculations
+    - Boat information
+    - Report-specific summaries
+
+This prevents duplicated PDF infrastructure.
+
+
+15. SECURITY
+------------
+
+Report APIs must verify:
+
+    - User is authenticated
+    - User has permission to access the boat
+    - Requested date range is valid
+    - rowsPerPdf is within an allowed range
+    - User cannot access another owner's private data
+
+Never trust:
+
+    boatId
+    userId
+    date range
+    report filters
+
+Validate everything server-side.
+
+
+16. FINANCIAL DATA CONSIDERATIONS
+---------------------------------
+
+For business/financial reports, always display:
+
+    Report period
+    Boat
+    Generated timestamp
+    Part number
+    Total rows/trips
+    Relevant totals
+
+For finalized accounting reports, a future version can introduce:
+
+    report_snapshots
+
+This allows a report to preserve the exact data used at generation time.
+
+This is NOT required for V1.
+
+
+17. LARGE REPORTS / FUTURE SCALING
+----------------------------------
+
+V1:
+
+    Request
+      -> query
+      -> generate PDF
+      -> download
+
+Later, if reports become very large:
+
+    Request
+      -> create report job
+      -> Redis
+      -> BullMQ
+      -> PDF worker
+      -> generate files
+      -> store temporary files
+      -> notify frontend
+      -> download
+
+Use background jobs only when report generation becomes heavy enough
+to affect normal API response times.
+
+Do not add Redis/BullMQ just for a small 20-100 row report.
+
+
+18. RECOMMENDED V1 STACK
+------------------------
+
+Frontend:
+    Next.js
+    React
+    TypeScript
+
+API:
+    Next.js Route Handlers
+    Zod
+
+Database:
+    PostgreSQL
+    Drizzle ORM
+
+PDF:
+    @react-pdf/renderer
+
+Download:
+    Browser Blob / download response
+
+Multiple files:
+    ZIP generation
+
+Future:
+    Redis
+    BullMQ
+    Background PDF worker
+
+
+19. COMPLETE ARCHITECTURE
+-------------------------
+
+                         NOUKAHISHAB
+                              |
+                              v
+                    +-------------------+
+                    |   Sand Dashboard  |
+                    +---------+---------+
+                              |
+                              | Report filters
+                              v
+                    +-------------------+
+                    |    Report API     |
+                    | /api/sand/reports |
+                    +---------+---------+
+                              |
+                              v
+                    +-------------------+
+                    | Auth + Zod        |
+                    | Validation        |
+                    +---------+---------+
+                              |
+                              v
+                    +-------------------+
+                    | Drizzle Queries   |
+                    | PostgreSQL        |
+                    +---------+---------+
+                              |
+                              v
+                    +-------------------+
+                    |   Report DTO      |
+                    | TripReportRow[]    |
+                    +---------+---------+
+                              |
+                              v
+                    +-------------------+
+                    |   Report Engine   |
+                    +---------+---------+
+                              |
+                              v
+                    +-------------------+
+                    | Chunk Data        |
+                    | Default: 20 rows  |
+                    +---------+---------+
+                              |
+                 +------------+------------+
+                 |            |            |
+                 v            v            v
+             PDF Part 1   PDF Part 2   PDF Part 3
+             Rows 1-20    Rows 21-40   Rows 41-60
+                 |            |            |
+                 +------------+------------+
+                              |
+                              v
+                    +-------------------+
+                    | Download / ZIP    |
+                    +---------+---------+
+                              |
+                              v
+                           User
+
+
+20. FINAL RECOMMENDATION
+------------------------
+
+For NoukaHishab V1, use this architecture:
+
+    PostgreSQL
+        ->
+    Drizzle report query
+        ->
+    Typed Report DTO
+        ->
+    Reusable Report Engine
+        ->
+    Configurable chunking (default 20 rows)
+        ->
+    @react-pdf/renderer
+        ->
+    One PDF or multiple PDFs
+        ->
+    ZIP when multiple files
+        ->
+    Browser download
+
+Keep the PDF generation server-side, keep report queries separate from
+normal page queries, use typed DTOs, and make the 20-row limit a
+configuration rather than hardcoding it throughout the system.
+
+The key design principle is:
+
+    DATABASE DATA
+         ->
+    REPORT DATA
+         ->
+    REPORT ENGINE
+         ->
+    PDF DOCUMENT
+
+This makes the system reusable for all future NoukaHishab reports.

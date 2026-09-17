@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useUploadBoatImage, useDeleteBoatImage } from '@/hooks/mutations/useBoatMutations';
 import { useMediaUpload } from '@/hooks/media/use-media-upload';
-import { Camera, Image as ImageIcon, Loader2, Star, Trash2 } from 'lucide-react';
+import { Camera, Image as ImageIcon, Loader2, Star, Trash2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import Image from 'next/image';
@@ -21,19 +21,55 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
   const { mutateAsync: deleteBoatImage, isPending: isDeletingImage } = useDeleteBoatImage();
   
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Clean up object URL to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const maxImagesLimit = 5;
+  const isLimitReached = boat.images.length >= maxImagesLimit;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate size (max 2MB)
+    const maxSizeMB = 2;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      toast.error(`Image size must be less than ${maxSizeMB}MB`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    // Validate type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleSave = async () => {
+    if (!selectedFile) return;
+
     try {
       setIsProcessing(true);
-      const results = await uploadMedia([file]);
+      const results = await uploadMedia([selectedFile]);
       if (results.length > 0) {
         const { fileId } = results[0];
         const isPrimary = boat.images.length === 0;
         await uploadBoatImage({ publicId: boat.publicId, fileId, isPrimary });
         toast.success(t('imageUploaded'));
+        setSelectedFile(null);
+        setPreviewUrl(null);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Upload failed');
@@ -41,6 +77,12 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
       setIsProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  const handleCancel = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSetPrimary = async (fileId: number) => {
@@ -81,11 +123,11 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
             className="hidden"
             accept="image/*"
             onChange={handleFileChange}
-            disabled={showLoader}
+            disabled={showLoader || isLimitReached}
           />
           <Button 
             onClick={() => fileInputRef.current?.click()}
-            disabled={showLoader}
+            disabled={showLoader || isLimitReached || !!selectedFile}
             className="shadow-md shadow-primary/20"
           >
             {showLoader ? (
@@ -93,10 +135,52 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
             ) : (
               <Camera className="w-4 h-4 mr-2" />
             )}
-            {showLoader ? t('uploading') : t('uploadImage')}
+            {showLoader ? t('uploading') : isLimitReached ? 'Limit Reached' : t('uploadImage')}
           </Button>
+          <div className="text-xs text-muted-foreground mt-2 text-right">
+            {boat.images.length} / {maxImagesLimit} Images
+          </div>
         </div>
       </div>
+
+      {previewUrl && selectedFile && (
+        <div className="mb-8 p-4 border border-border/50 rounded-xl bg-muted/20 flex flex-col items-center">
+          <h3 className="text-sm font-semibold mb-4 text-foreground">Preview Image</h3>
+          <div className="relative w-full max-w-sm aspect-[4/3] rounded-lg overflow-hidden border-2 border-border mb-4">
+            <Image 
+              src={previewUrl} 
+              alt="Preview" 
+              fill 
+              sizes="(max-width: 640px) 100vw, 384px"
+              className="object-cover"
+            />
+            {showLoader && (
+              <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3 w-full max-w-sm">
+            <Button 
+              onClick={handleSave}
+              disabled={showLoader}
+              className="flex-1"
+            >
+              <Check className="w-4 h-4 mr-2" />
+              Save
+            </Button>
+            <Button 
+              onClick={handleCancel}
+              disabled={showLoader}
+              variant="outline"
+              className="flex-1"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
 
       {boat.images.length === 0 ? (
         <div className="rounded-xl border border-dashed bg-muted/30 p-12 flex flex-col items-center justify-center text-center">

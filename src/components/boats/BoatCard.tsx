@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Ship, Anchor, Navigation } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { StaggerItem } from '../wrappers/motion-wrappers';
 
 interface BoatCardProps {
   boat: BoatListItem;
@@ -14,6 +13,7 @@ interface BoatCardProps {
 
 export function BoatCard({ boat }: BoatCardProps) {
   const t = useTranslations('boatsPage');
+  const tShared = useTranslations('shared');
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -49,9 +49,14 @@ export function BoatCard({ boat }: BoatCardProps) {
       </div>
       
       <CardContent className="p-6 flex-1 flex flex-col">
-        <h3 className="font-bold text-xl mb-1 truncate text-foreground group-hover:text-primary transition-colors">
-          {boat.name}
-        </h3>
+        <div className="flex items-start justify-between mb-1 gap-2">
+          <h3 className="font-bold text-xl truncate text-foreground group-hover:text-primary transition-colors">
+            {boat.name}
+          </h3>
+          <Badge variant="secondary" className="font-normal text-xs bg-muted/50 border-border/50 text-muted-foreground whitespace-nowrap">
+            {tShared(`sectors.${boat.sector}`)}
+          </Badge>
+        </div>
         
         <div className="space-y-4 mt-auto pt-6">
           <div className="flex items-center text-sm text-muted-foreground bg-muted/30 p-2.5 rounded-xl">

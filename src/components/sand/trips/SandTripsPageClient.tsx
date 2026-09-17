@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, Plus, Sailboat } from 'lucide-react';
 import Link from 'next/link';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
 import { useTranslations } from 'next-intl';
+import { SandTripReportExportButton } from '@/components/sand/reports/SandTripReportExportButton';
 
 export function SandTripsPageClient() {
   const t = useTranslations('sandTrips');
@@ -30,12 +31,15 @@ export function SandTripsPageClient() {
             {t('header.subtitle')}
           </p>
         </div>
-        <Button asChild className="h-10 px-5 rounded-xl bg-gradient-to-r from-river-500 to-river-600 hover:from-river-600 hover:to-river-700 text-white shadow-md shadow-river-500/20">
-          <Link href="/sand/trips/new">
-            <Plus className="w-4 h-4 mr-2" />
-            {t('header.newTrip')}
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <SandTripReportExportButton mode="list" />
+          <Button asChild className="h-10 px-5 rounded-xl bg-gradient-to-r from-river-500 to-river-600 hover:from-river-600 hover:to-river-700 text-white shadow-md shadow-river-500/20">
+            <Link href="/sand/trips/new">
+              <Plus className="w-4 h-4 mr-2" />
+              {t('header.newTrip')}
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* KPIs */}

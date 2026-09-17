@@ -13,8 +13,8 @@ export interface SandTripListItem {
   publicId: string;
   boatName: string;
   boatPublicId: string;
-  sourceLocation: LocationPayload | null;
-  destLocation: LocationPayload | null;
+  source: string | null;
+  destination: string | null;
   departureTime: string;
   arrivalTime: string | null;
   cargoValue: number | null;
@@ -34,6 +34,7 @@ export interface SandTripDetail extends SandTripListItem {
   govtRoyaltyTk: number | null;
   localTollRateTk: number | null;
   localTollTk: number | null;
+  operatingCostTk: number | null;
   totalOperatingCostTk: number | null;
   notes: string | null;
   expenses: SandTripExpenseItem[];
@@ -59,16 +60,12 @@ export interface SandTripsFilters {
   limit: number;
 }
 
-export interface LocationPayload {
-  name: string;
-  lat?: number | null;
-  lng?: number | null;
-}
+
 
 export interface CreateSandTripPayload {
   boatPublicId: string;
-  sourceLocation?: LocationPayload | null;
-  destLocation?: LocationPayload | null;
+  source?: string | null;
+  destination?: string | null;
   departureTime: string;
   arrivalTime?: string | null;
   cargoValue?: number | null;
@@ -82,6 +79,7 @@ export interface CreateSandTripPayload {
   govtRoyaltyTk?: number | null;
   localTollRateTk?: number | null;
   localTollTk?: number | null;
+  operatingCostTk?: number | null;
   status?: SandTripStatus;
   notes?: string | null;
 }

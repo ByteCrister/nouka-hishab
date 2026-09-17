@@ -7,10 +7,10 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { locale, publicId } = await params;
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'sandTripsDetail' });
   return {
-    title: `Trip ${publicId} | Nouka Hishab`,
+    title: `${t('meta.title')} | Nouka Hishab`,
     description: t('meta.description'),
   };
 }

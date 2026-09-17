@@ -31,6 +31,7 @@ export function BoatDetailHeader({ boat }: BoatDetailHeaderProps) {
   const t = useTranslations('boatsPage.detail');
   const tSand = useTranslations('sand');
   const tBoats = useTranslations('boatsPage');
+  const tShared = useTranslations('shared');
   const router = useRouter();
   const { mutateAsync: deleteBoat, isPending: isDeleting } = useDeleteBoat();
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -72,9 +73,14 @@ export function BoatDetailHeader({ boat }: BoatDetailHeaderProps) {
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
                 {boat.name}
               </h1>
-              <Badge variant="secondary" className={`capitalize ${getStatusColor(boat.status)}`}>
-                {tBoats(`status.${boat.status}`)}
-              </Badge>
+              <div className="flex gap-2">
+                <Badge variant="outline" className="capitalize text-muted-foreground bg-muted/50 font-normal">
+                  {tShared(`sectors.${boat.sector}`)}
+                </Badge>
+                <Badge variant="secondary" className={`capitalize ${getStatusColor(boat.status)}`}>
+                  {tBoats(`status.${boat.status}`)}
+                </Badge>
+              </div>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
 

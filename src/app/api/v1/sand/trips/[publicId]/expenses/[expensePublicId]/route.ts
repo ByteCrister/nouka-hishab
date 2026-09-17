@@ -8,6 +8,7 @@ import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult, ApiError } from "@/lib/helpers/withErrorHandler";
 import { updateSandTripExpenseSchema } from "@/utils/zod/sand-trips.schema";
 import { SandTripExpenseCategory } from "@/constants/db/sand.const";
+import { recalculateTripFinancials } from "../../../../../../../../lib/helpers/trip-financials.helper";
 
 interface RouteContext {
   params: Promise<{ publicId: string; expensePublicId: string }>;
@@ -65,6 +66,7 @@ export const PATCH = withErrorHandler<{ success: boolean }, [NextRequest, RouteC
 
     if (Object.keys(updateData).length > 0) {
       await db.update(sandTripExpenses).set(updateData).where(eq(sandTripExpenses.id, existingExpense.id));
+      await recalculateTripFinancials(existingTrip.id);
     }
 
     return { data: { success: true } };
@@ -107,6 +109,8 @@ export const DELETE = withErrorHandler<{ success: boolean }, [NextRequest, Route
       .returning({ id: sandTripExpenses.id });
 
     if (!deletedExpense) throw new ApiError("Expense not found", 404);
+
+    await recalculateTripFinancials(existingTrip.id);
 
     return { data: { success: true } };
   }

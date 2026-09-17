@@ -57,8 +57,8 @@ export function SandTripCard({ trip }: Props) {
           <div className="flex items-start gap-2 text-sm text-muted-foreground">
             <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-primary/60" />
             <div className="min-w-0">
-              <span className="font-medium text-foreground truncate block">{trip.sourceLocation?.name ?? '—'}</span>
-              <span className="text-xs">→ {trip.destLocation?.name ?? '—'}</span>
+              <span className="font-medium text-foreground truncate block">{trip.source ?? '—'}</span>
+              <span className="text-xs">→ {trip.destination ?? '—'}</span>
             </div>
           </div>
 

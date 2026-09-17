@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { NewSandTripForm } from '@/components/sand/trips/new/NewSandTripForm';
+import { SandTripForm } from '@/components/sand/trips/new/SandTripForm';
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 
 interface Props {
@@ -30,7 +30,7 @@ export default async function NewSandTripPage({ params }: Props) {
           { label: t('breadcrumbs.newTrip') },
         ]}
       />
-      <NewSandTripForm />
+      <SandTripForm />
     </main>
   );
 }

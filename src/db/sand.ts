@@ -14,7 +14,7 @@ import {
 import { sql } from 'drizzle-orm';
 import { ulid } from 'ulid';
 import { files } from './media';
-import { users, locations, upazilas } from './app';
+import { users } from './app';
 import { boats } from './boat';
 import { 
   SandCargoUnit, 
@@ -54,21 +54,9 @@ export const sandTrips = pgTable(
       .notNull()
       .references(() => boats.id, { onDelete: 'restrict' }),
 
-    // ── Source location ──────────────────────────────────────────────────
-    sourceLocationId: integer('source_location_id').references(() => locations.id, {
-      onDelete: 'restrict',
-    }),
-    sourceUpazilaId: integer('source_upazila_id').references(() => upazilas.id, {
-      onDelete: 'restrict',
-    }),
-
-    // ── Destination location ─────────────────────────────────────────────
-    destLocationId: integer('dest_location_id').references(() => locations.id, {
-      onDelete: 'restrict',
-    }),
-    destUpazilaId: integer('dest_upazila_id').references(() => upazilas.id, {
-      onDelete: 'restrict',
-    }),
+    // ── Location ─────────────────────────────────────────────────────────
+    source: text('source'), // "area, thana, district"
+    destination: text('destination'), // "area, thana, district"
 
     // ── Timing ───────────────────────────────────────────────────────────
     departureTime: timestamp('departure_time', { withTimezone: true }).notNull(),
@@ -99,6 +87,7 @@ export const sandTrips = pgTable(
     // BIWTA / union parishad / transport toll collected at river points.
     localTollRateTk: numeric('local_toll_rate_tk', { precision: 10, scale: 2 }),
     localTollTk: numeric('local_toll_tk', { precision: 12, scale: 2 }),
+    operatingCostTk: numeric('operating_cost_tk', { precision: 12, scale: 2 }),
 
     // ── Profit summary ───────────────────────────────────────────────────
     // total_operating_cost_tk is updated by the app whenever a trip expense
@@ -131,10 +120,6 @@ export const sandTrips = pgTable(
     publicIdIdx: index('idx_sand_trips_public_id').on(t.publicId),
     statusIdx: index('idx_sand_trips_status').on(t.status),
     departureIdx: index('idx_sand_trips_departure').on(t.departureTime),
-    sourceLocationIdx: index('idx_sand_trips_source_location').on(t.sourceLocationId),
-    sourceUpazilaIdx: index('idx_sand_trips_source_upazila').on(t.sourceUpazilaId),
-    destLocationIdx: index('idx_sand_trips_dest_location').on(t.destLocationId),
-    destUpazilaIdx: index('idx_sand_trips_dest_upazila').on(t.destUpazilaId),
   }),
 );
 

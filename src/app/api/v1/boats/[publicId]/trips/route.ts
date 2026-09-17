@@ -3,7 +3,6 @@ import { z } from "zod";
 import { db } from "@/config/db";
 import { boats } from "@/db/boat";
 import { sandTrips } from "@/db/sand";
-import { locations } from "@/db/app";
 import { eq, and, or, ilike, isNull, desc, asc, count, gte, lte } from "drizzle-orm";
 import { requireAuthUserId } from "@/lib/auth/utils";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
@@ -48,8 +47,7 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
     }
     const boatId = boatResult[0].id;
 
-    const sourceLocations = alias(locations, 'sourceLocations');
-    const destLocations = alias(locations, 'destLocations');
+
 
     const baseConditions = [
         eq(sandTrips.boatId, boatId),
@@ -61,11 +59,11 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
         baseConditions.push(eq(sandTrips.status, tripStatus));
     }
 
-    if (query.search) {
+        if (query.search) {
         baseConditions.push(
             or(
-                ilike(sourceLocations.name, `%${query.search}%`),
-                ilike(destLocations.name, `%${query.search}%`)
+                ilike(sandTrips.source, `%${query.search}%`),
+                ilike(sandTrips.destination, `%${query.search}%`)
             )!
         );
     }
@@ -92,8 +90,6 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
         db
             .select({ count: count() })
             .from(sandTrips)
-            .leftJoin(sourceLocations, eq(sandTrips.sourceLocationId, sourceLocations.id))
-            .leftJoin(destLocations, eq(sandTrips.destLocationId, destLocations.id))
             .where(whereClause),
 
         db
@@ -101,8 +97,8 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
                 id: sandTrips.id,
                 publicId: sandTrips.publicId,
                 boatId: sandTrips.boatId,
-                sourceLocationName: sourceLocations.name,
-                destLocationName: destLocations.name,
+                source: sandTrips.source,
+                destination: sandTrips.destination,
                 departureTime: sandTrips.departureTime,
                 arrivalTime: sandTrips.arrivalTime,
                 cargoValue: sandTrips.cargoValue,
@@ -112,8 +108,6 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
                 status: sandTrips.status,
             })
             .from(sandTrips)
-            .leftJoin(sourceLocations, eq(sandTrips.sourceLocationId, sourceLocations.id))
-            .leftJoin(destLocations, eq(sandTrips.destLocationId, destLocations.id))
             .where(whereClause)
             .orderBy(orderByClause)
             .limit(query.limit)
@@ -126,8 +120,8 @@ export const GET = withErrorHandler<BoatTripsResponse, [NextRequest, { params: P
         id: item.id,
         publicId: item.publicId,
         boatId: item.boatId,
-        sourceLocationName: item.sourceLocationName || null,
-        destLocationName: item.destLocationName || null,
+        source: item.source || null,
+        destination: item.destination || null,
         departureTime: item.departureTime.toISOString(),
         arrivalTime: item.arrivalTime ? item.arrivalTime.toISOString() : null,
         cargoValue: item.cargoValue ? Number(item.cargoValue) : null,

@@ -1,5 +1,6 @@
 {
   "meta": {
+    "title": "ট্রিপের বিবরণ",
     "description": "বালি ট্রিপের বিবরণ, খরচ এবং সংযুক্তি"
   },
   "breadcrumbs": {
@@ -11,6 +12,7 @@
   "notFound": "ট্রিপ পাওয়া যায়নি।",
   "backToTrips": "ট্রিপে ফিরে যান",
   "back": "ফিরে যান",
+  "edit": "সম্পাদনা করুন",
   "delete": "মুছুন",
   "confirm": "নিশ্চিত করুন",
   "status": {
@@ -46,7 +48,8 @@
     "royaltyRatePerUnit": "রয়্যালটি হার / একক",
     "localToll": "স্থানীয় টোল",
     "tollRatePerUnit": "টোল হার / একক",
-    "operatingCosts": "পরিচালন খরচ"
+    "operatingCosts": "পরিচালন খরচ",
+    "totalOperatingCosts": "মোট পরিচালন খরচ"
   },
   "expenses": {
     "title": "খরচ",
@@ -86,5 +89,15 @@
     "descriptionPlaceholder": "ঐচ্ছিক লেবেল",
     "attach": "সংযুক্ত করুন",
     "cancel": "বাতিল"
+  },
+  "deleteConfirm": {
+    "title": "আপনি কি সম্পূর্ণ নিশ্চিত?",
+    "tripDescription": "এই কাজটি আর ফেরানো যাবে না। এটি এই বালি ট্রিপ এবং এর সাথে সম্পর্কিত সমস্ত খরচ ও সংযুক্তি স্থায়ীভাবে মুছে ফেলবে।",
+    "expenseTitle": "খরচ মুছবেন?",
+    "expenseDescription": "আপনি কি নিশ্চিত যে আপনি এই খরচটি মুছতে চান? এই কাজটি আর ফেরানো যাবে না এবং ট্রিপের নিট মুনাফা পুনরায় হিসাব করা হবে।",
+    "attachmentTitle": "সংযুক্তি মুছবেন?",
+    "attachmentDescription": "আপনি কি নিশ্চিত যে আপনি এই সংযুক্তিটি মুছতে চান?",
+    "cancel": "বাতিল",
+    "delete": "মুছুন"
   }
 }

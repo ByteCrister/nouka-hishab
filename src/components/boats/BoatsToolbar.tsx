@@ -56,7 +56,7 @@ export function BoatsToolbar() {
           <SelectContent className="rounded-xl shadow-lg border-border/50">
             <SelectItem value="all" className="rounded-lg">{sharedT('sectors.all')}</SelectItem>
             <SelectItem value={SECTORS.SAND} className="rounded-lg">{sharedT('sectors.sand')}</SelectItem>
-            <SelectItem value={SECTORS.LIME_STONE} className="rounded-lg">{sharedT('sectors.stone')}</SelectItem>
+            <SelectItem value={SECTORS.LIME_STONE} className="rounded-lg">{sharedT('sectors.lime-stone')}</SelectItem>
             <SelectItem value={SECTORS.BRICK} className="rounded-lg">{sharedT('sectors.brick')}</SelectItem>
           </SelectContent>
         </Select>

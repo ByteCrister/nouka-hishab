@@ -4,8 +4,7 @@ import { db } from "@/config/db";
 import { boats } from "@/db/boat";
 import { sandTrips } from "@/db/sand";
 import { eq, and, isNull, desc, asc, sql, count, gte, lte } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
-import { locations, users } from "@/db/app";
+import { users } from "@/db/app";
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult } from "@/lib/helpers/withErrorHandler";
 import { SandTripListResponse } from "@/types/sand/trips.types";
@@ -73,17 +72,13 @@ export const GET = withErrorHandler<SandTripListResponse, [NextRequest]>(async (
                      sandTrips.departureTime;
   const orderByClause = query.sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn);
 
-  const sourceLocations = alias(locations, 'sourceLocations');
-  const destLocations = alias(locations, 'destLocations');
+
 
   const [countResult, itemsResult] = await Promise.all([
     db
       .select({ 
         count: count(),
         totalProfitTk: sql<string>`sum(${sandTrips.netProfitTk})`,
-        totalPurchaseCostTk: sql<string>`sum(${sandTrips.purchaseCostTk})`,
-        totalGovtRoyaltyTk: sql<string>`sum(${sandTrips.govtRoyaltyTk})`,
-        totalLocalTollTk: sql<string>`sum(${sandTrips.localTollTk})`,
         totalOperatingCostTk: sql<string>`sum(${sandTrips.totalOperatingCostTk})`,
       })
       .from(sandTrips)
@@ -95,12 +90,8 @@ export const GET = withErrorHandler<SandTripListResponse, [NextRequest]>(async (
         publicId: sandTrips.publicId,
         boatName: boats.name,
         boatPublicId: boats.publicId,
-        sourceLocationName: sourceLocations.name,
-        sourceLocationLat: sourceLocations.lat,
-        sourceLocationLng: sourceLocations.lng,
-        destLocationName: destLocations.name,
-        destLocationLat: destLocations.lat,
-        destLocationLng: destLocations.lng,
+        source: sandTrips.source,
+        destination: sandTrips.destination,
         departureTime: sql<string>`${sandTrips.departureTime}::text`,
         arrivalTime: sql<string>`${sandTrips.arrivalTime}::text`,
         cargoValue: sandTrips.cargoValue,
@@ -112,8 +103,6 @@ export const GET = withErrorHandler<SandTripListResponse, [NextRequest]>(async (
       })
       .from(sandTrips)
       .innerJoin(boats, eq(sandTrips.boatId, boats.id))
-      .leftJoin(sourceLocations, eq(sandTrips.sourceLocationId, sourceLocations.id))
-      .leftJoin(destLocations, eq(sandTrips.destLocationId, destLocations.id))
       .where(whereClause)
       .limit(query.limit)
       .offset(offset)
@@ -122,37 +111,9 @@ export const GET = withErrorHandler<SandTripListResponse, [NextRequest]>(async (
 
   const totalItems = countResult[0].count;
   const totalProfitTk = parseFloat(countResult[0].totalProfitTk || '0');
-  const totalCostTk = 
-    parseFloat(countResult[0].totalPurchaseCostTk || '0') + 
-    parseFloat(countResult[0].totalGovtRoyaltyTk || '0') + 
-    parseFloat(countResult[0].totalLocalTollTk || '0') + 
-    parseFloat(countResult[0].totalOperatingCostTk || '0');
+  const totalCostTk = parseFloat(countResult[0].totalOperatingCostTk || '0');
 
-  const items = itemsResult.map((item) => {
-    const {
-      sourceLocationName,
-      sourceLocationLat,
-      sourceLocationLng,
-      destLocationName,
-      destLocationLat,
-      destLocationLng,
-      ...rest
-    } = item;
-
-    return {
-      ...rest,
-      sourceLocation: sourceLocationName ? {
-        name: sourceLocationName,
-        lat: sourceLocationLat ? Number(sourceLocationLat) : null,
-        lng: sourceLocationLng ? Number(sourceLocationLng) : null,
-      } : null,
-      destLocation: destLocationName ? {
-        name: destLocationName,
-        lat: destLocationLat ? Number(destLocationLat) : null,
-        lng: destLocationLng ? Number(destLocationLng) : null,
-      } : null,
-    };
-  });
+  const items = itemsResult;
 
   return {
     data: {
@@ -181,30 +142,10 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
     .where(and(eq(boats.publicId, data.boatPublicId), eq(boats.createdBy, userRecord.id)));
   if (!boat) throw new Error("Boat not found or unauthorized");
 
-  let sourceLocId = null;
-  if (data.sourceLocation) {
-    const [inserted] = await db.insert(locations).values({
-      name: data.sourceLocation.name,
-      lat: data.sourceLocation.lat !== undefined && data.sourceLocation.lat !== null ? String(data.sourceLocation.lat) : null,
-      lng: data.sourceLocation.lng !== undefined && data.sourceLocation.lng !== null ? String(data.sourceLocation.lng) : null,
-    }).returning({ id: locations.id });
-    sourceLocId = inserted.id;
-  }
-
-  let destLocId = null;
-  if (data.destLocation) {
-    const [inserted] = await db.insert(locations).values({
-      name: data.destLocation.name,
-      lat: data.destLocation.lat !== undefined && data.destLocation.lat !== null ? String(data.destLocation.lat) : null,
-      lng: data.destLocation.lng !== undefined && data.destLocation.lng !== null ? String(data.destLocation.lng) : null,
-    }).returning({ id: locations.id });
-    destLocId = inserted.id;
-  }
-
   const [newTrip] = await db.insert(sandTrips).values({
     boatId: boat.id,
-    sourceLocationId: sourceLocId,
-    destLocationId: destLocId,
+    source: data.source ?? null,
+    destination: data.destination ?? null,
     departureTime: new Date(data.departureTime),
     arrivalTime: data.arrivalTime ? new Date(data.arrivalTime) : null,
     cargoValue: data.cargoValue != null ? String(data.cargoValue) : null,
@@ -218,6 +159,15 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
     govtRoyaltyTk: data.govtRoyaltyTk != null ? String(data.govtRoyaltyTk) : null,
     localTollRateTk: data.localTollRateTk != null ? String(data.localTollRateTk) : null,
     localTollTk: data.localTollTk != null ? String(data.localTollTk) : null,
+    operatingCostTk: data.operatingCostTk != null ? String(data.operatingCostTk) : null,
+    netProfitTk: String(
+      (data.saleAmountTk || 0) - (
+        (data.purchaseCostTk || 0) + 
+        (data.govtRoyaltyTk || 0) + 
+        (data.localTollTk || 0) + 
+        (data.operatingCostTk || 0)
+      )
+    ),
     status: data.status,
     notes: data.notes ?? null,
   }).returning({ publicId: sandTrips.publicId });

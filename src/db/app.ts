@@ -229,93 +229,7 @@ export const platformAccounts = pgTable(
   }),
 );
 
-// ─── Locations ─────────────────────────────────────────────────────────────
-// Physical points with coordinates, used for trip sources and destinations.
-// Completely independent entity with its own lat/lng.
-export const locations = pgTable(
-  'locations',
-  {
-    id: serial('id').primaryKey(),
-    publicId: varchar('public_id', { length: 26 })
-      .unique()
-      .notNull()
-      .$defaultFn(() => ulid()), // safe URL param
-    name: varchar('name', { length: 255 }).notNull(),
-    lat: numeric('lat', { precision: 10, scale: 7 }),
-    lng: numeric('lng', { precision: 10, scale: 7 }),
-    isActive: boolean('is_active').notNull().default(true),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-  },
-  (t) => ({
-    publicIdIdx: index('idx_locations_public_id').on(t.publicId),
-    isActiveIdx: index('idx_locations_is_active').on(t.isActive),
-  }),
-);
 
-// ─── Divisions ─────────────────────────────────────────────────────────────
-// Top-level Bangladesh administrative division (বিভাগ).
-// e.g. Sylhet, Dhaka, Chattogram. Admin-managed seed data.
-export const divisions = pgTable(
-  'divisions',
-  {
-    id: serial('id').primaryKey(),
-    slug: varchar('slug', { length: 100 }).unique().notNull(), // e.g. 'sylhet'
-    nameEn: varchar('name_en', { length: 100 }).unique().notNull(),
-    nameBn: varchar('name_bn', { length: 100 }),
-    locationId: integer('location_id').references(() => locations.id, { onDelete: 'set null' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (t) => ({
-    slugIdx: index('idx_divisions_slug').on(t.slug),
-  }),
-);
-
-// ─── Districts ─────────────────────────────────────────────────────────────
-// Bangladesh district (জেলা), child of a division.
-// e.g. Sunamganj → Sylhet division. Admin-managed seed data.
-export const districts = pgTable(
-  'districts',
-  {
-    id: serial('id').primaryKey(),
-    slug: varchar('slug', { length: 100 }).notNull(), // e.g. 'sunamganj', unique within division
-    divisionId: integer('division_id')
-      .notNull()
-      .references(() => divisions.id, { onDelete: 'restrict' }),
-    nameEn: varchar('name_en', { length: 100 }).notNull(),
-    nameBn: varchar('name_bn', { length: 100 }),
-    locationId: integer('location_id').references(() => locations.id, { onDelete: 'set null' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (t) => ({
-    divisionIdx: index('idx_districts_division').on(t.divisionId),
-    nameUnique: unique('districts_name_division_unique').on(t.nameEn, t.divisionId),
-    slugUnique: unique('districts_slug_division_unique').on(t.slug, t.divisionId),
-  }),
-);
-
-// ─── Upazilas ──────────────────────────────────────────────────────────────
-// Bangladesh upazila (উপজেলা), child of a district.
-// e.g. Sunamganj Sadar, Doarabazar. Admin-managed seed data.
-export const upazilas = pgTable(
-  'upazilas',
-  {
-    id: serial('id').primaryKey(),
-    slug: varchar('slug', { length: 100 }).notNull(), // e.g. 'sunamganj-sadar', unique within district
-    districtId: integer('district_id')
-      .notNull()
-      .references(() => districts.id, { onDelete: 'restrict' }),
-    nameEn: varchar('name_en', { length: 100 }).notNull(),
-    nameBn: varchar('name_bn', { length: 100 }),
-    locationId: integer('location_id').references(() => locations.id, { onDelete: 'set null' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (t) => ({
-    districtIdx: index('idx_upazilas_district').on(t.districtId),
-    nameUnique: unique('upazilas_name_district_unique').on(t.nameEn, t.districtId),
-    slugUnique: unique('upazilas_slug_district_unique').on(t.slug, t.districtId),
-  }),
-);
 
 // ─── Audit Logs ────────────────────────────────────────────────────────────
 // Immutable append-only log of significant actions by users, admins, or the
@@ -459,14 +373,6 @@ export type UserSubscription = typeof userSubscriptions.$inferSelect;
 export type NewUserSubscription = typeof userSubscriptions.$inferInsert;
 export type PlatformAccount = typeof platformAccounts.$inferSelect;
 
-export type Division = typeof divisions.$inferSelect;
-export type NewDivision = typeof divisions.$inferInsert;
-export type District = typeof districts.$inferSelect;
-export type NewDistrict = typeof districts.$inferInsert;
-export type Upazila = typeof upazilas.$inferSelect;
-export type NewUpazila = typeof upazilas.$inferInsert;
-export type Location = typeof locations.$inferSelect;
-export type NewLocation = typeof locations.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type Report = typeof reports.$inferSelect;
 export type NewReport = typeof reports.$inferInsert;

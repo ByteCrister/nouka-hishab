@@ -4,13 +4,13 @@ import { sandTrips, sandTripExpenses, sandTripAttachments } from "@/db/sand";
 import { files, assets } from "@/db/media";
 import { boats } from "@/db/boat";
 import { eq, and, isNull, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
-import { locations, users } from "@/db/app";
+import { users } from "@/db/app";
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult, ApiError } from "@/lib/helpers/withErrorHandler";
 import { SandTripDetail, SandTripDetailResponse } from "@/types/sand/trips.types";
 import { SandTripStatus, SandCargoUnit } from "@/constants/db/sand.const";
 import { updateSandTripSchema } from "@/utils/zod/sand-trips.schema";
+import { recalculateTripFinancials } from "../../../../../../lib/helpers/trip-financials.helper";
 
 interface RouteContext {
   params: Promise<{ publicId: string }>;
@@ -31,8 +31,9 @@ type UpdateFields = {
   cargoUnit?: SandCargoUnit | null;
   buyerName?: string | null;
   buyerPhone?: string | null;
-  sourceLocationId?: number | null;
-  destLocationId?: number | null;
+  source?: string | null;
+  destination?: string | null;
+  operatingCostTk?: string | null;
   status?: SandTripStatus;
   notes?: string | null;
   updatedAt?: Date;
@@ -46,8 +47,7 @@ export const GET = withErrorHandler<SandTripDetailResponse, [NextRequest, RouteC
     const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));
     if (!userRecord) throw new Error("User not found");
 
-    const sourceLocations = alias(locations, 'sourceLocations');
-    const destLocations = alias(locations, 'destLocations');
+
 
     const [trip] = await db
       .select({
@@ -55,12 +55,8 @@ export const GET = withErrorHandler<SandTripDetailResponse, [NextRequest, RouteC
         publicId: sandTrips.publicId,
         boatName: boats.name,
         boatPublicId: boats.publicId,
-        sourceLocationName: sourceLocations.name,
-        sourceLocationLat: sourceLocations.lat,
-        sourceLocationLng: sourceLocations.lng,
-        destLocationName: destLocations.name,
-        destLocationLat: destLocations.lat,
-        destLocationLng: destLocations.lng,
+        source: sandTrips.source,
+        destination: sandTrips.destination,
         departureTime: sql<string>`${sandTrips.departureTime}::text`,
         arrivalTime: sql<string>`${sandTrips.arrivalTime}::text`,
         cargoValue: sandTrips.cargoValue,
@@ -77,14 +73,13 @@ export const GET = withErrorHandler<SandTripDetailResponse, [NextRequest, RouteC
         govtRoyaltyTk: sandTrips.govtRoyaltyTk,
         localTollRateTk: sandTrips.localTollRateTk,
         localTollTk: sandTrips.localTollTk,
+        operatingCostTk: sandTrips.operatingCostTk,
         totalOperatingCostTk: sandTrips.totalOperatingCostTk,
         notes: sandTrips.notes,
         updatedAt: sql<string>`${sandTrips.updatedAt}::text`,
       })
       .from(sandTrips)
       .innerJoin(boats, eq(sandTrips.boatId, boats.id))
-      .leftJoin(sourceLocations, eq(sandTrips.sourceLocationId, sourceLocations.id))
-      .leftJoin(destLocations, eq(sandTrips.destLocationId, destLocations.id))
       .where(
         and(
           eq(sandTrips.publicId, params.publicId),
@@ -98,16 +93,7 @@ export const GET = withErrorHandler<SandTripDetailResponse, [NextRequest, RouteC
       throw new ApiError("Trip not found", 404);
     }
 
-    const {
-      id,
-      sourceLocationName,
-      sourceLocationLat,
-      sourceLocationLng,
-      destLocationName,
-      destLocationLat,
-      destLocationLng,
-      ...rest
-    } = trip;
+    const { id, ...rest } = trip;
 
     const expensesData = await db
       .select({
@@ -147,16 +133,6 @@ export const GET = withErrorHandler<SandTripDetailResponse, [NextRequest, RouteC
 
     const mappedTrip = {
       ...rest,
-      sourceLocation: sourceLocationName ? {
-        name: sourceLocationName,
-        lat: sourceLocationLat ? Number(sourceLocationLat) : null,
-        lng: sourceLocationLng ? Number(sourceLocationLng) : null,
-      } : null,
-      destLocation: destLocationName ? {
-        name: destLocationName,
-        lat: destLocationLat ? Number(destLocationLat) : null,
-        lng: destLocationLng ? Number(destLocationLng) : null,
-      } : null,
       expenses: expensesData,
       attachments: attachmentsData,
     };
@@ -200,31 +176,8 @@ export const PATCH = withErrorHandler<{ success: boolean; publicId: string }, [N
       updateData.boatId = boat.id;
     }
 
-    if (data.sourceLocation !== undefined) {
-      if (data.sourceLocation === null) {
-        updateData.sourceLocationId = null;
-      } else {
-        const [inserted] = await db.insert(locations).values({
-          name: data.sourceLocation.name,
-          lat: data.sourceLocation.lat !== undefined && data.sourceLocation.lat !== null ? String(data.sourceLocation.lat) : null,
-          lng: data.sourceLocation.lng !== undefined && data.sourceLocation.lng !== null ? String(data.sourceLocation.lng) : null,
-        }).returning({ id: locations.id });
-        updateData.sourceLocationId = inserted.id;
-      }
-    }
-
-    if (data.destLocation !== undefined) {
-      if (data.destLocation === null) {
-        updateData.destLocationId = null;
-      } else {
-        const [inserted] = await db.insert(locations).values({
-          name: data.destLocation.name,
-          lat: data.destLocation.lat !== undefined && data.destLocation.lat !== null ? String(data.destLocation.lat) : null,
-          lng: data.destLocation.lng !== undefined && data.destLocation.lng !== null ? String(data.destLocation.lng) : null,
-        }).returning({ id: locations.id });
-        updateData.destLocationId = inserted.id;
-      }
-    }
+    if (data.source !== undefined) updateData.source = data.source ?? null;
+    if (data.destination !== undefined) updateData.destination = data.destination ?? null;
     if (data.departureTime) updateData.departureTime = new Date(data.departureTime);
     if (data.arrivalTime !== undefined) updateData.arrivalTime = data.arrivalTime ? new Date(data.arrivalTime) : null;
     if (data.cargoValue !== undefined) updateData.cargoValue = data.cargoValue != null ? String(data.cargoValue) : null;
@@ -238,6 +191,7 @@ export const PATCH = withErrorHandler<{ success: boolean; publicId: string }, [N
     if (data.govtRoyaltyTk !== undefined) updateData.govtRoyaltyTk = data.govtRoyaltyTk != null ? String(data.govtRoyaltyTk) : null;
     if (data.localTollRateTk !== undefined) updateData.localTollRateTk = data.localTollRateTk != null ? String(data.localTollRateTk) : null;
     if (data.localTollTk !== undefined) updateData.localTollTk = data.localTollTk != null ? String(data.localTollTk) : null;
+    if (data.operatingCostTk !== undefined) updateData.operatingCostTk = data.operatingCostTk != null ? String(data.operatingCostTk) : null;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.notes !== undefined) updateData.notes = data.notes;
     updateData.updatedAt = new Date();
@@ -246,11 +200,13 @@ export const PATCH = withErrorHandler<{ success: boolean; publicId: string }, [N
       .update(sandTrips)
       .set(updateData)
       .where(eq(sandTrips.publicId, params.publicId))
-      .returning({ publicId: sandTrips.publicId });
+      .returning({ id: sandTrips.id, publicId: sandTrips.publicId });
 
     if (!updatedTrip) {
       throw new ApiError("Trip not found", 404);
     }
+
+    await recalculateTripFinancials(updatedTrip.id);
 
     return { data: { success: true, publicId: updatedTrip.publicId } };
   }

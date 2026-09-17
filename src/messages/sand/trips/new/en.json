@@ -1,13 +1,16 @@
 {
   "meta": {
     "title": "New Sand Trip",
+    "editTitle": "Edit Sand Trip",
     "description": "Log a new sand transport trip"
   },
   "breadcrumbs": {
     "home": "Home",
     "sand": "Sand",
     "trips": "Trips",
-    "newTrip": "New Trip"
+    "newTrip": "New Trip",
+    "edit": "Edit",
+    "tripDetails": "Trip Details"
   },
   "header": {
     "title": "New Sand Trip",
@@ -24,6 +27,7 @@
     "destination": "Destination",
     "cargo": "Cargo",
     "financials": "Financials",
+    "netProfit": "Net Profit",
     "notes": "Notes"
   },
   "fields": {
@@ -33,6 +37,8 @@
     "departureTime": "Departure Time",
     "arrivalTime": "Arrival Time",
     "locationName": "Location Name",
+    "source": "Source (Area, Thana, District)",
+    "destination": "Destination (Area, Thana, District)",
     "sourcePlaceholder": "e.g. Sylhet Ghat",
     "destPlaceholder": "e.g. Dhaka Terminal",
     "latitude": "Latitude",
@@ -49,6 +55,7 @@
     "govtRoyaltyTotal": "Govt Royalty Total (৳)",
     "localTollRate": "Local Toll Rate (৳)",
     "localTollTotal": "Local Toll Total (৳)",
+    "operatingCost": "Upfront Boat Operating Cost (৳)",
     "notesPlaceholder": "Additional notes about this trip..."
   },
   "status": {

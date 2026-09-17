@@ -118,8 +118,8 @@ export interface BoatTripListItem {
   id: number;
   publicId: string;
   boatId: number;
-  sourceLocationName: string | null;
-  destLocationName: string | null;
+  source: string | null;
+  destination: string | null;
   departureTime: string;
   arrivalTime: string | null;
   cargoValue: number | null;

@@ -34,12 +34,23 @@ export function BoatDocumentsSection({ boat }: BoatDocumentsSectionProps) {
     expiryDate: '',
   });
 
+  const maxDocumentsLimit = 10;
+  const isLimitReached = (boat.documents?.length || 0) >= maxDocumentsLimit;
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setIsDialogOpen(true);
+    if (!file) return;
+
+    // Validate size (max 2MB)
+    const maxSizeMB = 2;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      toast.error(`Document size must be less than ${maxSizeMB}MB`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
     }
+
+    setSelectedFile(file);
+    setIsDialogOpen(true);
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -114,11 +125,11 @@ export function BoatDocumentsSection({ boat }: BoatDocumentsSectionProps) {
             className="hidden"
             accept=".pdf,.doc,.docx,image/*"
             onChange={handleFileChange}
-            disabled={showLoader}
+            disabled={showLoader || isLimitReached}
           />
           <Button 
             onClick={() => fileInputRef.current?.click()}
-            disabled={showLoader}
+            disabled={showLoader || isLimitReached}
             variant="outline"
             className="border-river-200 text-river-600 hover:bg-river-50 dark:border-river-900/50 dark:text-river-400 dark:hover:bg-river-900/20"
           >
@@ -127,8 +138,11 @@ export function BoatDocumentsSection({ boat }: BoatDocumentsSectionProps) {
             ) : (
               <Upload className="w-4 h-4 mr-2" />
             )}
-            {t('uploadDocument') || 'Upload Document'}
+            {showLoader ? t('uploading') : isLimitReached ? 'Limit Reached' : t('uploadDocument') || 'Upload Document'}
           </Button>
+          <div className="text-xs text-muted-foreground mt-2 text-right">
+            {boat.documents?.length || 0} / {maxDocumentsLimit} Documents
+          </div>
         </div>
       </div>
 

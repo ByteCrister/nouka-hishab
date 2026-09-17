@@ -1,26 +1,37 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSandTripDetail } from '@/hooks/queries/useSandTripsQueries';
 import { useDeleteSandTrip, useUpdateSandTrip } from '@/hooks/mutations/useSandTripsMutations';
 import { SandTripExpensesSection } from './SandTripExpensesSection';
 import { SandTripAttachmentsSection } from './SandTripAttachmentsSection';
-import { MapPickerDialog } from '@/components/shared/MapPickerDialog';
+import { SandTripDetailSkeleton } from './SandTripDetailSkeleton';
+import { SandTripReportExportButton } from '@/components/sand/reports/SandTripReportExportButton';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
 import {
   ArrowLeft, Ship, MapPin, Clock, Package, Banknote,
   FileText, TrendingUp, TrendingDown, Trash2, Edit3,
-  CheckCircle2, User, Phone
+  User, Phone
 } from 'lucide-react';
 import Link from 'next/link';
 import { SAND_TRIP_STATUSES } from '@/constants/db/sand.const';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SandTripStatus } from '@/constants/db/sand.const';
 import { useTranslations } from 'next-intl';
-import { isWithinBangladesh } from '@/utils/geo';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Props { publicId: string; }
 
@@ -58,15 +69,10 @@ export function SandTripDetailClient({ publicId }: Props) {
   const trip = data?.trip;
   const { mutateAsync: deleteTrip, isPending: isDeleting } = useDeleteSandTrip(() => router.push('/sand/trips'));
   const { mutateAsync: updateTrip, isPending: isUpdating } = useUpdateSandTrip();
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [mapPickerTarget, setMapPickerTarget] = useState<'source' | 'dest' | null>(null);
+
 
   if (isLoading) {
-    return (
-      <div className="space-y-4 mt-6">
-        {[...Array(3)].map((_, i) => <div key={i} className="h-32 rounded-2xl border bg-card animate-pulse" />)}
-      </div>
-    );
+    return <SandTripDetailSkeleton />;
   }
 
   if (error || !trip) {
@@ -89,7 +95,6 @@ export function SandTripDetailClient({ publicId }: Props) {
   };
 
   const handleDelete = async () => {
-    if (!confirmDelete) { setConfirmDelete(true); return; }
     await deleteTrip(publicId);
   };
 
@@ -108,7 +113,7 @@ export function SandTripDetailClient({ publicId }: Props) {
                 <Badge variant="outline" className={`${statusCls} border`}>{statusLabel}</Badge>
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                {trip.sourceLocation?.name ?? '—'} → {trip.destLocation?.name ?? '—'}
+                {trip.source ?? '—'} → {trip.destination ?? '—'}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">{fmtDate(trip.departureTime)}</p>
             </div>
@@ -130,25 +135,46 @@ export function SandTripDetailClient({ publicId }: Props) {
               </SelectContent>
             </Select>
 
+            <Button variant="outline" asChild className="h-9 px-3 rounded-xl hidden sm:flex">
+              <Link href={`/sand/trips/${publicId}/edit`}><Edit3 className="w-4 h-4 mr-2" />{t('edit', { fallback: 'Edit' })}</Link>
+            </Button>
+            <SandTripReportExportButton mode="single" tripPublicId={publicId} />
             <Button variant="ghost" asChild className="h-9 px-3 rounded-xl hidden sm:flex">
               <Link href="/sand/trips"><ArrowLeft className="w-4 h-4 mr-2" />{t('back')}</Link>
             </Button>
 
-            <Button
-              variant={confirmDelete ? 'destructive' : 'outline'}
-              size="sm"
-              className="h-9 rounded-xl"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : confirmDelete ? (
-                <><CheckCircle2 className="w-4 h-4 mr-1" />{t('confirm')}</>
-              ) : (
-                <><Trash2 className="w-4 h-4 mr-1" />{t('delete')}</>
-              )}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 rounded-xl hover:bg-destructive hover:text-destructive-foreground">
+                  <Trash2 className="w-4 h-4 mr-1" />{t('delete')}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('deleteConfirm.title')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('deleteConfirm.tripDescription')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('deleteConfirm.cancel')}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDelete();
+                    }}
+                    disabled={isDeleting}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    {isDeleting ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      t('deleteConfirm.delete')
+                    )}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </FadeInUp>
@@ -189,20 +215,14 @@ export function SandTripDetailClient({ publicId }: Props) {
             <div className="flex items-start justify-between py-2.5 border-b border-border/40 gap-4">
               <span className="text-sm text-muted-foreground shrink-0">{t('labels.source')}</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-right">{trip.sourceLocation ? `${trip.sourceLocation.name}${trip.sourceLocation.lat ? ` (${trip.sourceLocation.lat}, ${trip.sourceLocation.lng})` : ''}` : '—'}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full shrink-0" onClick={() => setMapPickerTarget('source')} disabled={isUpdating}>
-                  <MapPin className="w-3 h-3 text-muted-foreground" />
-                </Button>
+                <span className="text-sm font-medium text-right">{trip.source ?? '—'}</span>
               </div>
             </div>
             
             <div className="flex items-start justify-between py-2.5 border-b border-border/40 gap-4">
               <span className="text-sm text-muted-foreground shrink-0">{t('labels.destination')}</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-right">{trip.destLocation ? `${trip.destLocation.name}${trip.destLocation.lat ? ` (${trip.destLocation.lat}, ${trip.destLocation.lng})` : ''}` : '—'}</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full shrink-0" onClick={() => setMapPickerTarget('dest')} disabled={isUpdating}>
-                  <MapPin className="w-3 h-3 text-muted-foreground" />
-                </Button>
+                <span className="text-sm font-medium text-right">{trip.destination ?? '—'}</span>
               </div>
             </div>
 
@@ -238,7 +258,8 @@ export function SandTripDetailClient({ publicId }: Props) {
             <InfoRow label={t('labels.royaltyRatePerUnit')} value={fmt(trip.govtRoyaltyRateTk)} />
             <InfoRow label={t('labels.localToll')} value={fmt(trip.localTollTk)} />
             <InfoRow label={t('labels.tollRatePerUnit')} value={fmt(trip.localTollRateTk)} />
-            <InfoRow label={t('labels.operatingCosts')} value={fmt(trip.totalOperatingCostTk)} />
+            <InfoRow label={t('labels.operatingCosts')} value={fmt(trip.operatingCostTk)} />
+            <InfoRow label={t('labels.totalOperatingCosts')} value={fmt(trip.totalOperatingCostTk)} />
           </div>
         </FadeInUp>
 
@@ -266,26 +287,7 @@ export function SandTripDetailClient({ publicId }: Props) {
         <SandTripAttachmentsSection tripPublicId={publicId} attachments={trip.attachments} />
       </FadeInUp>
 
-      <MapPickerDialog
-        open={!!mapPickerTarget}
-        onClose={() => setMapPickerTarget(null)}
-        initialPosition={mapPickerTarget === 'source' && trip.sourceLocation?.lat && trip.sourceLocation?.lng
-          ? [Number(trip.sourceLocation.lat), Number(trip.sourceLocation.lng)]
-          : mapPickerTarget === 'dest' && trip.destLocation?.lat && trip.destLocation?.lng
-            ? [Number(trip.destLocation.lat), Number(trip.destLocation.lng)]
-            : undefined}
-        onSelect={(lat, lng) => {
-          if (!isWithinBangladesh(lat, lng)) {
-            alert(t('errors.locationOutsideBD', { fallback: 'Location must be within Bangladesh.' }));
-            return;
-          }
-          if (mapPickerTarget === 'source') {
-            updateTrip({ publicId, payload: { sourceLocation: { name: trip.sourceLocation?.name || '', lat, lng } } });
-          } else if (mapPickerTarget === 'dest') {
-            updateTrip({ publicId, payload: { destLocation: { name: trip.destLocation?.name || '', lat, lng } } });
-          }
-        }}
-      />
+
     </div>
   );
 }

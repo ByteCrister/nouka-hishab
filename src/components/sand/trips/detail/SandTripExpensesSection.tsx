@@ -16,9 +16,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Plus, Trash2, Edit3, CheckCircle2, X, Receipt, AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-
 interface Props {
   tripPublicId: string;
   expenses: SandTripExpenseItem[];
@@ -237,15 +247,43 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => startEdit(exp)}>
                   <Edit3 className="w-3.5 h-3.5" />
                 </Button>
-                <Button
-                  variant={deleteConfirm === exp.publicId ? 'destructive' : 'ghost'}
-                  size="icon"
-                  className="h-7 w-7 rounded-lg"
-                  onClick={() => handleDelete(exp.publicId)}
-                  disabled={isDeleting}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 rounded-lg hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('deleteConfirm.expenseTitle')}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('deleteConfirm.expenseDescription')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('deleteConfirm.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDelete(exp.publicId);
+                        }}
+                        disabled={isDeleting}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        {isDeleting && deleteConfirm === exp.publicId ? (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          t('deleteConfirm.delete')
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}

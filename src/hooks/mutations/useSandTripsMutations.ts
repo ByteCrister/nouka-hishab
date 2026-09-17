@@ -22,8 +22,8 @@ export function useCreateSandTrip(onSuccessCallback?: (publicId: string) => void
 
   return useMutation({
     mutationFn: createSandTrip,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() });
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() });
       toast.success('Trip created successfully');
       onSuccessCallback?.(data.publicId);
     },
@@ -54,9 +54,15 @@ export function useUpdateSandTrip(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: updateSandTrip,
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.publicId) });
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() });
+    onSuccess: async (_data, variables) => {
+      // Await both invalidations so the cache is fully refreshed before
+      // the callback (which typically navigates to the detail page) fires.
+      // Without await, router.push() can land on the detail page before the
+      // refetch resolves, causing it to display stale data until a manual refresh.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.publicId) }),
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+      ]);
       toast.success('Trip updated successfully');
       onSuccessCallback?.();
     },
@@ -110,8 +116,11 @@ export function useCreateSandTripExpense(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: createSandTripExpense,
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) });
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+      ]);
       toast.success('Expense added successfully');
       onSuccessCallback?.();
     },
@@ -142,8 +151,11 @@ export function useUpdateSandTripExpense(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: updateSandTripExpense,
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) });
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+      ]);
       toast.success('Expense updated successfully');
       onSuccessCallback?.();
     },
@@ -171,8 +183,11 @@ export function useDeleteSandTripExpense(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: deleteSandTripExpense,
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) });
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+      ]);
       toast.success('Expense deleted successfully');
       onSuccessCallback?.();
     },
@@ -203,8 +218,11 @@ export function useCreateSandTripAttachment(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: createSandTripAttachment,
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) });
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+      ]);
       toast.success('Attachment added successfully');
       onSuccessCallback?.();
     },
@@ -232,8 +250,11 @@ export function useDeleteSandTripAttachment(onSuccessCallback?: () => void) {
 
   return useMutation({
     mutationFn: deleteSandTripAttachment,
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) });
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+      ]);
       toast.success('Attachment removed successfully');
       onSuccessCallback?.();
     },

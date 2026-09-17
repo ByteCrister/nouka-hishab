@@ -1,34 +1,46 @@
 import { z } from 'zod';
 import { SAND_TRIP_STATUSES, SAND_CARGO_UNITS, SAND_TRIP_EXPENSE_CATEGORIES } from '@/constants/db/sand.const';
 
-const locationSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  lat: z.number().nullable().optional(),
-  lng: z.number().nullable().optional(),
-});
+import { phoneSchema, bdPhoneRegex } from './common.schema';
 
-export const createSandTripSchema = z.object({
+const baseSandTripSchema = z.object({
   boatPublicId: z.string().min(1, "Boat is required"),
-  sourceLocation: locationSchema.nullable().optional(),
-  destLocation: locationSchema.nullable().optional(),
+  source: z.string().min(1, "Source is required"),
+  destination: z.string().min(1, "Destination is required"),
   departureTime: z.string().min(1, "Departure time is required"),
-  arrivalTime: z.string().nullable().optional(),
-  cargoValue: z.number().nullable().optional(),
-  cargoUnit: z.nativeEnum(SAND_CARGO_UNITS).nullable().optional(),
-  saleAmountTk: z.number().nullable().optional(),
-  buyerName: z.string().max(255).nullable().optional(),
-  buyerPhone: z.string().max(20).nullable().optional(),
-  purchaseRatePerUnitTk: z.number().nullable().optional(),
-  purchaseCostTk: z.number().nullable().optional(),
-  govtRoyaltyRateTk: z.number().nullable().optional(),
-  govtRoyaltyTk: z.number().nullable().optional(),
-  localTollRateTk: z.number().nullable().optional(),
-  localTollTk: z.number().nullable().optional(),
+  arrivalTime: z.string().min(1, "Arrival time is required"),
+  cargoValue: z.number().min(0, "Cannot be negative"),
+  cargoUnit: z.nativeEnum(SAND_CARGO_UNITS),
+  saleAmountTk: z.number().min(0, "Cannot be negative"),
+  buyerName: z.string().min(1, "Buyer name is required").max(255),
+  buyerPhone: z.string().regex(bdPhoneRegex, "Invalid Bangladesh phone number"),
+  purchaseRatePerUnitTk: z.number().min(0, "Cannot be negative"),
+  purchaseCostTk: z.number().min(0, "Cannot be negative"),
+  govtRoyaltyRateTk: z.number().min(0, "Cannot be negative"),
+  govtRoyaltyTk: z.number().min(0, "Cannot be negative"),
+  localTollRateTk: z.number().min(0, "Cannot be negative"),
+  localTollTk: z.number().min(0, "Cannot be negative"),
+  operatingCostTk: z.number().min(0, "Cannot be negative"),
   status: z.nativeEnum(SAND_TRIP_STATUSES).optional().default(SAND_TRIP_STATUSES.SCHEDULED),
   notes: z.string().nullable().optional(),
 });
 
-export const updateSandTripSchema = createSandTripSchema.partial();
+const timeRefinement = (data: { departureTime?: string | null; arrivalTime?: string | null }) => {
+  if (data.departureTime && data.arrivalTime) {
+    return new Date(data.arrivalTime) >= new Date(data.departureTime);
+  }
+  return true;
+};
+
+export const createSandTripSchema = baseSandTripSchema.refine(timeRefinement, {
+  message: "Arrival time cannot be before departure time",
+  path: ["arrivalTime"],
+});
+
+export const updateSandTripSchema = baseSandTripSchema.partial().refine(timeRefinement, {
+  message: "Arrival time cannot be before departure time",
+  path: ["arrivalTime"],
+});
 
 export const createSandTripExpenseSchema = z.object({
   category: z.nativeEnum(SAND_TRIP_EXPENSE_CATEGORIES),

@@ -14,6 +14,17 @@ import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Paperclip, X, CheckCircle2, ExternalLink, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Props {
   tripPublicId: string;
@@ -178,17 +189,40 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
-                <button
-                  onClick={() => handleDelete(att.fileId)}
-                  disabled={isDeleting}
-                  className={`h-7 w-7 rounded-lg border flex items-center justify-center transition-colors ${
-                    deleteConfirm === att.fileId
-                      ? 'bg-destructive text-white border-destructive'
-                      : 'bg-background/90 border-border/60 hover:bg-rose-500/10 hover:text-rose-500'
-                  }`}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className="h-7 w-7 rounded-lg border bg-background/90 border-border/60 flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('deleteConfirm.attachmentTitle')}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('deleteConfirm.attachmentDescription')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('deleteConfirm.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDelete(att.fileId);
+                        }}
+                        disabled={isDeleting}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        {isDeleting && deleteConfirm === att.fileId ? (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          t('deleteConfirm.delete')
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}

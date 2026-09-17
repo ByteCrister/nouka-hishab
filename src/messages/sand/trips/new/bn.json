@@ -1,13 +1,16 @@
 {
   "meta": {
     "title": "নতুন বালি ট্রিপ",
+    "editTitle": "বালি ট্রিপ সম্পাদনা করুন",
     "description": "একটি নতুন বালি পরিবহন ট্রিপ যোগ করুন"
   },
   "breadcrumbs": {
     "home": "হোম",
     "sand": "বালু",
     "trips": "ট্রিপ",
-    "newTrip": "নতুন ট্রিপ"
+    "newTrip": "নতুন ট্রিপ",
+    "edit": "সম্পাদনা",
+    "tripDetails": "ট্রিপের বিবরণ"
   },
   "header": {
     "title": "নতুন বালি ট্রিপ",
@@ -24,6 +27,7 @@
     "destination": "গন্তব্য",
     "cargo": "মালামাল",
     "financials": "আর্থিক বিবরণ",
+    "netProfit": "নিট মুনাফা",
     "notes": "নোট"
   },
   "fields": {
@@ -33,6 +37,8 @@
     "departureTime": "যাত্রার সময়",
     "arrivalTime": "আগমনের সময়",
     "locationName": "অবস্থানের নাম",
+    "source": "উৎস (এলাকা, থানা, জেলা)",
+    "destination": "গন্তব্য (এলাকা, থানা, জেলা)",
     "sourcePlaceholder": "যেমন: সিলেট ঘাট",
     "destPlaceholder": "যেমন: ঢাকা টার্মিনাল",
     "latitude": "অক্ষাংশ",
@@ -49,6 +55,7 @@
     "govtRoyaltyTotal": "মোট সরকারি রয়্যালটি (৳)",
     "localTollRate": "স্থানীয় টোল হার (৳)",
     "localTollTotal": "মোট স্থানীয় টোল (৳)",
+    "operatingCost": "নৌকা পরিচালনার অগ্রিম খরচ (৳)",
     "notesPlaceholder": "এই ট্রিপ সম্পর্কে অতিরিক্ত নোট..."
   },
   "status": {
