@@ -54,3 +54,4 @@ export function Footer({ locale }: { locale: AppLocale }) {
     </footer>
   );
 }
+

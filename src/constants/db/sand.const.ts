@@ -25,3 +25,5 @@ export const SAND_TRIP_EXPENSE_CATEGORIES = {
 } as const;
 export type SandTripExpenseCategory = typeof SAND_TRIP_EXPENSE_CATEGORIES[keyof typeof SAND_TRIP_EXPENSE_CATEGORIES];
 
+
+

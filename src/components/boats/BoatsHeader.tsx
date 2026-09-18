@@ -26,7 +26,7 @@ export function BoatsHeader() {
   ];
 
   return (
-    <div className="space-y-4 mb-8">
+    <div className="space-y-4">
       <Breadcrumbs items={breadcrumbItems} />
       
       <FadeInUp>
@@ -64,3 +64,5 @@ export function BoatsHeader() {
     </div>
   );
 }
+
+

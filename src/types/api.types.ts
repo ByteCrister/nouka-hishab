@@ -24,3 +24,4 @@ export type SortOrder = 'asc' | 'desc';
 export interface ApiErrorShape {
   error: string;
 }
+

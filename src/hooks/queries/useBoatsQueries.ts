@@ -85,3 +85,5 @@ export function useBoatTrips(publicId: string, filters: BoatTripsFilters) {
         enabled: !!publicId,
     });
 }
+
+

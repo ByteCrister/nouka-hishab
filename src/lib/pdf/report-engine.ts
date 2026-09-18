@@ -14,7 +14,7 @@ import React from 'react';
 import { pdf, DocumentProps } from '@react-pdf/renderer';
 import JSZip from 'jszip';
 
-import type { SandTripReportDTO, SingleSandTripReportDTO } from '@/types/sand/sand-report.types';
+import type { SandTripReportDTO, SingleSandTripReportDTO } from '@/types/sand-report.types';
 import type { AppLocale } from '@/constants/common.const';
 import { PDF_STRINGS } from './pdf-i18n';
 import { chunk } from './chunk';
@@ -163,3 +163,5 @@ export async function exportSingleSandTripReport(
   const { blob, filename } = await generateSingleTripPdf(dto, locale);
   await downloadSinglePdf(blob, filename);
 }
+
+

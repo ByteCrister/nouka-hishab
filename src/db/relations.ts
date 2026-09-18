@@ -235,3 +235,4 @@ export const filesRelations = relations(files, ({ one, many }) => ({
   sandTripAttachments: many(sandTripAttachments),
   reportAttachments: many(reportAttachments),
 }));
+

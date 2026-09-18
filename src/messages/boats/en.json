@@ -22,5 +22,11 @@
     "totalFleetCapacity": "Total Fleet Capacity",
     "totalFleetValue": "Total Fleet Value"
   },
+  "overview": {
+    "title": "Fleet Overview",
+    "subtitle": "Global metrics and filtered fleet statistics.",
+    "globalMetrics": "Global Fleet Performance",
+    "filteredMetrics": "Current Filtered List"
+  },
   "noBoats": "No boats found matching your criteria."
 }

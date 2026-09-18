@@ -124,3 +124,5 @@ export function HowItWorksPage({ locale }: { locale: AppLocale }) {
     </div>
   );
 }
+
+

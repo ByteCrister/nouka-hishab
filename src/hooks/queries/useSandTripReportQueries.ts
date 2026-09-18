@@ -6,11 +6,12 @@
 
 import { useQuery, type UseQueryOptions, type UseQueryResult } from '@tanstack/react-query';
 import { api, extractErrorMessage } from '@/utils/axios';
+import { tripKeys } from './useTripsQueries';
 import type {
   SandTripReportDTO,
   SingleSandTripReportDTO,
   SandTripsReportFilters,
-} from '@/types/sand/sand-report.types';
+} from '@/types/sand-report.types';
 
 // ─── Query key factory ────────────────────────────────────────────────────────
 
@@ -102,3 +103,6 @@ export function useSingleSandTripReport(
     ...options,
   });
 }
+
+
+

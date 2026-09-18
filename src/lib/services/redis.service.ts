@@ -60,3 +60,5 @@ export async function setCooldown(action: string, identifier: string, windowInSe
     console.error(`Redis set cooldown error for ${action}:`, error);
   }
 }
+
+

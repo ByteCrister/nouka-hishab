@@ -48,3 +48,5 @@ export const useBoatFiltersStore = create<BoatsFiltersState>((set) => ({
     setTripsLimit: (l) => set((s) => ({ tripsFilters: { ...s.tripsFilters, limit: l, page: 1 } })),
     resetTripsFilters: () => set({ tripsFilters: { ...BOAT_TRIPS_DEFAULT_FILTERS } }),
 }));
+
+

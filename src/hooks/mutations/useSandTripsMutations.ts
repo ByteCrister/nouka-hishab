@@ -6,14 +6,14 @@ import {
   CreateSandTripExpensePayload,
   UpdateSandTripExpensePayload,
   CreateSandTripAttachmentPayload
-} from '@/types/sand/trips.types';
-import { sandTripKeys } from '@/hooks/queries/useSandTripsQueries';
+} from '@/types/trips.types';
+import { tripKeys } from '@/hooks/queries/useTripsQueries';
 import { toast } from 'sonner';
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 
 async function createSandTrip(payload: CreateSandTripPayload): Promise<{ success: boolean; publicId: string }> {
-  const { data } = await api.post<{ data: { success: boolean; publicId: string } }>('/sand/trips', payload);
+  const { data } = await api.post<{ data: { success: boolean; publicId: string } }>('/trips/sand', payload);
   return data.data;
 }
 
@@ -23,7 +23,7 @@ export function useCreateSandTrip(onSuccessCallback?: (publicId: string) => void
   return useMutation({
     mutationFn: createSandTrip,
     onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() });
+      await queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
       toast.success('Trip created successfully');
       onSuccessCallback?.(data.publicId);
     },
@@ -43,7 +43,7 @@ async function updateSandTrip({
   payload: UpdateSandTripPayload;
 }): Promise<{ success: boolean; publicId: string }> {
   const { data } = await api.patch<{ data: { success: boolean; publicId: string } }>(
-    `/sand/trips/${publicId}`,
+    `/trips/sand/${publicId}`,
     payload
   );
   return data.data;
@@ -60,8 +60,8 @@ export function useUpdateSandTrip(onSuccessCallback?: () => void) {
       // Without await, router.push() can land on the detail page before the
       // refetch resolves, causing it to display stale data until a manual refresh.
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.publicId) }),
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.detail(variables.publicId) }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.lists() }),
       ]);
       toast.success('Trip updated successfully');
       onSuccessCallback?.();
@@ -75,7 +75,7 @@ export function useUpdateSandTrip(onSuccessCallback?: () => void) {
 // ─── Delete ───────────────────────────────────────────────────────────────────
 
 async function deleteSandTrip(publicId: string): Promise<{ success: boolean }> {
-  const { data } = await api.delete<{ data: { success: boolean } }>(`/sand/trips/${publicId}`);
+  const { data } = await api.delete<{ data: { success: boolean } }>(`/trips/sand/${publicId}`);
   return data.data;
 }
 
@@ -85,7 +85,7 @@ export function useDeleteSandTrip(onSuccessCallback?: () => void) {
   return useMutation({
     mutationFn: deleteSandTrip,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: tripKeys.lists() });
       toast.success('Trip deleted successfully');
       onSuccessCallback?.();
     },
@@ -105,7 +105,7 @@ async function createSandTripExpense({
   payload: CreateSandTripExpensePayload;
 }): Promise<{ success: boolean; publicId: string }> {
   const { data } = await api.post<{ data: { success: boolean; publicId: string } }>(
-    `/sand/trips/${tripPublicId}/expenses`,
+    `/trips/sand/${tripPublicId}/expenses`,
     payload
   );
   return data.data;
@@ -118,8 +118,8 @@ export function useCreateSandTripExpense(onSuccessCallback?: () => void) {
     mutationFn: createSandTripExpense,
     onSuccess: async (_data, variables) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.lists() }),
       ]);
       toast.success('Expense added successfully');
       onSuccessCallback?.();
@@ -140,7 +140,7 @@ async function updateSandTripExpense({
   payload: UpdateSandTripExpensePayload;
 }): Promise<{ success: boolean }> {
   const { data } = await api.patch<{ data: { success: boolean } }>(
-    `/sand/trips/${tripPublicId}/expenses/${expensePublicId}`,
+    `/trips/sand/${tripPublicId}/expenses/${expensePublicId}`,
     payload
   );
   return data.data;
@@ -153,8 +153,8 @@ export function useUpdateSandTripExpense(onSuccessCallback?: () => void) {
     mutationFn: updateSandTripExpense,
     onSuccess: async (_data, variables) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.lists() }),
       ]);
       toast.success('Expense updated successfully');
       onSuccessCallback?.();
@@ -173,7 +173,7 @@ async function deleteSandTripExpense({
   expensePublicId: string;
 }): Promise<{ success: boolean }> {
   const { data } = await api.delete<{ data: { success: boolean } }>(
-    `/sand/trips/${tripPublicId}/expenses/${expensePublicId}`
+    `/trips/sand/${tripPublicId}/expenses/${expensePublicId}`
   );
   return data.data;
 }
@@ -185,8 +185,8 @@ export function useDeleteSandTripExpense(onSuccessCallback?: () => void) {
     mutationFn: deleteSandTripExpense,
     onSuccess: async (_data, variables) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.lists() }),
       ]);
       toast.success('Expense deleted successfully');
       onSuccessCallback?.();
@@ -207,7 +207,7 @@ async function createSandTripAttachment({
   payload: CreateSandTripAttachmentPayload;
 }): Promise<{ success: boolean }> {
   const { data } = await api.post<{ data: { success: boolean } }>(
-    `/sand/trips/${tripPublicId}/attachments`,
+    `/trips/sand/${tripPublicId}/attachments`,
     payload
   );
   return data.data;
@@ -220,8 +220,8 @@ export function useCreateSandTripAttachment(onSuccessCallback?: () => void) {
     mutationFn: createSandTripAttachment,
     onSuccess: async (_data, variables) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.lists() }),
       ]);
       toast.success('Attachment added successfully');
       onSuccessCallback?.();
@@ -240,7 +240,7 @@ async function deleteSandTripAttachment({
   fileId: number;
 }): Promise<{ success: boolean }> {
   const { data } = await api.delete<{ data: { success: boolean } }>(
-    `/sand/trips/${tripPublicId}/attachments/${fileId}`
+    `/trips/sand/${tripPublicId}/attachments/${fileId}`
   );
   return data.data;
 }
@@ -252,8 +252,8 @@ export function useDeleteSandTripAttachment(onSuccessCallback?: () => void) {
     mutationFn: deleteSandTripAttachment,
     onSuccess: async (_data, variables) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.detail(variables.tripPublicId) }),
-        queryClient.invalidateQueries({ queryKey: sandTripKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.detail(variables.tripPublicId) }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.lists() }),
       ]);
       toast.success('Attachment removed successfully');
       onSuccessCallback?.();
@@ -263,3 +263,6 @@ export function useDeleteSandTripAttachment(onSuccessCallback?: () => void) {
     },
   });
 }
+
+
+

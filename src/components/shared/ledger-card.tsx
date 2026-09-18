@@ -41,3 +41,5 @@ export function LedgerCard({ title, tag, lines, totalLabel, totalValue, classNam
     </div>
   );
 }
+
+

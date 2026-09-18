@@ -120,3 +120,5 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
     set({ profile: null, isLoading: false, isUpdating: false, error: null });
   },
 }));
+
+

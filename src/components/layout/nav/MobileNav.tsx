@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Menu, User, LogOut, Ship, LayoutDashboard, Anchor, CircleDollarSign, Wallet, Wrench, FileSpreadsheet, Trash2, ChevronDown } from "lucide-react";
+import { Menu, User, LogOut, Ship, Wrench, FileSpreadsheet, Trash2 } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -27,14 +27,6 @@ interface MobileNavProps {
 export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
-  const [isSandOpen, setIsSandOpen] = useState(false);
-
-  const sandLinks = [
-    { href: "/sand", label: t("dashboard"), icon: LayoutDashboard },
-    { href: "/sand/trips", label: t("trips"), icon: Anchor },
-    { href: "/sand/sales", label: t("sales"), icon: CircleDollarSign },
-    { href: "/sand/payments", label: t("payments"), icon: Wallet },
-  ];
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -82,26 +74,7 @@ export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
                   <Wrench className="w-5 h-5 opacity-70" />
                   {t("maintenance")}
                 </Link>
-                <button 
-                  onClick={() => setIsSandOpen(!isSandOpen)}
-                  className="flex items-center justify-between w-full text-sm font-bold text-ink-400 uppercase tracking-wider outline-none"
-                >
-                  {t("sand")}
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isSandOpen ? "rotate-180" : ""}`} />
-                </button>
-                {isSandOpen && (
-                  <div className="flex flex-col space-y-4 pt-2 pl-3 ml-1 border-l-2 border-river-100">
-                    {sandLinks.map((link) => {
-                      const Icon = link.icon;
-                      return (
-                        <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="flex items-center gap-3 text-base font-medium text-ink-700 hover:text-river-500 transition-colors">
-                          <Icon className="w-5 h-5 opacity-70" />
-                          {link.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+
               </div>
             </>
           )}
@@ -139,3 +112,5 @@ export function MobileNav({ isAuthenticated, user }: MobileNavProps) {
     </Sheet>
   );
 }
+
+

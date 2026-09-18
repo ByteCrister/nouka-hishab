@@ -108,3 +108,5 @@ export function BoatDetailKpis({ kpis }: BoatDetailKpisProps) {
     </div>
   );
 }
+
+

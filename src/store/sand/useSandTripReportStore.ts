@@ -6,7 +6,7 @@
 // range each time.
 
 import { create } from 'zustand';
-import type { SandTripsReportFilters } from '@/types/sand/sand-report.types';
+import type { SandTripsReportFilters } from '@/types/sand-report.types';
 
 // ── State shape ───────────────────────────────────────────────────────────────
 
@@ -101,3 +101,5 @@ export const useSandTripReportStore = create<SandTripReportState>()((set, get) =
     };
   },
 }));
+
+

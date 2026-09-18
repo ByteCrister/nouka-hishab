@@ -256,3 +256,5 @@ export function BoatDocumentsSection({ boat }: BoatDocumentsSectionProps) {
     </div>
   );
 }
+
+

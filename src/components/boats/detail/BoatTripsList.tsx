@@ -47,7 +47,7 @@ export function BoatTripsList({ publicId }: BoatTripsListProps) {
   };
 
   const handleRowClick = (publicId: string) => {
-    router.push(`/sand/trips/${publicId}`);
+    router.push(`/trips/sand/${publicId}`);
   };
 
   if (isTripsLoading && trips.length === 0) {
@@ -157,3 +157,5 @@ export function BoatTripsList({ publicId }: BoatTripsListProps) {
     </FadeInUp>
   );
 }
+
+

@@ -19,7 +19,7 @@ export function MarketingCTA({ signInText, dashboardText, className, tone = "red
   if (isAuthenticated) {
     return (
       <GlossButton asChild tone={tone} className={className}>
-        <Link href="/sand">{dashboardText}</Link>
+        <Link href="/boats">{dashboardText}</Link>
       </GlossButton>
     );
   }
@@ -32,3 +32,5 @@ export function MarketingCTA({ signInText, dashboardText, className, tone = "red
     </SignInDialog>
   );
 }
+
+

@@ -17,7 +17,7 @@ const SESSION_COOKIE =
     ? "__Secure-authjs.session-token"
     : "authjs.session-token";
 
-const PROTECTED_PREFIXES = ["/profile", "/sand", "/boats", "/reports", "/recyclebin", "/maintenance"];
+const PROTECTED_PREFIXES = ["/profile", "/boats", "/trips", "/reports", "/recyclebin", "/maintenance"];
 
 function isProtected(pathnameWithoutLocale: string): boolean {
   return PROTECTED_PREFIXES.some(
@@ -81,3 +81,5 @@ export const config = {
   // Match everything except: API routes, Next.js internals, static files, favicons
   matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };
+
+

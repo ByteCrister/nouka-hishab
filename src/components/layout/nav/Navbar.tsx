@@ -8,7 +8,6 @@ import { SignInDialog } from "@/components/shared/signin/SigninDialog";
 import { Link } from "@/i18n/routing";
 import { useSession } from "next-auth/react";
 import { UserAccountNav } from "./UserAccountNav";
-import { SandMegaMenu } from "./SandMegaMenu";
 import { MobileNav } from "./MobileNav";
 
 export function Navbar({ locale }: { locale: AppLocale }) {
@@ -27,16 +26,18 @@ export function Navbar({ locale }: { locale: AppLocale }) {
                 <Link href="/boats" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
                   {t.nav.boats}
                 </Link>
+                <Link href="/trips" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
+                  {t.nav.trips}
+                </Link>
+                <Link href="/maintenance" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
+                  {t.nav.maintenance}
+                </Link>
                 <Link href="/reports" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
                   {t.nav.reports}
                 </Link>
                 <Link href="/recyclebin" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
                   {t.nav.recyclebin}
                 </Link>
-                <Link href="/maintenance" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
-                  {t.nav.maintenance}
-                </Link>
-                <SandMegaMenu />
               </>
             )}
             <Link href="/how-it-works" className="text-sm font-medium text-ink-700 hover:text-river-500 transition-colors">
@@ -71,3 +72,5 @@ export function Navbar({ locale }: { locale: AppLocale }) {
     </header>
   );
 }
+
+

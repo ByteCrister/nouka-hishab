@@ -19,3 +19,5 @@ export function isWithinBangladesh(lat: number, lng: number): boolean {
     lng <= BD_BOUNDS.northEast[1]
   );
 }
+
+

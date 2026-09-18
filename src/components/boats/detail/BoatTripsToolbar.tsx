@@ -80,3 +80,5 @@ export function BoatTripsToolbar() {
     </FadeInUp>
   );
 }
+
+

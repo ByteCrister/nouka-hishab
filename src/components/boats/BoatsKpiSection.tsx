@@ -14,14 +14,14 @@ export function BoatsKpiSection() {
 
   if (isLoading && !kpis) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="rounded-xl border bg-card p-5 h-[110px] animate-pulse">
-            <div className="flex items-center space-x-3 mb-3">
+          <div key={i} className="rounded-xl border border-border/40 bg-card/40 p-3.5 h-[72px] animate-pulse flex items-center justify-between">
+            <div className="flex items-center space-x-3">
               <div className="h-9 w-9 bg-muted rounded-lg" />
               <div className="h-4 w-20 bg-muted rounded-md" />
             </div>
-            <div className="h-8 w-16 bg-muted rounded-md" />
+            <div className="h-6 w-12 bg-muted rounded-md" />
           </div>
         ))}
       </div>
@@ -74,19 +74,19 @@ export function BoatsKpiSection() {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {kpiItems.map((item, idx) => (
         <FadeInUp key={idx} delay={item.delay}>
-          <div className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5 shadow-sm hover:shadow-md hover:border-primary/20 transition-all relative overflow-hidden group">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className={`p-2 rounded-xl ${item.bg}`}>
+          <div className="rounded-xl border border-border/40 bg-card/40 hover:bg-card/60 backdrop-blur-sm p-3.5 shadow-sm hover:shadow-md hover:border-primary/20 transition-all flex items-center justify-between group">
+            <div className="flex items-center space-x-3">
+              <div className={`p-2 rounded-lg ${item.bg} group-hover:scale-110 transition-transform duration-300`}>
                 {item.icon}
               </div>
-              <h3 className="font-medium text-muted-foreground text-sm leading-tight">
+              <h3 className="font-medium text-muted-foreground text-xs sm:text-sm leading-tight">
                 {item.title}
               </h3>
             </div>
-            <p className="text-2xl font-bold tracking-tight text-foreground truncate" title={String(item.value)}>
+            <p className="text-xl font-bold tracking-tight text-foreground pl-3 text-right" title={String(item.value)}>
               {item.value}
             </p>
           </div>
@@ -95,3 +95,5 @@ export function BoatsKpiSection() {
     </div>
   );
 }
+
+

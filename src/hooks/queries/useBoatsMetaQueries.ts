@@ -1,6 +1,6 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { api, extractErrorMessage } from '@/utils/axios';
-import { BoatMeta } from '@/types/sand/trips.types';
+import { BoatMeta } from '@/types/trips.types';
 
 export const boatMetaKeys = {
   all: ['boatsMeta'] as const,
@@ -25,3 +25,5 @@ export function useBoatsMeta(
     ...options,
   });
 }
+
+

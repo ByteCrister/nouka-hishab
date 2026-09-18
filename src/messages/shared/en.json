@@ -10,7 +10,10 @@
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create",
-    "back": "Back"
+    "back": "Back",
+    "export": "Export",
+    "exportSuccess": "Export successful",
+    "exportFailed": "Failed to export report"
   },
   "common": {
     "loading": "Loading...",

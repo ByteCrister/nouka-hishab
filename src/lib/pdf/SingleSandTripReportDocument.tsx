@@ -12,7 +12,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 
-import type { SingleSandTripReportDTO } from '@/types/sand/sand-report.types';
+import type { SingleSandTripReportDTO } from '@/types/sand-report.types';
 import type { PdfStrings } from './pdf-i18n';
 import { formatCurrency, formatDate } from './pdf-utils';
 import { getExpenseCategoryLabel } from './pdf-i18n';
@@ -403,3 +403,5 @@ export function SingleSandTripReportDocument({ dto, strings }: Props) {
     </Document>
   );
 }
+
+

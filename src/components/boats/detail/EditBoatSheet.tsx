@@ -296,3 +296,5 @@ export function EditBoatSheet({ boat, open, onOpenChange }: EditBoatSheetProps) 
     </Sheet>
   );
 }
+
+

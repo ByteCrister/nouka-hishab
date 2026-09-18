@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-import type { SandTripReportDTO, SingleSandTripReportDTO } from '@/types/sand/sand-report.types';
+import type { SandTripReportRow, SandTripReportDTO, SingleSandTripReportDTO } from '@/types/sand-report.types';
 import type { AppLocale } from '@/constants/common.const';
 import { PDF_STRINGS } from '@/lib/pdf/pdf-i18n';
 import {

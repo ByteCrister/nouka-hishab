@@ -84,3 +84,4 @@ export const BOAT_TRIP_STATUS_FILTER_OPTIONS: {
     label: prettify(s),
   })),
 ];
+

@@ -7,7 +7,7 @@ import { eq, and, isNull } from "drizzle-orm";
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult } from "@/lib/helpers/withErrorHandler";
 import { SECTORS } from "@/constants/db/app.const";
-import { BoatMeta } from "@/types/sand/trips.types";
+import type { BoatMeta } from '@/types/trips.types';
 
 const getBoatsMetaSchema = z.object({
   sector: z.enum([SECTORS.SAND, SECTORS.LIME_STONE, SECTORS.BRICK, "all"]).optional().default("all"),
@@ -52,3 +52,5 @@ export const GET = withErrorHandler<BoatMeta[], [NextRequest]>(
     return { data: metaRecords as BoatMeta[] };
   }
 );
+
+

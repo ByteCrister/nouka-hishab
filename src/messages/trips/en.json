@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "title": "Trips",
+    "description": "Manage all transport trips"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "trips": "Trips"
+  },
+  "header": {
+    "title": "Trips",
+    "subtitle": "Track and manage all cargo transport operations",
+    "newTrip": "New Trip",
+    "newSandTrip": "New Sand Trip"
+  },
+  "kpi": {
+    "totalTrips": "Total Trips",
+    "totalRevenue": "Total Revenue",
+    "totalCosts": "Total Costs"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search trips...",
+    "allSectors": "All Sectors",
+    "allStatuses": "All Statuses",
+    "allBoats": "All Boats",
+    "resetFilters": "Reset filters",
+    "departureDesc": "Departure ↓",
+    "departureAsc": "Departure ↑",
+    "profitDesc": "Profit ↓",
+    "profitAsc": "Profit ↑",
+    "saleDesc": "Sale ↓",
+    "newest": "Newest"
+  },
+  "status": {
+    "scheduled": "Scheduled",
+    "loading": "Loading",
+    "in_transit": "In Transit",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "all": "All Statuses"
+  },
+  "empty": {
+    "title": "No trips found",
+    "subtitle": "Adjust your filters or log your first trip.",
+    "logFirst": "Log First Trip"
+  },
+  "pagination": {
+    "showing": "Showing {from}–{to} of {total} trips",
+    "previous": "Previous",
+    "next": "Next"
+  }
+}

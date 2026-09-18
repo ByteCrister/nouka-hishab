@@ -55,3 +55,5 @@ export const createSandTripAttachmentSchema = z.object({
   fileId: z.number().int().positive("Invalid file ID"),
   description: z.string().nullable().optional(),
 });
+
+

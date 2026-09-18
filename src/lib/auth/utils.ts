@@ -42,3 +42,5 @@ export async function requireAuthUser() {
   }
   return session.user;
 }
+
+

@@ -157,3 +157,5 @@ export type Boat = typeof boats.$inferSelect;
 export type NewBoat = typeof boats.$inferInsert;
 export type BoatMaintenanceLog = typeof boatMaintenanceLogs.$inferSelect;
 export type NewBoatMaintenanceLog = typeof boatMaintenanceLogs.$inferInsert;
+
+

@@ -561,3 +561,4 @@ export const useBoatStore = create<BoatDetailState>((set, get) => ({
         });
     },
 }));
+

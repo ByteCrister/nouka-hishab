@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "title": "ট্রিপ",
+    "description": "সকল পরিবহন ট্রিপ পরিচালনা করুন"
+  },
+  "breadcrumbs": {
+    "home": "হোম",
+    "trips": "ট্রিপ"
+  },
+  "header": {
+    "title": "ট্রিপ",
+    "subtitle": "সকল কার্গো পরিবহন অপারেশন ট্র্যাক ও পরিচালনা করুন",
+    "newTrip": "নতুন ট্রিপ",
+    "newSandTrip": "নতুন বালু ট্রিপ"
+  },
+  "kpi": {
+    "totalTrips": "মোট ট্রিপ",
+    "totalRevenue": "মোট আয়",
+    "totalCosts": "মোট খরচ"
+  },
+  "toolbar": {
+    "searchPlaceholder": "ট্রিপ খুঁজুন...",
+    "allSectors": "সব খাত",
+    "allStatuses": "সব স্ট্যাটাস",
+    "allBoats": "সব নৌকা",
+    "resetFilters": "ফিল্টার রিসেট করুন",
+    "departureDesc": "যাত্রা ↓",
+    "departureAsc": "যাত্রা ↑",
+    "profitDesc": "মুনাফা ↓",
+    "profitAsc": "মুনাফা ↑",
+    "saleDesc": "বিক্রয় ↓",
+    "newest": "সর্বশেষ"
+  },
+  "status": {
+    "scheduled": "নির্ধারিত",
+    "loading": "লোড হচ্ছে",
+    "in_transit": "পথে আছে",
+    "completed": "সম্পন্ন",
+    "cancelled": "বাতিল",
+    "all": "সব স্ট্যাটাস"
+  },
+  "empty": {
+    "title": "কোনো ট্রিপ পাওয়া যায়নি",
+    "subtitle": "আপনার ফিল্টার পরিবর্তন করুন বা প্রথম ট্রিপ যোগ করুন।",
+    "logFirst": "প্রথম ট্রিপ যোগ করুন"
+  },
+  "pagination": {
+    "showing": "{total} ট্রিপের মধ্যে {from}–{to} দেখাচ্ছে",
+    "previous": "পূর্ববর্তী",
+    "next": "পরবর্তী"
+  }
+}

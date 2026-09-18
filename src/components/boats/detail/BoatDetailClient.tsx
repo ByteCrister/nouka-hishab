@@ -60,3 +60,5 @@ export function BoatDetailClient({ publicId }: BoatDetailClientProps) {
     </div>
   );
 }
+
+

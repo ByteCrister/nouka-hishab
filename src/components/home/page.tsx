@@ -187,3 +187,5 @@ export function LandingPage({ locale }: { locale: AppLocale }) {
     </div>
   );
 }
+
+

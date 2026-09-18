@@ -213,3 +213,5 @@ export const generateOtpHtml = (otp: string, type: string) => {
 </html>
     `;
 };
+
+

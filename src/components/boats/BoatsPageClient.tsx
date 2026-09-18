@@ -3,13 +3,14 @@
 import { useBoatFiltersStore } from '@/store/useBoatFiltersStore';
 import { useBoats } from '@/hooks/queries/useBoatsQueries';
 import { BoatsHeader } from './BoatsHeader';
-import { BoatsKpiSection } from './BoatsKpiSection';
+import { BoatsOverviewSection } from './BoatsOverviewSection';
 import { BoatsToolbar } from './BoatsToolbar';
 import { BoatsList } from './BoatsList';
+import { BoatsDashboardSection } from './dashboard/BoatsDashboardSection';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { FadeInUp, StaggerContainer, StaggerItem } from '../wrappers/motion-wrappers';
+import { FadeInUp } from '../wrappers/motion-wrappers';
 
 export function BoatsPageClient() {
   const { listFilters, setPage } = useBoatFiltersStore();
@@ -18,16 +19,20 @@ export function BoatsPageClient() {
   const meta = data?.meta;
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-8 pb-12">
       <FadeInUp>
         <BoatsHeader />
       </FadeInUp>
-      
+
       <FadeInUp delay={0.1}>
-        <BoatsKpiSection />
+        <BoatsOverviewSection />
       </FadeInUp>
 
       <FadeInUp delay={0.2}>
+        <BoatsDashboardSection />
+      </FadeInUp>
+
+      <FadeInUp delay={0.3}>
         <div className="rounded-3xl border border-border/50 bg-card/40 p-6 sm:p-8 backdrop-blur-xl shadow-sm">
           <BoatsToolbar />
           <div className="mt-6">
@@ -89,3 +94,5 @@ export function BoatsPageClient() {
     </div>
   );
 }
+
+

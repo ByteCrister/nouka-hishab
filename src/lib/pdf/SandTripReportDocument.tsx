@@ -14,7 +14,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 
-import type { SandTripReportMeta, SandTripReportRow } from '@/types/sand/sand-report.types';
+import type { SandTripReportMeta, SandTripReportRow } from '@/types/sand-report.types';
 import type { PdfStrings } from './pdf-i18n';
 import { formatCurrency, formatDate } from './pdf-utils';
 
@@ -444,3 +444,5 @@ export function SandTripReportDocument({
     </Document>
   );
 }
+
+

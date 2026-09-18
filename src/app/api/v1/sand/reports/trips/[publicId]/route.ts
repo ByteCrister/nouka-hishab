@@ -1,23 +1,12 @@
-// src/app/api/v1/sand/reports/trips/[publicId]/route.ts
-// ─── Single-Trip Report API ───────────────────────────────────────────────────
-// GET /api/v1/sand/reports/trips/:publicId
-//
-// Returns a SingleSandTripReportDTO for a specific trip.
-// Used by the sand/trips/[publicId] detail page export button.
-
-import { NextRequest } from 'next/server';
-import { db } from '@/config/db';
-import { boats } from '@/db/boat';
-import { sandTrips, sandTripExpenses } from '@/db/sand';
-import { eq, and, isNull, sql } from 'drizzle-orm';
-import { users } from '@/db/app';
-import { requireAuthPublicId } from '@/lib/auth/utils';
-import { withErrorHandler, HandlerResult, ApiError } from '@/lib/helpers/withErrorHandler';
-import type {
-  SingleSandTripReportDTO,
-  SandTripReportRow,
-  SandTripExpenseReportRow,
-} from '@/types/sand/sand-report.types';
+import { NextRequest } from "next/server";
+import { db } from "@/config/db";
+import { sandTrips, sandTripExpenses } from "@/db/sand";
+import { boats } from "@/db/boat";
+import { users } from "@/db/app";
+import { eq, and, isNull } from "drizzle-orm";
+import { requireAuthPublicId } from "@/lib/auth/utils";
+import { withErrorHandler, HandlerResult, ApiError } from "@/lib/helpers/withErrorHandler";
+import { SingleSandTripReportDTO, SandTripReportRow } from "@/types/sand-report.types";
 
 interface RouteContext {
   params: Promise<{ publicId: string }>;
@@ -25,24 +14,18 @@ interface RouteContext {
 
 export const GET = withErrorHandler<SingleSandTripReportDTO, [NextRequest, RouteContext]>(
   async (_req, context): Promise<HandlerResult<SingleSandTripReportDTO>> => {
-    const { publicId } = await context.params;
+    const params = await context.params;
     const userPublicId = await requireAuthPublicId();
 
-    const [userRecord] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.publicId, userPublicId));
-    if (!userRecord) throw new ApiError('User not found', 404);
+    const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));
+    if (!userRecord) throw new Error("User not found");
 
-    // ── Fetch trip + ownership check ───────────────────────────────────────
-    const [tripData] = await db
+    const [trip] = await db
       .select({
         id: sandTrips.id,
         publicId: sandTrips.publicId,
-        boatName: boats.name,
-        boatPublicId: boats.publicId,
-        departureTime: sql<string>`${sandTrips.departureTime}::text`,
-        arrivalTime: sql<string>`${sandTrips.arrivalTime}::text`,
+        departureTime: sandTrips.departureTime,
+        arrivalTime: sandTrips.arrivalTime,
         source: sandTrips.source,
         destination: sandTrips.destination,
         cargoValue: sandTrips.cargoValue,
@@ -59,96 +42,82 @@ export const GET = withErrorHandler<SingleSandTripReportDTO, [NextRequest, Route
         purchaseRatePerUnitTk: sandTrips.purchaseRatePerUnitTk,
         govtRoyaltyRateTk: sandTrips.govtRoyaltyRateTk,
         localTollRateTk: sandTrips.localTollRateTk,
+        boatName: boats.name,
+        boatPublicId: boats.publicId,
       })
       .from(sandTrips)
       .innerJoin(boats, eq(sandTrips.boatId, boats.id))
       .where(
         and(
-          eq(sandTrips.publicId, publicId),
+          eq(sandTrips.publicId, params.publicId),
           isNull(sandTrips.deletedAt),
-          eq(boats.createdBy, userRecord.id) // ownership guard
+          eq(boats.createdBy, userRecord.id)
         )
-      )
-      .limit(1);
+      );
 
-    if (!tripData) throw new ApiError('Trip not found', 404);
+    if (!trip) {
+      throw new ApiError("Trip not found", 404);
+    }
 
-    // ── Fetch expenses ─────────────────────────────────────────────────────
     const expensesData = await db
       .select({
         category: sandTripExpenses.category,
         description: sandTripExpenses.description,
-        amountTk: sql<number>`${sandTripExpenses.amountTk}::float`,
+        amountTk: sandTripExpenses.amountTk,
       })
       .from(sandTripExpenses)
       .where(
         and(
-          eq(sandTripExpenses.sandTripId, tripData.id),
+          eq(sandTripExpenses.sandTripId, trip.id),
           isNull(sandTripExpenses.deletedAt)
         )
-      )
-      .orderBy(sandTripExpenses.createdAt);
+      );
 
-    const expenses: SandTripExpenseReportRow[] = expensesData.map((e) => ({
+    const tripExpenses = expensesData.map(e => ({
       category: e.category,
       description: e.description,
-      amountTk: e.amountTk,
+      amountTk: e.amountTk ? parseFloat(e.amountTk) : 0,
     }));
-
-    // ── Build report DTO ───────────────────────────────────────────────────
-    const toNum = (v: unknown): number | null =>
-      v != null ? parseFloat(String(v)) : null;
 
     const row: SandTripReportRow = {
       serial: 1,
-      publicId: tripData.publicId,
-      date: tripData.departureTime,
-      source: tripData.source,
-      destination: tripData.destination,
-      cargoValue: toNum(tripData.cargoValue),
-      cargoUnit: tripData.cargoUnit ?? null,
-      saleAmountTk: toNum(tripData.saleAmountTk),
-      purchaseCostTk: toNum(tripData.purchaseCostTk),
-      govtRoyaltyTk: toNum(tripData.govtRoyaltyTk),
-      localTollTk: toNum(tripData.localTollTk),
-      totalOperatingCostTk: toNum(tripData.totalOperatingCostTk),
-      netProfitTk: toNum(tripData.netProfitTk),
-      status: tripData.status,
-      buyerName: tripData.buyerName,
-      buyerPhone: tripData.buyerPhone,
-      purchaseRatePerUnitTk: toNum(tripData.purchaseRatePerUnitTk),
-      govtRoyaltyRateTk: toNum(tripData.govtRoyaltyRateTk),
-      localTollRateTk: toNum(tripData.localTollRateTk),
-      expenses,
+      publicId: trip.publicId,
+      date: trip.departureTime.toISOString(),
+      source: trip.source,
+      destination: trip.destination,
+      cargoValue: trip.cargoValue ? parseFloat(trip.cargoValue) : null,
+      cargoUnit: trip.cargoUnit,
+      saleAmountTk: trip.saleAmountTk ? parseFloat(trip.saleAmountTk) : null,
+      purchaseCostTk: trip.purchaseCostTk ? parseFloat(trip.purchaseCostTk) : null,
+      govtRoyaltyTk: trip.govtRoyaltyTk ? parseFloat(trip.govtRoyaltyTk) : null,
+      localTollTk: trip.localTollTk ? parseFloat(trip.localTollTk) : null,
+      totalOperatingCostTk: trip.totalOperatingCostTk ? parseFloat(trip.totalOperatingCostTk) : null,
+      netProfitTk: trip.netProfitTk ? parseFloat(trip.netProfitTk) : null,
+      status: trip.status,
+      buyerName: trip.buyerName,
+      buyerPhone: trip.buyerPhone,
+      purchaseRatePerUnitTk: trip.purchaseRatePerUnitTk ? parseFloat(trip.purchaseRatePerUnitTk) : null,
+      govtRoyaltyRateTk: trip.govtRoyaltyRateTk ? parseFloat(trip.govtRoyaltyRateTk) : null,
+      localTollRateTk: trip.localTollRateTk ? parseFloat(trip.localTollRateTk) : null,
+      expenses: tripExpenses,
     };
 
-    // Compute totals for the single-trip meta
-    const totalSaleAmountTk = row.saleAmountTk ?? 0;
-    const totalPurchaseCostTk = row.purchaseCostTk ?? 0;
-    const totalGovtRoyaltyTk = row.govtRoyaltyTk ?? 0;
-    const totalLocalTollTk = row.localTollTk ?? 0;
-    const totalOperatingCostTk = row.totalOperatingCostTk ?? 0;
-    const totalNetProfitTk = row.netProfitTk ?? 0;
-
-    const dto: SingleSandTripReportDTO = {
-      meta: {
-        boatName: tripData.boatName,
-        boatPublicId: tripData.boatPublicId,
-        tripPublicId: tripData.publicId,
-        departureTime: tripData.departureTime,
-        arrivalTime: tripData.arrivalTime,
-        generatedAt: new Date().toISOString(),
-        totalTrips: 1,
-        totalSaleAmountTk,
-        totalPurchaseCostTk,
-        totalGovtRoyaltyTk,
-        totalLocalTollTk,
-        totalOperatingCostTk,
-        totalNetProfitTk,
-      },
-      row,
+    const meta = {
+      boatName: trip.boatName,
+      boatPublicId: trip.boatPublicId,
+      tripPublicId: trip.publicId,
+      departureTime: trip.departureTime.toISOString(),
+      arrivalTime: trip.arrivalTime ? trip.arrivalTime.toISOString() : null,
+      generatedAt: new Date().toISOString(),
+      totalTrips: 1,
+      totalSaleAmountTk: trip.saleAmountTk ? parseFloat(trip.saleAmountTk) : 0,
+      totalPurchaseCostTk: trip.purchaseCostTk ? parseFloat(trip.purchaseCostTk) : 0,
+      totalGovtRoyaltyTk: trip.govtRoyaltyTk ? parseFloat(trip.govtRoyaltyTk) : 0,
+      totalLocalTollTk: trip.localTollTk ? parseFloat(trip.localTollTk) : 0,
+      totalOperatingCostTk: trip.totalOperatingCostTk ? parseFloat(trip.totalOperatingCostTk) : 0,
+      totalNetProfitTk: trip.netProfitTk ? parseFloat(trip.netProfitTk) : 0,
     };
 
-    return { data: dto };
+    return { data: { meta, row } };
   }
 );

@@ -55,3 +55,5 @@ export async function recalculateTripFinancials(tripId: number) {
     })
     .where(eq(sandTrips.id, tripId));
 }
+
+

@@ -11,3 +11,5 @@ export function getPaginationMeta(total: number, page: number, limit: number): P
         hasPrev: page > 1,
     };
 }
+
+

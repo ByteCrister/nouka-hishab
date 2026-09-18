@@ -184,3 +184,5 @@ export type SandTrip = typeof sandTrips.$inferSelect;
 export type NewSandTrip = typeof sandTrips.$inferInsert;
 export type SandTripExpense = typeof sandTripExpenses.$inferSelect;
 export type NewSandTripExpense = typeof sandTripExpenses.$inferInsert;
+
+

@@ -177,3 +177,42 @@ export interface BoatTripsResponse {
   items: BoatTripListItem[];
   meta: PaginationMeta;
 }
+
+// ─── Boats Dashboard (merged from sand-dashboard) ──────────────────────────
+export interface BoatsDashboardRecentTrip {
+  id: number;
+  publicId: string;
+  boatName: string;
+  sector: string;
+  status: string;
+  amount: number;
+  date: Date | null;
+}
+
+export interface BoatsDashboardRecentMaintenance {
+  id: number;
+  boatName: string;
+  description: string;
+  cost: number;
+  date: Date | null;
+}
+
+export interface BoatsDashboardMetrics {
+  revenue: {
+    total: number;
+    currentMonth: number;
+  };
+  boats: {
+    total: number;
+    active: number;
+    maintenanceCostTotal: number;
+  };
+  trips: {
+    total: number;
+    completed: number;
+    ongoing: number;
+  };
+  recentTrips: BoatsDashboardRecentTrip[];
+  recentMaintenance: BoatsDashboardRecentMaintenance[];
+}
+

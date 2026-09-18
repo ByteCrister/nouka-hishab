@@ -17,3 +17,4 @@ const getRedisClient = (): Redis => {
 };
 
 export default getRedisClient;
+

@@ -74,3 +74,5 @@ export const generateSignature = (folder: string, originalFileName?: string) => 
     cloud_name: env.CLOUDINARY_CLOUD_NAME,
   };
 };
+
+

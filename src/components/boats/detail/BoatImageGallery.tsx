@@ -247,3 +247,5 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
     </div>
   );
 }
+
+

@@ -24,3 +24,5 @@ export const POST = withErrorHandler(async (req: Request) => {
 
   return { data: { exists: !!userRecord } };
 });
+
+

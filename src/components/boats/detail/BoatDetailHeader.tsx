@@ -150,3 +150,5 @@ export function BoatDetailHeader({ boat }: BoatDetailHeaderProps) {
     </div>
   );
 }
+
+

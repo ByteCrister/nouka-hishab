@@ -101,3 +101,5 @@ export function BoatDetailSkeleton() {
     </div>
   );
 }
+
+

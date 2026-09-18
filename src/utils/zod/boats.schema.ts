@@ -67,3 +67,5 @@ export const uploadBoatDocumentSchema = z.object({
 });
 
 export type UploadBoatDocumentSchema = z.infer<typeof uploadBoatDocumentSchema>;
+
+

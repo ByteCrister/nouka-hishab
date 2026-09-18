@@ -13,3 +13,5 @@ export const OTP_TYPES = {
 } as const;
 
 export type OtpType = typeof OTP_TYPES[keyof typeof OTP_TYPES];
+
+

@@ -43,3 +43,5 @@ export interface ProfileStore {
   updateImage: (payload: UpdateProfileImagePayload, avatarUrl: string | null) => Promise<void>;
   clearProfile: () => void;
 }
+
+

@@ -12,7 +12,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   // Each page folder has its own en.json / bn.json.
   // We merge all page messages into one flat messages object so
   // useTranslations() works across layouts and pages in the same tree.
-  const [home, howItWorks, stories, profile, sand, boats, boatsDetails, boatsNew, shared, sandTrips, sandTripsNew, sandTripsDetail] = await Promise.all([
+  const [home, howItWorks, stories, profile, sand, boats, boatsDetails, boatsNew, shared, trips, tripsSandNew, tripsSandDetail] = await Promise.all([
     import(`@/messages/home/${locale}.json`),
     import(`@/messages/how-it-works/${locale}.json`),
     import(`@/messages/stories/${locale}.json`),
@@ -22,9 +22,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`@/messages/boats/details/${locale}.json`),
     import(`@/messages/boats/new/${locale}.json`),
     import(`@/messages/shared/${locale}.json`),
-    import(`@/messages/sand/trips/${locale}.json`),
-    import(`@/messages/sand/trips/new/${locale}.json`),
-    import(`@/messages/sand/trips/detail/${locale}.json`),
+    import(`@/messages/trips/${locale}.json`),
+    import(`@/messages/trips/sand/new/${locale}.json`),
+    import(`@/messages/trips/sand/detail/${locale}.json`),
   ]);
 
   return {
@@ -41,9 +41,11 @@ export default getRequestConfig(async ({ requestLocale }) => {
         ...boatsNew.default
       },
       shared: shared.default,
-      sandTrips: sandTrips.default,
-      sandTripsNew: sandTripsNew.default,
-      sandTripsDetail: sandTripsDetail.default,
+      trips: trips.default,
+      sandTripsNew: tripsSandNew.default,
+      sandTripsDetail: tripsSandDetail.default,
     },
   };
 });
+
+

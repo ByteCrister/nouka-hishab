@@ -28,3 +28,5 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
     </SessionProvider>
   );
 }
+
+
