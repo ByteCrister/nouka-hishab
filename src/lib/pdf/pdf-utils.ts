@@ -75,24 +75,15 @@ function slugifyBoatName(name: string): string {
     .replace(/[^a-zA-Z0-9\u0980-\u09FF\-_]/g, '');
 }
 
-/**
- * Builds a report filename for a multi-trip PDF part.
- *
- * @example
- *   createReportFilename("MV Rahman", "2026-08-01", "2026-08-31", 1, 2)
- *   → "MV-Rahman-01-08-26-to-31-08-26-Part-1-of-2.pdf"
- */
 export function createReportFilename(
   boatName: string,
   fromDate: string,
-  toDate: string,
-  partNumber: number,
-  totalParts: number
+  toDate: string
 ): string {
   const slug = slugifyBoatName(boatName);
   const from = formatDate(fromDate).replace(/\//g, '-');
   const to = formatDate(toDate).replace(/\//g, '-');
-  return `${slug}-${from}-to-${to}-Part-${partNumber}-of-${totalParts}.pdf`;
+  return `${slug}-${from}-to-${to}-Report.pdf`;
 }
 
 /**
@@ -112,23 +103,6 @@ export function createSingleTripFilename(
   return `${slug}-Trip-${tripPublicId}-${date}.pdf`;
 }
 
-/**
- * Builds a ZIP filename for multi-PDF exports.
- *
- * @example
- *   createZipFilename("MV Rahman", "2026-08-01", "2026-08-31")
- *   → "MV-Rahman-01-08-26-to-31-08-26-Reports.zip"
- */
-export function createZipFilename(
-  boatName: string,
-  fromDate: string,
-  toDate: string
-): string {
-  const slug = slugifyBoatName(boatName);
-  const from = formatDate(fromDate).replace(/\//g, '-');
-  const to = formatDate(toDate).replace(/\//g, '-');
-  return `${slug}-${from}-to-${to}-Reports.zip`;
-}
 
 // ── Browser download trigger ──────────────────────────────────────────────────
 

@@ -88,6 +88,7 @@ export function SandTripDetailClient({ publicId }: Props) {
   const statusCls = STATUS_CLS[trip.status] ?? 'bg-muted text-muted-foreground';
   const statusLabel = t(`status.${trip.status}` as Parameters<typeof t>[0], { fallback: trip.status });
   const profit = Number(trip.netProfitTk ?? 0);
+  const expensesTotal = trip.expenses?.reduce((sum, exp) => sum + Number(exp.amountTk || 0), 0) || 0;
 
   const handleStatusChange = async (newStatus: string) => {
     await updateTrip({ publicId, payload: { status: newStatus as SandTripStatus } });
@@ -180,7 +181,7 @@ export function SandTripDetailClient({ publicId }: Props) {
 
       {/* Profit banner */}
       <FadeInUp delay={0.1}>
-        <div className={`rounded-2xl border p-5 flex items-center justify-between ${profit >= 0 ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-rose-500/5 border-rose-500/20'}`}>
+        <div className={`rounded-2xl border p-5 flex flex-wrap items-center justify-between gap-4 ${profit >= 0 ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-rose-500/5 border-rose-500/20'}`}>
           <div className="flex items-center gap-3">
             {profit >= 0 ? <TrendingUp className="w-5 h-5 text-emerald-500" /> : <TrendingDown className="w-5 h-5 text-rose-500" />}
             <div>
@@ -201,11 +202,15 @@ export function SandTripDetailClient({ publicId }: Props) {
         </div>
       </FadeInUp>
 
-      {/* Detail Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Main Layout Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left Column: Details, Expenses, Attachments */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Location & Timing */}
         <FadeInUp delay={0.15}>
-          <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
+          <div className="rounded-2xl border border-border/50 bg-card/60 p-6 h-full">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-4 h-4 text-primary" />
               <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.routeTiming')}</h3>
@@ -232,7 +237,7 @@ export function SandTripDetailClient({ publicId }: Props) {
 
         {/* Cargo */}
         <FadeInUp delay={0.2}>
-          <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
+          <div className="rounded-2xl border border-border/50 bg-card/60 p-6 h-full">
             <div className="flex items-center gap-2 mb-4">
               <Package className="w-4 h-4 text-primary" />
               <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.cargo')}</h3>
@@ -242,39 +247,20 @@ export function SandTripDetailClient({ publicId }: Props) {
             <InfoRow label={t('labels.buyerPhone')} value={<span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-muted-foreground" />{trip.buyerPhone}</span>} />
           </div>
         </FadeInUp>
+      </div>
 
-        {/* Financials */}
-        <FadeInUp delay={0.25}>
+      {/* Notes */}
+      {trip.notes && (
+        <FadeInUp delay={0.3}>
           <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Banknote className="w-4 h-4 text-primary" />
-              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.financials')}</h3>
+              <FileText className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.notes')}</h3>
             </div>
-            <InfoRow label={t('labels.saleAmount')} value={fmt(trip.saleAmountTk)} />
-            <InfoRow label={t('labels.purchaseCost')} value={fmt(trip.purchaseCostTk)} />
-            <InfoRow label={t('labels.purchaseRatePerUnit')} value={fmt(trip.purchaseRatePerUnitTk)} />
-            <InfoRow label={t('labels.govtRoyalty')} value={fmt(trip.govtRoyaltyTk)} />
-            <InfoRow label={t('labels.royaltyRatePerUnit')} value={fmt(trip.govtRoyaltyRateTk)} />
-            <InfoRow label={t('labels.localToll')} value={fmt(trip.localTollTk)} />
-            <InfoRow label={t('labels.tollRatePerUnit')} value={fmt(trip.localTollRateTk)} />
-            <InfoRow label={t('labels.operatingCosts')} value={fmt(trip.operatingCostTk)} />
-            <InfoRow label={t('labels.totalOperatingCosts')} value={fmt(trip.totalOperatingCostTk)} />
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{trip.notes}</p>
           </div>
         </FadeInUp>
-
-        {/* Notes */}
-        {trip.notes && (
-          <FadeInUp delay={0.3}>
-            <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.notes')}</h3>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{trip.notes}</p>
-            </div>
-          </FadeInUp>
-        )}
-      </div>
+      )}
 
       {/* Expenses */}
       <FadeInUp delay={0.35}>
@@ -285,8 +271,107 @@ export function SandTripDetailClient({ publicId }: Props) {
       <FadeInUp delay={0.4}>
         <SandTripAttachmentsSection tripPublicId={publicId} attachments={trip.attachments} />
       </FadeInUp>
+    </div>
 
+    {/* Right Column: Financials Sidebar */}
+    <div className="lg:col-span-1 space-y-6">
 
+        {/* Financials */}
+        <FadeInUp delay={0.25}>
+          <div className="rounded-2xl border border-border/50 bg-card/60 p-6 sticky top-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Banknote className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.financials')}</h3>
+            </div>
+            
+            <div className="space-y-4 font-mono text-sm mt-6">
+              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Cost Breakdown</div>
+
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="text-muted-foreground">{t('labels.purchaseCost')}</div>
+                  {trip.purchaseRatePerUnitTk && trip.cargoValue && (
+                    <div className="text-xs text-muted-foreground/70 mt-0.5">{trip.cargoValue} {trip.cargoUnit} @ {fmt(trip.purchaseRatePerUnitTk)}</div>
+                  )}
+                </div>
+                <div className="text-muted-foreground">{fmt(trip.purchaseCostTk)}</div>
+              </div>
+
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="text-muted-foreground">{t('labels.govtRoyalty')}</div>
+                  {trip.govtRoyaltyRateTk && trip.cargoValue && (
+                    <div className="text-xs text-muted-foreground/70 mt-0.5">{trip.cargoValue} {trip.cargoUnit} @ {fmt(trip.govtRoyaltyRateTk)}</div>
+                  )}
+                </div>
+                <div className="text-muted-foreground">{fmt(trip.govtRoyaltyTk)}</div>
+              </div>
+
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="text-muted-foreground">{t('labels.localToll')}</div>
+                  {trip.localTollRateTk && trip.cargoValue && (
+                    <div className="text-xs text-muted-foreground/70 mt-0.5">{trip.cargoValue} {trip.cargoUnit} @ {fmt(trip.localTollRateTk)}</div>
+                  )}
+                </div>
+                <div className="text-muted-foreground">{fmt(trip.localTollTk)}</div>
+              </div>
+
+              <div className="flex justify-between items-start">
+                <div>
+                  <div className="text-muted-foreground">{t('labels.operatingCosts')}</div>
+                  <div className="text-xs text-muted-foreground/70 mt-0.5">Upfront</div>
+                </div>
+                <div className="text-muted-foreground">{fmt(trip.operatingCostTk)}</div>
+              </div>
+
+              {expensesTotal > 0 && (
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-muted-foreground">{t('expenses.title', { fallback: 'Logged Expenses' })}</div>
+                    <div className="text-xs text-muted-foreground/70 mt-0.5">From Expenses list</div>
+                  </div>
+                  <div className="text-muted-foreground">{fmt(expensesTotal)}</div>
+                </div>
+              )}
+
+              {/* Dashed Separator */}
+              <div className="my-2 pt-2 border-t-2 border-dashed border-border/60"></div>
+
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-foreground">{t('labels.totalOperatingCosts')}</span>
+                <span className="font-medium text-foreground">{fmt(trip.totalOperatingCostTk)}</span>
+              </div>
+
+              {/* Final Calculation Block */}
+              <div className="mt-8 pt-4 border-t border-border/40 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-foreground">{t('labels.saleAmount')} (Revenue)</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">+{fmt(trip.saleAmountTk)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-foreground">Total Costs</span>
+                  <span className="font-medium text-rose-500">-{fmt(trip.totalOperatingCostTk)}</span>
+                </div>
+
+                {/* Double Line Separator */}
+                <div className="pt-3">
+                  <div className="border-t border-solid border-border/80"></div>
+                  <div className="mt-0.5 mb-3 border-t border-solid border-border/80"></div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-base text-foreground uppercase tracking-wide">{t('profit.netProfit')}</span>
+                    <span className={`font-bold text-xl ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
+                      {fmt(profit)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeInUp>
+      </div>
+      </div>
     </div>
   );
 }

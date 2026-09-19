@@ -2,6 +2,7 @@ import type { PaginationMeta, SortOrder } from '@/types/api.types';
 import type { SandTripStatus, SandCargoUnit, SandTripExpenseCategory } from '@/constants/db/sand.const';
 
 export interface BoatMeta {
+  id: number;
   publicId: string;
   name: string;
   sector: string;

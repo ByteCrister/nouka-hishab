@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useDebounce } from 'use-debounce';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useBoatFiltersStore } from '@/store/useBoatFiltersStore';
 import { useTranslations } from 'next-intl';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
@@ -23,7 +23,7 @@ export function BoatsToolbar() {
   const { listFilters: filters, setSearch, setStatus, setSector } = useBoatFiltersStore();
   const [localSearch, setLocalSearch] = useState(filters.search || '');
 
-  const [debouncedSearch] = useDebounce(localSearch, 400);
+  const debouncedSearch = useDebounce(localSearch, 400);
 
   // Debounce search input
   useEffect(() => {

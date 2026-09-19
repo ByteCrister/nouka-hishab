@@ -1,0 +1,57 @@
+{
+  "title": "Maintenance Log",
+  "description": "Track and manage boat maintenance records.",
+  "kpis": {
+    "totalRecords": "Total Records",
+    "totalCost": "Total Cost",
+    "monthCost": "Cost (This Month)"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search descriptions or vendors...",
+    "allBoats": "All Boats",
+    "exportPdf": "Export PDF",
+    "addMaintenance": "Add Maintenance"
+  },
+  "table": {
+    "date": "Date",
+    "boatName": "Boat Name",
+    "description": "Description",
+    "vendor": "Vendor",
+    "cost": "Cost (Tk)",
+    "loading": "Loading maintenance records...",
+    "noData": "No maintenance records found."
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "maintenance": "Maintenance"
+  },
+  "form": {
+    "addTitle": "Add Maintenance Record",
+    "editTitle": "Edit Maintenance Record",
+    "sector": "Sector",
+    "boat": "Boat",
+    "selectBoat": "Select a boat",
+    "date": "Date",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Engine repair, oil change",
+    "costTk": "Cost (Tk)",
+    "vendorName": "Vendor Name",
+    "vendorPlaceholder": "e.g. Rahim Engineering",
+    "notes": "Additional Notes",
+    "notesPlaceholder": "Any extra details..."
+  },
+  "actions": {
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "deleteConfirmTitle": "Delete Maintenance Record",
+  "deleteConfirmDescription": "Are you sure you want to delete this maintenance record? This action cannot be undone.",
+  "messages": {
+    "createSuccess": "Maintenance record created successfully",
+    "createError": "Failed to create maintenance record",
+    "updateSuccess": "Maintenance record updated successfully",
+    "updateError": "Failed to update maintenance record",
+    "deleteSuccess": "Maintenance record deleted successfully",
+    "deleteError": "Failed to delete maintenance record"
+  }
+}

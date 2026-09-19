@@ -26,31 +26,29 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import { useMediaUpload } from '@/hooks/media/use-media-upload';
+
 interface Props {
   tripPublicId: string;
   attachments: SandTripAttachmentItem[];
 }
 
-type AttachForm = { fileId: string; description: string };
-const emptyForm: AttachForm = { fileId: '', description: '' };
-
 export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props) {
   const t = useTranslations('sandTripsDetail');
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState<AttachForm>(emptyForm);
+  const [file, setFile] = useState<File | null>(null);
+  const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
+  const { uploadMedia, isUploading, progress } = useMediaUpload();
+
   const { mutateAsync: createAttachment, isPending: isCreating } = useCreateSandTripAttachment(() => {
     setShowAdd(false);
-    setForm(emptyForm);
+    setFile(null);
+    setDescription('');
   });
   const { mutateAsync: deleteAttachment, isPending: isDeleting } = useDeleteSandTripAttachment();
-
-  const set = (k: keyof AttachForm, v: string) => {
-    setForm(p => ({ ...p, [k]: v }));
-    setErrors(p => { const n = { ...p }; delete n[k]; return n; });
-  };
 
   const renderError = (field: string) => errors[field] ? (
     <span className="flex items-center text-xs text-destructive mt-1 font-medium">
@@ -60,10 +58,20 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
 
   const handleSubmit = async () => {
     setErrors({});
+    if (!file) {
+      setErrors({ file: t('attachments.fileRequired', { fallback: 'File is required' }) });
+      return;
+    }
+
     try {
+      // 1. Upload to cloudinary + create DB record
+      const uploadResults = await uploadMedia([file]);
+      const fileId = uploadResults[0].fileId;
+
+      // 2. Attach to trip
       const payload = createSandTripAttachmentSchema.parse({
-        fileId: parseInt(form.fileId, 10),
-        description: form.description || null,
+        fileId,
+        description: description || null,
       });
       await createAttachment({ tripPublicId, payload });
     } catch (err) {
@@ -71,6 +79,8 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
         const fe: Record<string, string> = {};
         err.issues.forEach(i => { if (i.path[0]) fe[i.path[0] as string] = i.message; });
         setErrors(fe);
+      } else {
+        setErrors({ file: t('attachments.uploadFailed', { fallback: 'Upload failed' }) });
       }
     }
   };
@@ -81,9 +91,17 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
     setDeleteConfirm(null);
   };
 
-  const cancelForm = () => { setShowAdd(false); setForm(emptyForm); setErrors({}); };
+  const cancelForm = () => { 
+    setShowAdd(false); 
+    setFile(null);
+    setDescription('');
+    setErrors({}); 
+  };
 
   const isImage = (url: string) => /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url);
+  const isPending = isUploading || isCreating;
+  
+  // Try to find the progress for the current file if it has a predictable ID in the hook (it uses ulid internally, so we just show a generic loading state if isUploading is true, but hook exposes a progress dictionary by ID). We'll just rely on isUploading.
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card/60 p-6">
@@ -105,39 +123,42 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
       {/* Add Form */}
       {showAdd && (
         <div className="mb-5 p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
-          <p className="text-sm font-medium">{t('attachments.attachFileById')}</p>
-          <p className="text-xs text-muted-foreground">
-            {t('attachments.attachFileByIdDesc')}
-          </p>
+          <p className="text-sm font-medium">{t('attachments.uploadNewFile', { fallback: 'Upload a new file' })}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs">{t('attachments.fileId')} *</Label>
+              <Label className="text-xs">{t('attachments.file', { fallback: 'File' })} *</Label>
               <Input
-                type="number"
-                value={form.fileId}
-                onChange={(e) => set('fileId', e.target.value)}
-                placeholder={t('attachments.fileIdPlaceholder')}
-                className={`h-9 rounded-lg text-sm bg-background/50 ${errors.fileId ? 'border-destructive' : ''}`}
+                type="file"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className={`text-sm bg-background/50 ${errors.file ? 'border-destructive' : ''}`}
+                disabled={isPending}
               />
-              {renderError('fileId')}
+              {renderError('file')}
             </div>
             <div className="space-y-1">
               <Label className="text-xs">{t('attachments.description')}</Label>
               <Input
-                value={form.description}
-                onChange={(e) => set('description', e.target.value)}
+                value={description}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  setErrors(p => { const n = { ...p }; delete n.description; return n; });
+                }}
                 placeholder={t('attachments.descriptionPlaceholder')}
-                className="h-9 rounded-lg text-sm bg-background/50"
+                className="h-10 rounded-lg text-sm bg-background/50"
+                disabled={isPending}
               />
             </div>
           </div>
           <div className="flex gap-2 justify-end pt-1">
-            <Button variant="ghost" size="sm" onClick={cancelForm} className="h-8 rounded-lg">
+            <Button variant="ghost" size="sm" onClick={cancelForm} disabled={isPending} className="h-8 rounded-lg">
               <X className="w-3.5 h-3.5 mr-1" />{t('attachments.cancel')}
             </Button>
-            <Button size="sm" onClick={handleSubmit} disabled={isCreating} className="h-8 rounded-lg">
-              {isCreating ? (
-                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <Button size="sm" onClick={handleSubmit} disabled={isPending || !file} className="h-8 rounded-lg">
+              {isPending ? (
+                <div className="flex items-center">
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  {isUploading ? t('attachments.uploading', { fallback: 'Uploading...' }) : t('attachments.saving', { fallback: 'Saving...' })}
+                </div>
               ) : (
                 <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />{t('attachments.attach')}</>
               )}

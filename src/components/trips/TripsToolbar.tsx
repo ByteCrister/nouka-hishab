@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTripsFiltersStore } from '@/store/useTripsFiltersStore';
 import { useBoatsMeta } from '@/hooks/queries/useBoatsMetaQueries';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,6 +16,13 @@ export function TripsToolbar() {
   const t = useTranslations('trips');
   const { filters, setFilter, resetFilters } = useTripsFiltersStore();
   const { data: boats } = useBoatsMeta(filters.sector === 'all' ? undefined : filters.sector);
+
+  const [localSearch, setLocalSearch] = useState(filters.search || '');
+  const debouncedSearch = useDebounce(localSearch, 500);
+
+  useEffect(() => {
+    setFilter('search', debouncedSearch);
+  }, [debouncedSearch, setFilter]);
 
   const STATUS_OPTIONS: { value: SandTripStatus | 'all'; labelKey: string }[] = [
     { value: 'all', labelKey: 'status.all' },
@@ -31,8 +40,8 @@ export function TripsToolbar() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder={t('toolbar.searchPlaceholder')}
-          value={filters.search}
-          onChange={(e) => setFilter('search', e.target.value)}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
           className="pl-9 h-10 rounded-xl bg-background/50"
         />
       </div>

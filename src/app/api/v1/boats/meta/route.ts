@@ -39,6 +39,7 @@ export const GET = withErrorHandler<BoatMeta[], [NextRequest]>(
 
     const metaRecords = await db
       .select({
+        id: boats.id,
         publicId: boats.publicId,
         name: boats.name,
         sector: boats.sector,

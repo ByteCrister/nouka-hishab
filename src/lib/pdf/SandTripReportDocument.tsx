@@ -17,6 +17,7 @@ import {
 import type { SandTripReportMeta, SandTripReportRow } from '@/types/sand-report.types';
 import type { PdfStrings } from './pdf-i18n';
 import { formatCurrency, formatDate } from './pdf-utils';
+import { chunk } from './chunk';
 
 import { Font } from '@react-pdf/renderer';
 
@@ -222,9 +223,8 @@ const styles = StyleSheet.create({
 interface Props {
   meta: SandTripReportMeta;
   rows: SandTripReportRow[];
-  partNumber: number;
-  totalParts: number;
   strings: PdfStrings;
+  rowsPerPage?: number;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -246,18 +246,11 @@ function cargoLabel(row: SandTripReportRow): string {
 export function SandTripReportDocument({
   meta,
   rows,
-  partNumber,
-  totalParts,
   strings,
+  rowsPerPage = 20,
 }: Props) {
-  const chunkTotals = {
-    sale: rows.reduce((s, r) => s + (r.saleAmountTk ?? 0), 0),
-    purchase: rows.reduce((s, r) => s + (r.purchaseCostTk ?? 0), 0),
-    royalty: rows.reduce((s, r) => s + (r.govtRoyaltyTk ?? 0), 0),
-    toll: rows.reduce((s, r) => s + (r.localTollTk ?? 0), 0),
-    operating: rows.reduce((s, r) => s + (r.totalOperatingCostTk ?? 0), 0),
-    profit: rows.reduce((s, r) => s + (r.netProfitTk ?? 0), 0),
-  };
+  const chunks = chunk(rows, rowsPerPage);
+  const totalParts = chunks.length;
 
   const generatedDate = new Date(meta.generatedAt);
   const generatedStr = `${generatedDate.getUTCDate().toString().padStart(2, '0')}/${
@@ -265,8 +258,20 @@ export function SandTripReportDocument({
 
   return (
     <Document>
-      <Page size="A4" orientation="landscape" style={styles.page}>
-        {/* ── Header ── */}
+      {chunks.map((chunkRows, idx) => {
+        const partNumber = idx + 1;
+        const chunkTotals = {
+          sale: chunkRows.reduce((s, r) => s + (r.saleAmountTk ?? 0), 0),
+          purchase: chunkRows.reduce((s, r) => s + (r.purchaseCostTk ?? 0), 0),
+          royalty: chunkRows.reduce((s, r) => s + (r.govtRoyaltyTk ?? 0), 0),
+          toll: chunkRows.reduce((s, r) => s + (r.localTollTk ?? 0), 0),
+          operating: chunkRows.reduce((s, r) => s + (r.totalOperatingCostTk ?? 0), 0),
+          profit: chunkRows.reduce((s, r) => s + (r.netProfitTk ?? 0), 0),
+        };
+
+        return (
+          <Page key={partNumber} size="A4" orientation="landscape" style={styles.page}>
+            {/* ── Header ── */}
         <View style={styles.header} fixed>
           <View style={styles.headerLeft}>
             <Text style={styles.appTitle}>{strings.header.title}</Text>
@@ -296,7 +301,7 @@ export function SandTripReportDocument({
           </View>
           <View style={styles.metaItem}>
             <Text style={styles.metaLabel}>{strings.summary.totalTrips} ({strings.meta.part} {partNumber})</Text>
-            <Text style={styles.metaValue}>{rows.length}</Text>
+            <Text style={styles.metaValue}>{chunkRows.length}</Text>
           </View>
         </View>
 
@@ -351,7 +356,7 @@ export function SandTripReportDocument({
           </View>
 
           {/* Data rows */}
-          {rows.map((row, idx) => {
+          {chunkRows.map((row, idx) => {
             const isAlt = idx % 2 === 1;
             const profit = row.netProfitTk ?? 0;
             return (
@@ -441,6 +446,8 @@ export function SandTripReportDocument({
           />
         </View>
       </Page>
+        );
+      })}
     </Document>
   );
 }

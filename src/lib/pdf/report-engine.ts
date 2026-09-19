@@ -12,7 +12,6 @@
 
 import React from 'react';
 import { pdf, DocumentProps } from '@react-pdf/renderer';
-import JSZip from 'jszip';
 
 import type { SandTripReportDTO, SingleSandTripReportDTO } from '@/types/sand-report.types';
 import type { AppLocale } from '@/constants/common.const';
@@ -21,11 +20,12 @@ import { chunk } from './chunk';
 import {
   createReportFilename,
   createSingleTripFilename,
-  createZipFilename,
   downloadBlob,
 } from './pdf-utils';
 import { SandTripReportDocument } from './SandTripReportDocument';
 import { SingleSandTripReportDocument } from './SingleSandTripReportDocument';
+import { MaintenanceReportDocument } from './MaintenanceReportDocument';
+import type { MaintenanceListItem, MaintenanceKpis } from '@/types/maintenance.types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 // Max rows that comfortably fit on a landscape A4 page before overflow.
@@ -41,41 +41,26 @@ export const DEFAULT_ROWS_PER_PDF = 20;
  *
  * @returns { blobs, filenames } — parallel arrays, same length.
  */
-export async function generateSandTripPdfs(
+export async function generateSandTripPdf(
   dto: SandTripReportDTO,
   locale: AppLocale = 'en',
-  rowsPerPdf: number = DEFAULT_ROWS_PER_PDF
-): Promise<{ blobs: Blob[]; filenames: string[] }> {
+  rowsPerPage: number = DEFAULT_ROWS_PER_PDF
+): Promise<{ blob: Blob; filename: string }> {
   const strings = PDF_STRINGS[locale];
-  const chunks = chunk(dto.rows, rowsPerPdf);
-  const totalParts = chunks.length;
-
-  const results = await Promise.all(
-    chunks.map(async (rowChunk, idx) => {
-      const partNumber = idx + 1;
-      const element = React.createElement(SandTripReportDocument, {
-        meta: dto.meta,
-        rows: rowChunk,
-        partNumber,
-        totalParts,
-        strings,
-      }) as React.ReactElement<DocumentProps>;
-      const blob = await pdf(element).toBlob();
-      const filename = createReportFilename(
-        dto.meta.boatName,
-        dto.meta.fromDate,
-        dto.meta.toDate,
-        partNumber,
-        totalParts
-      );
-      return { blob, filename };
-    })
+  const element = React.createElement(SandTripReportDocument, {
+    meta: dto.meta,
+    rows: dto.rows,
+    strings,
+    rowsPerPage,
+  }) as React.ReactElement<DocumentProps>;
+  
+  const blob = await pdf(element).toBlob();
+  const filename = createReportFilename(
+    dto.meta.boatName,
+    dto.meta.fromDate,
+    dto.meta.toDate
   );
-
-  return {
-    blobs: results.map((r) => r.blob),
-    filenames: results.map((r) => r.filename),
-  };
+  return { blob, filename };
 }
 
 // ─── Single-trip generation ───────────────────────────────────────────────────
@@ -107,25 +92,7 @@ export async function downloadSinglePdf(blob: Blob, filename: string): Promise<v
   downloadBlob(blob, filename);
 }
 
-/**
- * Packages multiple PDF blobs into a ZIP and triggers download.
- *
- * @param blobs      - Array of PDF blobs (same order as filenames)
- * @param filenames  - Parallel array of per-file names
- * @param zipName    - Name for the resulting .zip file
- */
-export async function downloadAsZip(
-  blobs: Blob[],
-  filenames: string[],
-  zipName: string
-): Promise<void> {
-  const zip = new JSZip();
-  blobs.forEach((blob, idx) => {
-    zip.file(filenames[idx], blob);
-  });
-  const zipBlob = await zip.generateAsync({ type: 'blob' });
-  downloadBlob(zipBlob, zipName);
-}
+
 
 // ─── High-level convenience: generate + download in one call ──────────────────
 
@@ -136,20 +103,10 @@ export async function downloadAsZip(
 export async function exportSandTripReport(
   dto: SandTripReportDTO,
   locale: AppLocale = 'en',
-  rowsPerPdf: number = DEFAULT_ROWS_PER_PDF
+  rowsPerPage: number = DEFAULT_ROWS_PER_PDF
 ): Promise<void> {
-  const { blobs, filenames } = await generateSandTripPdfs(dto, locale, rowsPerPdf);
-
-  if (blobs.length === 1) {
-    await downloadSinglePdf(blobs[0], filenames[0]);
-  } else {
-    const zipName = createZipFilename(
-      dto.meta.boatName,
-      dto.meta.fromDate,
-      dto.meta.toDate
-    );
-    await downloadAsZip(blobs, filenames, zipName);
-  }
+  const { blob, filename } = await generateSandTripPdf(dto, locale, rowsPerPage);
+  await downloadSinglePdf(blob, filename);
 }
 
 /**
@@ -161,6 +118,24 @@ export async function exportSingleSandTripReport(
   locale: AppLocale = 'en'
 ): Promise<void> {
   const { blob, filename } = await generateSingleTripPdf(dto, locale);
+  await downloadSinglePdf(blob, filename);
+}
+
+export async function generateMaintenancePdf(
+  items: MaintenanceListItem[],
+  kpis?: MaintenanceKpis
+): Promise<{ blob: Blob; filename: string }> {
+  const element = React.createElement(MaintenanceReportDocument, { items, kpis }) as React.ReactElement<DocumentProps>;
+  const blob = await pdf(element).toBlob();
+  const filename = `maintenance-report-${new Date().toISOString().split('T')[0]}.pdf`;
+  return { blob, filename };
+}
+
+export async function exportMaintenanceReport(
+  items: MaintenanceListItem[],
+  kpis?: MaintenanceKpis
+): Promise<void> {
+  const { blob, filename } = await generateMaintenancePdf(items, kpis);
   await downloadSinglePdf(blob, filename);
 }
 

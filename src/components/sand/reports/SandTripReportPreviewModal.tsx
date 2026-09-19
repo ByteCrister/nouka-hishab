@@ -25,7 +25,7 @@ import {
   exportSingleSandTripReport,
   DEFAULT_ROWS_PER_PDF,
 } from '@/lib/pdf/report-engine';
-import { chunk } from '@/lib/pdf/chunk';
+
 
 // ── Lazy-load heavy @react-pdf/renderer components ───────────────────────────
 // PDFViewer is only needed on desktop — we SSR-skip it to avoid bundle bloat.
@@ -73,15 +73,12 @@ export function SandTripReportPreviewModal(props: Props) {
   const locale = useLocale() as AppLocale;
   const strings = PDF_STRINGS[locale];
 
-  // Part navigation (list mode only)
-  const [currentPart, setCurrentPart] = useState(0); // 0-indexed
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const chunks =
+  const totalPages =
     mode === 'list'
-      ? chunk((dto as SandTripReportDTO).rows, DEFAULT_ROWS_PER_PDF)
-      : null;
-  const totalParts = chunks?.length ?? 1;
+      ? Math.ceil((dto as SandTripReportDTO).rows.length / DEFAULT_ROWS_PER_PDF)
+      : 1;
 
   const handleDownload = useCallback(async () => {
     setIsDownloading(true);
@@ -114,40 +111,11 @@ export function SandTripReportPreviewModal(props: Props) {
             <FileText className="w-4 h-4 text-primary" />
             <DialogTitle className="text-sm font-semibold">
               {strings.header.reportTitle}
-              {totalParts > 1 && (
-                <span className="ml-2 text-muted-foreground font-normal">
-                  — {strings.meta.part} {currentPart + 1} {strings.meta.of} {totalParts}
-                </span>
-              )}
+
             </DialogTitle>
           </div>
           <div className="flex items-center gap-2">
-            {/* Part navigation */}
-            {totalParts > 1 && (
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  disabled={currentPart === 0}
-                  onClick={() => setCurrentPart((p) => Math.max(0, p - 1))}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-xs text-muted-foreground px-1">
-                  {currentPart + 1} / {totalParts}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  disabled={currentPart === totalParts - 1}
-                  onClick={() => setCurrentPart((p) => Math.min(totalParts - 1, p + 1))}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
+
             <Button
               size="sm"
               onClick={handleDownload}
@@ -159,10 +127,7 @@ export function SandTripReportPreviewModal(props: Props) {
               ) : (
                 <Download className="w-3 h-3" />
               )}
-              {totalParts > 1 ? `Download ZIP (${totalParts} PDFs)` : 'Download PDF'}
-            </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
-              <X className="w-4 h-4" />
+              {totalPages > 1 ? `Download PDF (${totalPages} pages)` : 'Download PDF'}
             </Button>
           </div>
         </DialogHeader>
@@ -171,13 +136,11 @@ export function SandTripReportPreviewModal(props: Props) {
         <div className="flex-1 min-h-0 relative">
           {/* Desktop: PDFViewer */}
           <div className="hidden sm:flex w-full h-full">
-            {mode === 'list' && chunks && (
+            {mode === 'list' && (
               <PDFViewer width="100%" height="100%" showToolbar={false}>
                 <SandTripReportDocument
                   meta={(dto as SandTripReportDTO).meta}
-                  rows={chunks[currentPart] ?? []}
-                  partNumber={currentPart + 1}
-                  totalParts={totalParts}
+                  rows={(dto as SandTripReportDTO).rows}
                   strings={strings}
                 />
               </PDFViewer>
@@ -202,7 +165,7 @@ export function SandTripReportPreviewModal(props: Props) {
               {mode === 'list' && (
                 <p className="text-sm text-muted-foreground mt-1">
                   {(dto as SandTripReportDTO).meta.totalTrips} trips ·{' '}
-                  {totalParts} PDF{totalParts > 1 ? 's' : ''}
+                  {totalPages} page{totalPages > 1 ? 's' : ''}
                 </p>
               )}
               <p className="text-xs text-muted-foreground mt-3">
@@ -222,7 +185,7 @@ export function SandTripReportPreviewModal(props: Props) {
               ) : (
                 <Download className="w-4 h-4" />
               )}
-              {totalParts > 1 ? `Download ZIP (${totalParts} PDFs)` : 'Download PDF'}
+              {totalPages > 1 ? `Download PDF (${totalPages} pages)` : 'Download PDF'}
             </Button>
           </div>
         </div>

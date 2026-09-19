@@ -24,6 +24,13 @@
     "filter": "Filter",
     "clearFilters": "Clear Filters"
   },
+  "actions": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "save": "Save",
+    "saving": "Saving..."
+  },
   "sectors": {
     "all": "All Sectors",
     "sand": "Sand",

@@ -5,6 +5,7 @@ import { useTrips } from '@/hooks/queries/useTripsQueries';
 import { TripsKpiSection } from './TripsKpiSection';
 import { TripsToolbar } from './TripsToolbar';
 import { SandTripCard } from './sand/SandTripCard';
+import { SandTripCardSkeleton } from './sand/SandTripCardSkeleton';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Plus, Sailboat } from 'lucide-react';
 import Link from 'next/link';
@@ -15,7 +16,7 @@ import { SandTripReportExportButton } from '@/components/sand/reports/SandTripRe
 export function TripsPageClient() {
   const t = useTranslations('trips');
   const { filters, setPage } = useTripsFiltersStore();
-  const { data, isLoading } = useTrips(filters);
+  const { data, isLoading, isFetching } = useTrips(filters);
   const meta = data?.meta;
   const items = data?.items ?? [];
 
@@ -49,10 +50,12 @@ export function TripsPageClient() {
       <div className="rounded-2xl border border-border/50 bg-card/30 p-6 backdrop-blur-xl">
         <TripsToolbar />
 
-        {isLoading && !items.length ? (
+        {isLoading || isFetching ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="rounded-xl border bg-card h-[200px] animate-pulse" />
+              <div key={i} className="animate-pulse">
+                <SandTripCardSkeleton />
+              </div>
             ))}
           </div>
         ) : items.length === 0 ? (
