@@ -198,7 +198,7 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
 
   const field = (label: string, key: keyof FormData, type = 'text', placeholder = '', required = true) => (
     <div className="space-y-2 group">
-      <Label className="text-sm font-medium">{label}{required && <span className="text-destructive ml-1">*</span>}</Label>
+      <Label className="text-sm font-medium text-foreground/80 group-focus-within:text-primary transition-colors">{label}{required && <span className="text-destructive ml-1">*</span>}</Label>
       <Input
         type={type}
         value={form[key]}
@@ -206,7 +206,7 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
         placeholder={placeholder}
         disabled={isPending || (!form.boatPublicId && key !== 'boatPublicId')}
         step={type === 'number' ? 'any' : undefined}
-        className={`h-11 bg-background/50 rounded-xl placeholder:text-muted-foreground/50 ${errors[key] && form[key] !== '' ? 'border-destructive focus-visible:ring-destructive/20' : ''}`}
+        className={`h-11 bg-background/50 backdrop-blur-sm rounded-xl border-border/50 hover:border-border transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50 placeholder:text-muted-foreground/40 ${errors[key] && form[key] !== '' ? 'border-destructive focus-visible:ring-destructive/20' : ''}`}
       />
       {renderError(key)}
     </div>
@@ -229,45 +229,49 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
 
   return (
     <FadeInUp>
-      <div className="relative overflow-hidden bg-card/70 backdrop-blur-xl p-8 rounded-2xl border border-border/50 shadow-lg max-w-5xl mx-auto mt-6">
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-river-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden bg-card/60 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-border/40 shadow-xl max-w-5xl mx-auto mt-6">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-72 h-72 bg-river-500/10 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-72 h-72 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
+        
         <div className="relative z-10">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-river-50 dark:bg-river-500/10 text-river-600 dark:text-river-400 rounded-xl">
-                <Ship className="w-5 h-5" />
+          <div className="flex items-center justify-between mb-10 pb-6 border-b border-border/40">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-river-500/10 to-primary/10 text-river-600 dark:text-river-400 rounded-2xl shadow-sm border border-river-500/10">
+                <Ship className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+                <h2 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 tracking-tight">
                   {isEdit ? t('meta.editTitle') : t('header.title')}
                 </h2>
-                <p className="text-sm text-muted-foreground">{t('header.subtitle')}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t('header.subtitle')}</p>
               </div>
             </div>
-            <Button variant="ghost" onClick={() => router.back()} className="h-9 px-4 hidden sm:flex">
+            <Button variant="outline" onClick={() => router.back()} className="h-10 px-5 hidden sm:flex rounded-xl bg-background/50 hover:bg-background/80 border-border/50 shadow-sm transition-all">
               <ArrowLeft className="w-4 h-4 mr-2" />{t('back')}
             </Button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-10">
             {/* Section: Trip Info */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Ship className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.tripInfo')}</h3>
+            <section className="space-y-5">
+              <div className="flex items-center gap-3 pb-2 border-b border-border/40">
+                <div className="p-1.5 bg-primary/10 rounded-lg">
+                  <Ship className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm uppercase tracking-wider text-foreground/90">{t('sections.tripInfo')}</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {/* Boat */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">{t('fields.boat')} <span className="text-destructive">*</span></Label>
+                <div className="space-y-2 group">
+                  <Label className="text-sm font-medium text-foreground/80 group-focus-within:text-primary transition-colors">{t('fields.boat')} <span className="text-destructive">*</span></Label>
                   <Select value={form.boatPublicId} onValueChange={(v) => set('boatPublicId', v)} disabled={isPending || boatsLoading}>
-                    <SelectTrigger className={`h-11 bg-background/50 rounded-xl ${errors.boatPublicId && form.boatPublicId !== '' ? 'border-destructive' : ''}`}>
+                    <SelectTrigger className={`h-11 bg-background/50 backdrop-blur-sm rounded-xl border-border/50 hover:border-border transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary/50 ${errors.boatPublicId && form.boatPublicId !== '' ? 'border-destructive' : ''}`}>
                       <SelectValue placeholder={t('fields.boatPlaceholder')} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl border-border/50 shadow-xl">
                       {boats?.map((b) => (
-                        <SelectItem key={b.publicId} value={b.publicId}>
+                        <SelectItem key={b.publicId} value={b.publicId} className="rounded-lg">
                           {b.name}{b.capacityValue ? ` (${b.capacityValue} ${b.capacityUnit})` : ''}
                         </SelectItem>
                       ))}
@@ -277,18 +281,18 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
                 </div>
 
                 {/* Status */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">{t('fields.status')}</Label>
+                <div className="space-y-2 group">
+                  <Label className="text-sm font-medium text-foreground/80 group-focus-within:text-primary transition-colors">{t('fields.status')}</Label>
                   <Select value={form.status} onValueChange={(v) => set('status', v)} disabled={isPending || !form.boatPublicId}>
-                    <SelectTrigger className="h-11 bg-background/50 rounded-xl">
+                    <SelectTrigger className="h-11 bg-background/50 backdrop-blur-sm rounded-xl border-border/50 hover:border-border transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary/50">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={SAND_TRIP_STATUSES.SCHEDULED}>{t('status.scheduled')}</SelectItem>
-                      <SelectItem value={SAND_TRIP_STATUSES.LOADING}>{t('status.loading')}</SelectItem>
-                      <SelectItem value={SAND_TRIP_STATUSES.IN_TRANSIT}>{t('status.in_transit')}</SelectItem>
-                      <SelectItem value={SAND_TRIP_STATUSES.COMPLETED}>{t('status.completed')}</SelectItem>
-                      <SelectItem value={SAND_TRIP_STATUSES.CANCELLED}>{t('status.cancelled')}</SelectItem>
+                    <SelectContent className="rounded-xl border-border/50 shadow-xl">
+                      <SelectItem value={SAND_TRIP_STATUSES.SCHEDULED} className="rounded-lg">{t('status.scheduled')}</SelectItem>
+                      <SelectItem value={SAND_TRIP_STATUSES.LOADING} className="rounded-lg">{t('status.loading')}</SelectItem>
+                      <SelectItem value={SAND_TRIP_STATUSES.IN_TRANSIT} className="rounded-lg">{t('status.in_transit')}</SelectItem>
+                      <SelectItem value={SAND_TRIP_STATUSES.COMPLETED} className="rounded-lg">{t('status.completed')}</SelectItem>
+                      <SelectItem value={SAND_TRIP_STATUSES.CANCELLED} className="rounded-lg">{t('status.cancelled')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -299,10 +303,12 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
             </section>
 
             {/* Section: Locations */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <MapPin className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.locations')}</h3>
+            <section className="space-y-5">
+              <div className="flex items-center gap-3 pb-2 border-b border-border/40">
+                <div className="p-1.5 bg-primary/10 rounded-lg">
+                  <MapPin className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm uppercase tracking-wider text-foreground/90">{t('sections.locations')}</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {field(t('fields.source'), 'source', 'text', 'e.g. Bholaganj, Companiganj, Sylhet')}
@@ -311,21 +317,23 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
             </section>
 
             {/* Section: Cargo */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Package className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.cargo')}</h3>
+            <section className="space-y-5">
+              <div className="flex items-center gap-3 pb-2 border-b border-border/40">
+                <div className="p-1.5 bg-primary/10 rounded-lg">
+                  <Package className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm uppercase tracking-wider text-foreground/90">{t('sections.cargo')}</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {field(t('fields.cargoValue'), 'cargoValue', 'number', 'e.g. 5000')}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">{t('fields.cargoUnit')} <span className="text-destructive">*</span></Label>
+                <div className="space-y-2 group">
+                  <Label className="text-sm font-medium text-foreground/80 group-focus-within:text-primary transition-colors">{t('fields.cargoUnit')} <span className="text-destructive">*</span></Label>
                   <Select value={form.cargoUnit} onValueChange={(v) => set('cargoUnit', v)} disabled={isPending || !form.boatPublicId}>
-                    <SelectTrigger className="h-11 bg-background/50 rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={SAND_CARGO_UNITS.CUBIC_FT}>{t('cargoUnit.cubic_ft')}</SelectItem>
-                      <SelectItem value={SAND_CARGO_UNITS.TON}>{t('cargoUnit.ton')}</SelectItem>
-                      <SelectItem value={SAND_CARGO_UNITS.CUBIC_M}>{t('cargoUnit.cubic_m')}</SelectItem>
+                    <SelectTrigger className="h-11 bg-background/50 backdrop-blur-sm rounded-xl border-border/50 hover:border-border transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary/50"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-xl border-border/50 shadow-xl">
+                      <SelectItem value={SAND_CARGO_UNITS.CUBIC_FT} className="rounded-lg">{t('cargoUnit.cubic_ft')}</SelectItem>
+                      <SelectItem value={SAND_CARGO_UNITS.TON} className="rounded-lg">{t('cargoUnit.ton')}</SelectItem>
+                      <SelectItem value={SAND_CARGO_UNITS.CUBIC_M} className="rounded-lg">{t('cargoUnit.cubic_m')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -333,70 +341,92 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
             </section>
 
             {/* Section: Financials */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Banknote className="w-4 h-4 text-primary" />
-                  <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.financials')}</h3>
+            <section className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/40">
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 bg-primary/10 rounded-lg">
+                    <Banknote className="w-4 h-4 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-sm uppercase tracking-wider text-foreground/90">{t('sections.financials')}</h3>
                 </div>
                 
                 {form.boatPublicId && (
-                  <div className={`px-4 py-1.5 rounded-full text-sm font-semibold border ${netProfit >= 0 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400' : 'bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400'}`}>
+                  <div className={`px-4 py-1.5 rounded-full text-sm font-semibold border shadow-sm transition-colors ${netProfit >= 0 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400' : 'bg-red-500/10 text-red-600 border-red-500/20 dark:text-red-400'}`}>
                     {t('sections.netProfit')}: ৳ {netProfit.toLocaleString('en-IN')}
                   </div>
                 )}
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {field(t('fields.saleRate'), 'saleRatePerUnitTk', 'number', '100', false)}
-                {field(t('fields.saleAmount'), 'saleAmountTk', 'number', '480000')}
-                {field(t('fields.buyerName'), 'buyerName', 'text', t('fields.buyerNamePlaceholder'))}
-                {field(t('fields.buyerPhone'), 'buyerPhone', 'tel', '017XXXXXXXX')}
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                  <div className="md:col-span-2 p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 grid grid-cols-1 sm:grid-cols-2 gap-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
+                    {field(t('fields.saleRate'), 'saleRatePerUnitTk', 'number', '100', false)}
+                    {field(t('fields.saleAmount'), 'saleAmountTk', 'number', '480000')}
+                  </div>
+                  {field(t('fields.buyerName'), 'buyerName', 'text', t('fields.buyerNamePlaceholder'))}
+                  {field(t('fields.buyerPhone'), 'buyerPhone', 'tel', '017XXXXXXXX')}
+                </div>
                 
-                <div className="xl:col-span-4 border-t border-border mt-2 pt-4"></div>
-                
-                {field(t('fields.operatingCostRate'), 'operatingCostRatePerUnitTk', 'number', '25', false)}
-                {field(t('fields.operatingCost'), 'operatingCostTk', 'number', '120000')}
-                {field(t('fields.purchaseRate'), 'purchaseRatePerUnitTk', 'number', '51')}
-                {field(t('fields.purchaseCost'), 'purchaseCostTk', 'number', '255000')}
-                
-                {field(t('fields.govtRoyaltyRate'), 'govtRoyaltyRateTk', 'number', '20')}
-                {field(t('fields.govtRoyaltyTotal'), 'govtRoyaltyTk', 'number', '100000')}
-                
-                {field(t('fields.localTollRate'), 'localTollRateTk', 'number', '3')}
-                {field(t('fields.localTollTotal'), 'localTollTk', 'number', '15000')}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="p-5 rounded-2xl bg-card border border-border/50 grid grid-cols-1 sm:grid-cols-2 gap-5 relative overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:border-blue-500/30">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500/80"></div>
+                    {field(t('fields.purchaseRate'), 'purchaseRatePerUnitTk', 'number', '51')}
+                    {field(t('fields.purchaseCost'), 'purchaseCostTk', 'number', '255000')}
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-card border border-border/50 grid grid-cols-1 sm:grid-cols-2 gap-5 relative overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:border-amber-500/30">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500/80"></div>
+                    {field(t('fields.operatingCostRate'), 'operatingCostRatePerUnitTk', 'number', '25', false)}
+                    {field(t('fields.operatingCost'), 'operatingCostTk', 'number', '120000')}
+                  </div>
+                  
+                  <div className="p-5 rounded-2xl bg-card border border-border/50 grid grid-cols-1 sm:grid-cols-2 gap-5 relative overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:border-purple-500/30">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-purple-500/80"></div>
+                    {field(t('fields.govtRoyaltyRate'), 'govtRoyaltyRateTk', 'number', '20')}
+                    {field(t('fields.govtRoyaltyTotal'), 'govtRoyaltyTk', 'number', '100000')}
+                  </div>
+                  
+                  <div className="p-5 rounded-2xl bg-card border border-border/50 grid grid-cols-1 sm:grid-cols-2 gap-5 relative overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:border-rose-500/30">
+                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500/80"></div>
+                    {field(t('fields.localTollRate'), 'localTollRateTk', 'number', '3')}
+                    {field(t('fields.localTollTotal'), 'localTollTk', 'number', '15000')}
+                  </div>
+                </div>
               </div>
             </section>
 
             {/* Notes */}
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{t('sections.notes')}</h3>
+            <section className="space-y-5">
+              <div className="flex items-center gap-3 pb-2 border-b border-border/40">
+                <div className="p-1.5 bg-primary/10 rounded-lg">
+                  <FileText className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm uppercase tracking-wider text-foreground/90">{t('sections.notes')}</h3>
               </div>
               <textarea
                 value={form.notes}
                 onChange={(e) => set('notes', e.target.value)}
                 placeholder={t('fields.notesPlaceholder')}
                 disabled={isPending || !form.boatPublicId}
-                className="w-full px-3 py-2.5 min-h-[100px] text-sm bg-background/50 border border-input rounded-xl placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-river-500/20 resize-y disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full p-4 min-h-[120px] text-sm bg-background/50 backdrop-blur-sm border border-border/50 rounded-2xl placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all duration-300 resize-y disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               />
             </section>
 
             {/* Submit */}
-            <div className="pt-4 border-t border-border flex items-center justify-between">
-              <Button type="button" variant="ghost" onClick={() => router.back()} disabled={isPending} className="h-11 px-6 rounded-xl sm:hidden">
+            <div className="pt-6 border-t border-border/40 flex items-center justify-between">
+              <Button type="button" variant="ghost" onClick={() => router.back()} disabled={isPending} className="h-12 px-6 rounded-xl sm:hidden">
                 {t('cancel')}
               </Button>
               <Button
                 type="submit"
                 disabled={isPending || !form.boatPublicId || Object.keys(errors).length > 0}
-                className="h-11 px-8 rounded-xl bg-gradient-to-r from-river-500 to-river-600 hover:from-river-600 hover:to-river-700 text-white shadow-md shadow-river-500/20 ml-auto"
+                className="h-12 px-8 rounded-xl bg-gradient-to-r from-river-500 to-river-600 hover:from-river-600 hover:to-river-700 text-white shadow-lg shadow-river-500/25 ml-auto transition-all duration-300 active:scale-[0.98]"
               >
                 {isPending ? (
-                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />{t('saving')}</>
+                  <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />{t('saving')}</>
                 ) : (
-                  <><CheckCircle2 className="w-4 h-4 mr-2" />{t('saveTrip')}</>
+                  <><CheckCircle2 className="w-5 h-5 mr-2" />{t('saveTrip')}</>
                 )}
               </Button>
             </div>
@@ -406,5 +436,6 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
     </FadeInUp>
   );
 }
+
 
 

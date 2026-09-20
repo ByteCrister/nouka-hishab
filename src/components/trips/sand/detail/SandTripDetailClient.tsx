@@ -330,7 +330,7 @@ export function SandTripDetailClient({ publicId }: Props) {
               <div className="my-2 pt-2 border-t-2 border-dashed border-border/60"></div>
 
               <div className="flex justify-between items-center">
-                <span className="font-medium text-foreground">Total Costs</span>
+                <span className="font-medium text-foreground">{t('labels.totalOperatingCosts', { fallback: 'Total Costs' })}</span>
                 <span className="font-medium text-foreground">{fmt(trip.totalOperatingCostTk)}</span>
               </div>
 
@@ -338,7 +338,7 @@ export function SandTripDetailClient({ publicId }: Props) {
               <div className="mt-8 pt-4 border-t border-border/40 space-y-3">
                 <div className="flex justify-between items-center">
                   <div>
-                    <span className="font-medium text-foreground">{t('labels.saleAmount')} (Revenue)</span>
+                    <span className="font-medium text-foreground">{t('labels.saleAmount', { fallback: 'Sale Amount' })} (Revenue)</span>
                     {trip.saleRatePerUnitTk && trip.cargoValue && (
                       <div className="text-xs font-normal text-muted-foreground mt-0.5">{trip.cargoValue} {trip.cargoUnit} @ {fmt(trip.saleRatePerUnitTk)}</div>
                     )}
@@ -351,14 +351,8 @@ export function SandTripDetailClient({ publicId }: Props) {
                 </div>
               </div>
 
-              {/* Total Costs */}
-              <div className="flex justify-between items-center pt-2 border-t border-dashed border-border/60 text-muted-foreground">
-                <span className="font-semibold">{t('labels.totalOperatingCosts')}</span>
-                <span className="font-semibold">{fmt(trip.totalOperatingCostTk)}</span>
-              </div>
-
               {/* Net Profit */}
-              <div className="flex justify-between items-center pt-2 mt-2 border-t-2 border-border/60">
+              <div className="flex justify-between items-center pt-4 mt-2 border-t-2 border-border/60">
                 <span className="font-bold text-base text-foreground">{t('profit.netProfit')}</span>
                 <span className={`font-bold text-lg ${profit >= 0 ? 'text-primary' : 'text-destructive'}`}>
                   {fmt(profit)}

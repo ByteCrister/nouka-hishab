@@ -27,8 +27,8 @@
       "cubicFt": "Cubic FT",
       "ton": "Ton"
     },
-    "submit": "Create Boat",
-    "submitting": "Creating...",
+    "submit": "Add New Boat",
+    "submitting": "Adding...",
     "cancel": "Cancel",
     "success": "Boat created successfully",
     "error": "Failed to create boat"
