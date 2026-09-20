@@ -1,5 +1,6 @@
 import type { PaginationMeta, SortOrder } from '@/types/api.types';
 import type { SandTripStatus, SandCargoUnit, SandTripExpenseCategory } from '@/constants/db/sand.const';
+import { SECTORS } from '@/constants/db/app.const';
 
 export interface BoatMeta {
   id: number;
@@ -32,12 +33,14 @@ export interface SandTripDetail extends Omit<TripListItem, 'cargoUnit' | 'status
   status: SandTripStatus;
   buyerName: string | null;
   buyerPhone: string | null;
+  saleRatePerUnitTk: number | null;
   purchaseRatePerUnitTk: number | null;
   purchaseCostTk: number | null;
   govtRoyaltyRateTk: number | null;
   govtRoyaltyTk: number | null;
   localTollRateTk: number | null;
   localTollTk: number | null;
+  operatingCostRatePerUnitTk: number | null;
   operatingCostTk: number | null;
   totalOperatingCostTk: number | null;
   notes: string | null;
@@ -53,7 +56,7 @@ export type TripSortField =
   | 'saleAmountTk';
 
 export interface TripsFilters {
-  sector: 'all' | 'sand' | 'brick' | 'limestone';
+  sector: typeof SECTORS.SAND; // sector: 'all' | 'sand' | 'brick' | 'limestone';
   status: string | 'all';
   boatPublicId: string | null;
   search: string;
@@ -73,6 +76,7 @@ export interface CreateSandTripPayload {
   arrivalTime?: string | null;
   cargoValue?: number | null;
   cargoUnit?: SandCargoUnit | null;
+  saleRatePerUnitTk?: number | null;
   saleAmountTk?: number | null;
   buyerName?: string | null;
   buyerPhone?: string | null;
@@ -82,6 +86,7 @@ export interface CreateSandTripPayload {
   govtRoyaltyTk?: number | null;
   localTollRateTk?: number | null;
   localTollTk?: number | null;
+  operatingCostRatePerUnitTk?: number | null;
   operatingCostTk?: number | null;
   status?: SandTripStatus;
   notes?: string | null;

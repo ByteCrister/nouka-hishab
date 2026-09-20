@@ -45,6 +45,7 @@
     "longitude": "দ্রাঘিমাংশ",
     "cargoValue": "মালের পরিমাণ",
     "cargoUnit": "পরিমাপ একক",
+    "saleRate": "বিক্রয় মূল্য / একক (৳)",
     "saleAmount": "বিক্রয় পরিমাণ (৳)",
     "buyerName": "ক্রেতার নাম",
     "buyerNamePlaceholder": "যেমন: রহিম ট্রেডার্স",
@@ -55,6 +56,7 @@
     "govtRoyaltyTotal": "মোট সরকারি রয়্যালটি (৳)",
     "localTollRate": "স্থানীয় টোল হার (৳)",
     "localTollTotal": "মোট স্থানীয় টোল (৳)",
+    "operatingCostRate": "পরিচালনা খরচ / একক (৳)",
     "operatingCost": "নৌকা পরিচালনার অগ্রিম খরচ (৳)",
     "notesPlaceholder": "এই ট্রিপ সম্পর্কে অতিরিক্ত নোট..."
   },

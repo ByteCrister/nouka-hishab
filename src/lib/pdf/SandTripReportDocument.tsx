@@ -265,7 +265,7 @@ export function SandTripReportDocument({
           purchase: chunkRows.reduce((s, r) => s + (r.purchaseCostTk ?? 0), 0),
           royalty: chunkRows.reduce((s, r) => s + (r.govtRoyaltyTk ?? 0), 0),
           toll: chunkRows.reduce((s, r) => s + (r.localTollTk ?? 0), 0),
-          operating: chunkRows.reduce((s, r) => s + (r.totalOperatingCostTk ?? 0), 0),
+          operating: chunkRows.reduce((s, r) => s + (r.operatingCostTk ?? 0), 0),
           profit: chunkRows.reduce((s, r) => s + (r.netProfitTk ?? 0), 0),
         };
 
@@ -390,7 +390,7 @@ export function SandTripReportDocument({
                   {row.localTollTk != null ? row.localTollTk.toLocaleString('en-IN') : '—'}
                 </Text>
                 <Text style={[styles.cell, styles.colOperating]}>
-                  {row.totalOperatingCostTk != null ? row.totalOperatingCostTk.toLocaleString('en-IN') : '—'}
+                  {row.operatingCostTk != null ? row.operatingCostTk.toLocaleString('en-IN') : '—'}
                 </Text>
                 <Text style={[
                   styles.cell,

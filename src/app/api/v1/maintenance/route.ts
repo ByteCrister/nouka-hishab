@@ -55,11 +55,15 @@ export const GET = withErrorHandler<MaintenanceListResponse, [NextRequest]>(asyn
         }
     }
 
-    if (query.fromDate) {
-        baseConditions.push(gte(boatMaintenanceLogs.maintenanceDate, query.fromDate));
-    }
-    if (query.toDate) {
-        baseConditions.push(lte(boatMaintenanceLogs.maintenanceDate, query.toDate));
+    if (query.fromDate && query.toDate) {
+        baseConditions.push(
+            gte(boatMaintenanceLogs.maintenanceDate, query.fromDate),
+            lte(boatMaintenanceLogs.maintenanceDate, query.toDate)
+        );
+    } else if (query.fromDate) {
+        baseConditions.push(eq(boatMaintenanceLogs.maintenanceDate, query.fromDate));
+    } else if (query.toDate) {
+        baseConditions.push(eq(boatMaintenanceLogs.maintenanceDate, query.toDate));
     }
 
     const whereClause = and(...baseConditions);
@@ -82,6 +86,16 @@ export const GET = withErrorHandler<MaintenanceListResponse, [NextRequest]>(asyn
     ];
     if (query.boatId && query.boatId !== 'all') {
         kpiConditions.push(eq(boatMaintenanceLogs.boatId, parseInt(query.boatId, 10)));
+    }
+    if (query.fromDate && query.toDate) {
+        kpiConditions.push(
+            gte(boatMaintenanceLogs.maintenanceDate, query.fromDate),
+            lte(boatMaintenanceLogs.maintenanceDate, query.toDate)
+        );
+    } else if (query.fromDate) {
+        kpiConditions.push(eq(boatMaintenanceLogs.maintenanceDate, query.fromDate));
+    } else if (query.toDate) {
+        kpiConditions.push(eq(boatMaintenanceLogs.maintenanceDate, query.toDate));
     }
 
     const [

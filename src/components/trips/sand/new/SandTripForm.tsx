@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertCircle, ArrowLeft, CheckCircle2, MapPin, Ship, Package, Banknote, FileText } from 'lucide-react';
 import { FadeInUp } from '@/components/wrappers/motion-wrappers';
 import { SAND_TRIP_STATUSES, SAND_CARGO_UNITS } from '@/constants/db/sand.const';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { SandTripDetail, CreateSandTripPayload } from '@/types/trips.types';
 
@@ -24,6 +23,7 @@ type FormData = {
   arrivalTime: string;
   cargoValue: string;
   cargoUnit: string;
+  saleRatePerUnitTk: string;
   saleAmountTk: string;
   buyerName: string;
   buyerPhone: string;
@@ -33,6 +33,7 @@ type FormData = {
   govtRoyaltyTk: string;
   localTollRateTk: string;
   localTollTk: string;
+  operatingCostRatePerUnitTk: string;
   operatingCostTk: string;
   status: string;
   notes: string;
@@ -42,10 +43,11 @@ const initialForm: FormData = {
   boatPublicId: '', source: '', destination: '',
   departureTime: '', arrivalTime: '',
   cargoValue: '', cargoUnit: SAND_CARGO_UNITS.CUBIC_FT,
-  saleAmountTk: '', buyerName: '', buyerPhone: '',
+  saleRatePerUnitTk: '', saleAmountTk: '', buyerName: '', buyerPhone: '',
   purchaseRatePerUnitTk: '', purchaseCostTk: '',
   govtRoyaltyRateTk: '', govtRoyaltyTk: '',
-  localTollRateTk: '', localTollTk: '', operatingCostTk: '',
+  localTollRateTk: '', localTollTk: '',
+  operatingCostRatePerUnitTk: '', operatingCostTk: '',
   status: SAND_TRIP_STATUSES.SCHEDULED, notes: '',
 };
 
@@ -70,6 +72,7 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
         arrivalTime: toDatetimeLocal(initialData.arrivalTime),
         cargoValue: initialData.cargoValue?.toString() || '',
         cargoUnit: initialData.cargoUnit || SAND_CARGO_UNITS.CUBIC_FT,
+        saleRatePerUnitTk: initialData.saleRatePerUnitTk?.toString() || '',
         saleAmountTk: initialData.saleAmountTk?.toString() || '',
         buyerName: initialData.buyerName || '',
         buyerPhone: initialData.buyerPhone || '',
@@ -79,6 +82,7 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
         govtRoyaltyTk: initialData.govtRoyaltyTk?.toString() || '',
         localTollRateTk: initialData.localTollRateTk?.toString() || '',
         localTollTk: initialData.localTollTk?.toString() || '',
+        operatingCostRatePerUnitTk: initialData.operatingCostRatePerUnitTk?.toString() || '',
         operatingCostTk: initialData.operatingCostTk?.toString() || '',
         status: initialData.status,
         notes: initialData.notes || '',
@@ -107,6 +111,7 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
     arrivalTime: form.arrivalTime || null,
     cargoValue: numOrNull(form.cargoValue),
     cargoUnit: form.cargoUnit || null,
+    saleRatePerUnitTk: numOrNull(form.saleRatePerUnitTk),
     saleAmountTk: numOrNull(form.saleAmountTk),
     buyerName: form.buyerName || null,
     buyerPhone: form.buyerPhone || null,
@@ -116,6 +121,7 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
     govtRoyaltyTk: numOrNull(form.govtRoyaltyTk),
     localTollRateTk: numOrNull(form.localTollRateTk),
     localTollTk: numOrNull(form.localTollTk),
+    operatingCostRatePerUnitTk: numOrNull(form.operatingCostRatePerUnitTk),
     operatingCostTk: numOrNull(form.operatingCostTk),
     status: form.status,
     notes: form.notes || null,
@@ -155,9 +161,11 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
         }
       };
 
+      calcTotalOrRate('saleRatePerUnitTk', 'saleAmountTk');
       calcTotalOrRate('purchaseRatePerUnitTk', 'purchaseCostTk');
       calcTotalOrRate('govtRoyaltyRateTk', 'govtRoyaltyTk');
       calcTotalOrRate('localTollRateTk', 'localTollTk');
+      calcTotalOrRate('operatingCostRatePerUnitTk', 'operatingCostTk');
 
       return next;
     });
@@ -340,12 +348,14 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {field(t('fields.saleRate'), 'saleRatePerUnitTk', 'number', '100', false)}
                 {field(t('fields.saleAmount'), 'saleAmountTk', 'number', '480000')}
                 {field(t('fields.buyerName'), 'buyerName', 'text', t('fields.buyerNamePlaceholder'))}
                 {field(t('fields.buyerPhone'), 'buyerPhone', 'tel', '017XXXXXXXX')}
                 
                 <div className="xl:col-span-4 border-t border-border mt-2 pt-4"></div>
                 
+                {field(t('fields.operatingCostRate'), 'operatingCostRatePerUnitTk', 'number', '25', false)}
                 {field(t('fields.operatingCost'), 'operatingCostTk', 'number', '120000')}
                 {field(t('fields.purchaseRate'), 'purchaseRatePerUnitTk', 'number', '51')}
                 {field(t('fields.purchaseCost'), 'purchaseCostTk', 'number', '255000')}

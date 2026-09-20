@@ -88,7 +88,6 @@ export function SandTripDetailClient({ publicId }: Props) {
   const statusCls = STATUS_CLS[trip.status] ?? 'bg-muted text-muted-foreground';
   const statusLabel = t(`status.${trip.status}` as Parameters<typeof t>[0], { fallback: trip.status });
   const profit = Number(trip.netProfitTk ?? 0);
-  const expensesTotal = trip.expenses?.reduce((sum, exp) => sum + Number(exp.amountTk || 0), 0) || 0;
 
   const handleStatusChange = async (newStatus: string) => {
     await updateTrip({ publicId, payload: { status: newStatus as SandTripStatus } });
@@ -264,7 +263,7 @@ export function SandTripDetailClient({ publicId }: Props) {
 
       {/* Expenses */}
       <FadeInUp delay={0.35}>
-        <SandTripExpensesSection tripPublicId={publicId} expenses={trip.expenses} />
+        <SandTripExpensesSection tripPublicId={publicId} expenses={trip.expenses} operatingCostTk={trip.operatingCostTk} />
       </FadeInUp>
 
       {/* Attachments */}
@@ -319,53 +318,51 @@ export function SandTripDetailClient({ publicId }: Props) {
 
               <div className="flex justify-between items-start">
                 <div>
-                  <div className="text-muted-foreground">{t('labels.operatingCosts')}</div>
-                  <div className="text-xs text-muted-foreground/70 mt-0.5">Upfront</div>
+                  <div className="text-muted-foreground">{t('labels.upfrontOperatingCost')}</div>
+                  {trip.operatingCostRatePerUnitTk && trip.cargoValue && (
+                    <div className="text-xs text-muted-foreground/70 mt-0.5">{trip.cargoValue} {trip.cargoUnit} @ {fmt(trip.operatingCostRatePerUnitTk)}</div>
+                  )}
                 </div>
                 <div className="text-muted-foreground">{fmt(trip.operatingCostTk)}</div>
               </div>
-
-              {expensesTotal > 0 && (
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="text-muted-foreground">{t('expenses.title', { fallback: 'Logged Expenses' })}</div>
-                    <div className="text-xs text-muted-foreground/70 mt-0.5">From Expenses list</div>
-                  </div>
-                  <div className="text-muted-foreground">{fmt(expensesTotal)}</div>
-                </div>
-              )}
 
               {/* Dashed Separator */}
               <div className="my-2 pt-2 border-t-2 border-dashed border-border/60"></div>
 
               <div className="flex justify-between items-center">
-                <span className="font-medium text-foreground">{t('labels.totalOperatingCosts')}</span>
+                <span className="font-medium text-foreground">Total Costs</span>
                 <span className="font-medium text-foreground">{fmt(trip.totalOperatingCostTk)}</span>
               </div>
 
               {/* Final Calculation Block */}
               <div className="mt-8 pt-4 border-t border-border/40 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium text-foreground">{t('labels.saleAmount')} (Revenue)</span>
+                  <div>
+                    <span className="font-medium text-foreground">{t('labels.saleAmount')} (Revenue)</span>
+                    {trip.saleRatePerUnitTk && trip.cargoValue && (
+                      <div className="text-xs font-normal text-muted-foreground mt-0.5">{trip.cargoValue} {trip.cargoUnit} @ {fmt(trip.saleRatePerUnitTk)}</div>
+                    )}
+                  </div>
                   <span className="font-medium text-emerald-600 dark:text-emerald-400">+{fmt(trip.saleAmountTk)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-foreground">Total Costs</span>
                   <span className="font-medium text-rose-500">-{fmt(trip.totalOperatingCostTk)}</span>
                 </div>
+              </div>
 
-                {/* Double Line Separator */}
-                <div className="pt-3">
-                  <div className="border-t border-solid border-border/80"></div>
-                  <div className="mt-0.5 mb-3 border-t border-solid border-border/80"></div>
+              {/* Total Costs */}
+              <div className="flex justify-between items-center pt-2 border-t border-dashed border-border/60 text-muted-foreground">
+                <span className="font-semibold">{t('labels.totalOperatingCosts')}</span>
+                <span className="font-semibold">{fmt(trip.totalOperatingCostTk)}</span>
+              </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-base text-foreground uppercase tracking-wide">{t('profit.netProfit')}</span>
-                    <span className={`font-bold text-xl ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
-                      {fmt(profit)}
-                    </span>
-                  </div>
-                </div>
+              {/* Net Profit */}
+              <div className="flex justify-between items-center pt-2 mt-2 border-t-2 border-border/60">
+                <span className="font-bold text-base text-foreground">{t('profit.netProfit')}</span>
+                <span className={`font-bold text-lg ${profit >= 0 ? 'text-primary' : 'text-destructive'}`}>
+                  {fmt(profit)}
+                </span>
               </div>
             </div>
           </div>

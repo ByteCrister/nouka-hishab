@@ -33,6 +33,8 @@ export interface SandTripReportRow {
   purchaseRatePerUnitTk?: number | null;
   govtRoyaltyRateTk?: number | null;
   localTollRateTk?: number | null;
+  operatingCostTk?: number | null;
+  operatingCostRatePerUnitTk?: number | null;
   expenses: SandTripExpenseReportRow[];
 }
 

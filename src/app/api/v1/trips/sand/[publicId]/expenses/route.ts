@@ -36,7 +36,7 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
 
     if (!existingTrip) throw new ApiError("Trip not found", 404);
 
-    // Limit expenses to 50 per trip to prevent abuse
+    // Limit expenses to 10 per trip to prevent abuse
     const [{ expenseCount }] = await db
       .select({ expenseCount: count() })
       .from(sandTripExpenses)
@@ -47,8 +47,8 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
         )
       );
 
-    if (expenseCount >= 50) {
-      throw new ApiError("Maximum limit of 50 expenses per trip reached.", 400);
+    if (expenseCount >= 10) {
+      throw new ApiError("Maximum limit of 10 expenses per trip reached.", 400);
     }
 
     const body = await req.json();

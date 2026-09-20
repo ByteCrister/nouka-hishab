@@ -49,7 +49,8 @@
     "localToll": "স্থানীয় টোল",
     "tollRatePerUnit": "টোল হার / একক",
     "operatingCosts": "পরিচালন খরচ",
-    "totalOperatingCosts": "মোট পরিচালন খরচ"
+    "totalOperatingCosts": "মোট পরিচালন খরচ",
+    "upfrontOperatingCost": "নৌকা পরিচালন খরচ"
   },
   "expenses": {
     "title": "খরচ",
@@ -58,6 +59,9 @@
     "newExpense": "নতুন খরচ",
     "noExpenses": "এখনো কোনো খরচ রেকর্ড করা হয়নি।",
     "total": "মোট:",
+    "totalWithoutOperating": "মোট বিস্তারিত খরচ:",
+    "upfrontOperating": "নৌকা পরিচালন খরচ:",
+    "totalWithOperating": "সর্বমোট খরচ:",
     "category": "বিভাগ",
     "amount": "পরিমাণ (৳)",
     "date": "তারিখ",

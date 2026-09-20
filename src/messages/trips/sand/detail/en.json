@@ -49,7 +49,8 @@
     "localToll": "Local Toll",
     "tollRatePerUnit": "Toll Rate / Unit",
     "operatingCosts": "Operating Costs",
-    "totalOperatingCosts": "Total Operating Costs"
+    "totalOperatingCosts": "Total Operating Costs",
+    "upfrontOperatingCost": "Boat Operating Cost"
   },
   "expenses": {
     "title": "Expenses",
@@ -58,6 +59,9 @@
     "newExpense": "New Expense",
     "noExpenses": "No expenses recorded yet.",
     "total": "Total:",
+    "totalWithoutOperating": "Itemized Expenses Total:",
+    "upfrontOperating": "Boat Operating Cost:",
+    "totalWithOperating": "Total Expenses:",
     "category": "Category",
     "amount": "Amount (৳)",
     "date": "Date",

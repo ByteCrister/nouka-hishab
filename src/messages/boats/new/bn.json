@@ -8,7 +8,7 @@
     "sectorPlaceholder": "খাত নির্বাচন করুন",
     "sectorRequired": "খাত নির্বাচন করা প্রয়োজন",
     "capacityValue": "ধারণক্ষমতা",
-    "capacityValuePlaceholder": "ধারণক্ষমতা লিখুন (ঐচ্ছিক)",
+    "capacityValuePlaceholder": "ধারণক্ষমতা লিখুন",
     "capacityMustBePositive": "ধারণক্ষমতা ধনাত্মক হতে হবে",
     "capacityUnitRequired": "ধারণক্ষমতা প্রদান করা হলে একক নির্বাচন করা আবশ্যক",
     "capacityUnit": "একক",
@@ -18,6 +18,15 @@
     "notes": "নোট",
     "notesPlaceholder": "এই নৌকা সম্পর্কে কোনো নোট লিখুন (ঐচ্ছিক)",
     "notesTooLong": "নোট খুব বড়",
+    "sectors": {
+      "sand": "বালি",
+      "stone": "পাথর",
+      "brick": "ইট"
+    },
+    "capacityUnits": {
+      "cubicFt": "ঘনফুট",
+      "ton": "টন"
+    },
     "submit": "নৌকা তৈরি করুন",
     "submitting": "তৈরি হচ্ছে...",
     "cancel": "বাতিল",

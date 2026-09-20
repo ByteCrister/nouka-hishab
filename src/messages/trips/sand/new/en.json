@@ -45,6 +45,7 @@
     "longitude": "Longitude",
     "cargoValue": "Cargo Value",
     "cargoUnit": "Cargo Unit",
+    "saleRate": "Sale Rate / Unit (৳)",
     "saleAmount": "Sale Amount (৳)",
     "buyerName": "Buyer Name",
     "buyerNamePlaceholder": "e.g. Rahim Traders",
@@ -55,6 +56,7 @@
     "govtRoyaltyTotal": "Govt Royalty Total (৳)",
     "localTollRate": "Local Toll Rate (৳)",
     "localTollTotal": "Local Toll Total (৳)",
+    "operatingCostRate": "Operating Cost Rate / Unit (৳)",
     "operatingCost": "Upfront Boat Operating Cost (৳)",
     "notesPlaceholder": "Additional notes about this trip..."
   },

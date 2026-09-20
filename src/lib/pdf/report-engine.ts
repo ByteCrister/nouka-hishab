@@ -123,9 +123,11 @@ export async function exportSingleSandTripReport(
 
 export async function generateMaintenancePdf(
   items: MaintenanceListItem[],
-  kpis?: MaintenanceKpis
+  kpis?: MaintenanceKpis,
+  locale: AppLocale = 'en'
 ): Promise<{ blob: Blob; filename: string }> {
-  const element = React.createElement(MaintenanceReportDocument, { items, kpis }) as React.ReactElement<DocumentProps>;
+  const strings = PDF_STRINGS[locale];
+  const element = React.createElement(MaintenanceReportDocument, { items, kpis, strings }) as React.ReactElement<DocumentProps>;
   const blob = await pdf(element).toBlob();
   const filename = `maintenance-report-${new Date().toISOString().split('T')[0]}.pdf`;
   return { blob, filename };
@@ -133,9 +135,10 @@ export async function generateMaintenancePdf(
 
 export async function exportMaintenanceReport(
   items: MaintenanceListItem[],
-  kpis?: MaintenanceKpis
+  kpis?: MaintenanceKpis,
+  locale: AppLocale = 'en'
 ): Promise<void> {
-  const { blob, filename } = await generateMaintenancePdf(items, kpis);
+  const { blob, filename } = await generateMaintenancePdf(items, kpis, locale);
   await downloadSinglePdf(blob, filename);
 }
 

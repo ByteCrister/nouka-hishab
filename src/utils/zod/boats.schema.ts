@@ -5,21 +5,10 @@ import { SECTORS } from '@/constants/db/app.const';
 export const createBoatSchema = z.object({
   name: z.string().min(1, 'nameRequired').max(255, 'nameTooLong'),
   sector: z.nativeEnum(SECTORS, { message: 'sectorRequired' }),
-  capacityValue: z.coerce.number().positive('capacityMustBePositive').nullable().optional().or(z.literal('')),
-  capacityUnit: z.enum([BOAT_CAPACITY_UNITS.CUBIC_FT, BOAT_CAPACITY_UNITS.TON]).nullable().optional().or(z.literal('')),
+  capacityValue: z.coerce.number({ message: 'capacityMustBePositive' }).positive('capacityMustBePositive'),
+  capacityUnit: z.enum([BOAT_CAPACITY_UNITS.CUBIC_FT, BOAT_CAPACITY_UNITS.TON], { message: 'capacityUnitRequired' }),
   status: z.enum([BOAT_STATUSES.ACTIVE, BOAT_STATUSES.MAINTENANCE, BOAT_STATUSES.INACTIVE]).optional().default(BOAT_STATUSES.ACTIVE),
   notes: z.string().max(1000, 'notesTooLong').nullable().optional(),
-}).refine(data => {
-  const hasValue = data.capacityValue !== null && data.capacityValue !== undefined && data.capacityValue !== '';
-  const hasUnit = data.capacityUnit !== null && data.capacityUnit !== undefined && data.capacityUnit !== '';
-  
-  if (hasValue && !hasUnit) {
-    return false;
-  }
-  return true;
-}, {
-  message: "capacityUnitRequired",
-  path: ["capacityUnit"]
 });
 
 export type CreateBoatSchema = z.infer<typeof createBoatSchema>;

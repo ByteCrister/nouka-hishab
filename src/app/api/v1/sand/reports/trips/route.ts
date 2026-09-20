@@ -54,6 +54,8 @@ export const GET = withErrorHandler<SandTripReportDTO, [NextRequest]>(
         purchaseCostTk: sandTrips.purchaseCostTk,
         govtRoyaltyTk: sandTrips.govtRoyaltyTk,
         localTollTk: sandTrips.localTollTk,
+        operatingCostTk: sandTrips.operatingCostTk,
+        operatingCostRatePerUnitTk: sandTrips.operatingCostRatePerUnitTk,
         totalOperatingCostTk: sandTrips.totalOperatingCostTk,
         netProfitTk: sandTrips.netProfitTk,
         status: sandTrips.status,
@@ -133,6 +135,8 @@ export const GET = withErrorHandler<SandTripReportDTO, [NextRequest]>(
         purchaseRatePerUnitTk: t.purchaseRatePerUnitTk ? parseFloat(t.purchaseRatePerUnitTk) : null,
         govtRoyaltyRateTk: t.govtRoyaltyRateTk ? parseFloat(t.govtRoyaltyRateTk) : null,
         localTollRateTk: t.localTollRateTk ? parseFloat(t.localTollRateTk) : null,
+        operatingCostTk: t.operatingCostTk ? parseFloat(t.operatingCostTk) : null,
+        operatingCostRatePerUnitTk: t.operatingCostRatePerUnitTk ? parseFloat(t.operatingCostRatePerUnitTk) : null,
         expenses: tripExpenses,
       };
     });

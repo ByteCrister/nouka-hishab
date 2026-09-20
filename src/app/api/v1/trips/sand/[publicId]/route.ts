@@ -34,6 +34,8 @@ type UpdateFields = {
   buyerPhone?: string | null;
   source?: string | null;
   destination?: string | null;
+  saleRatePerUnitTk?: string | null;
+  operatingCostRatePerUnitTk?: string | null;
   operatingCostTk?: string | null;
   status?: SandTripStatus;
   notes?: string | null;
@@ -62,6 +64,7 @@ export const GET = withErrorHandler<SandTripDetail, [NextRequest, RouteContext]>
         arrivalTime: sql<string>`${sandTrips.arrivalTime}::text`,
         cargoValue: sandTrips.cargoValue,
         cargoUnit: sandTrips.cargoUnit,
+        saleRatePerUnitTk: sandTrips.saleRatePerUnitTk,
         saleAmountTk: sandTrips.saleAmountTk,
         netProfitTk: sandTrips.netProfitTk,
         status: sandTrips.status,
@@ -74,6 +77,7 @@ export const GET = withErrorHandler<SandTripDetail, [NextRequest, RouteContext]>
         govtRoyaltyTk: sandTrips.govtRoyaltyTk,
         localTollRateTk: sandTrips.localTollRateTk,
         localTollTk: sandTrips.localTollTk,
+        operatingCostRatePerUnitTk: sandTrips.operatingCostRatePerUnitTk,
         operatingCostTk: sandTrips.operatingCostTk,
         totalOperatingCostTk: sandTrips.totalOperatingCostTk,
         notes: sandTrips.notes,
@@ -184,6 +188,7 @@ export const PATCH = withErrorHandler<{ success: boolean; publicId: string }, [N
     if (data.cargoValue !== undefined) updateData.cargoValue = data.cargoValue != null ? String(data.cargoValue) : null;
     if (data.cargoUnit !== undefined) updateData.cargoUnit = data.cargoUnit;
     if (data.saleAmountTk !== undefined) updateData.saleAmountTk = data.saleAmountTk != null ? String(data.saleAmountTk) : null;
+    if (data.saleRatePerUnitTk !== undefined) updateData.saleRatePerUnitTk = data.saleRatePerUnitTk != null ? String(data.saleRatePerUnitTk) : null;
     if (data.buyerName !== undefined) updateData.buyerName = data.buyerName;
     if (data.buyerPhone !== undefined) updateData.buyerPhone = data.buyerPhone;
     if (data.purchaseRatePerUnitTk !== undefined) updateData.purchaseRatePerUnitTk = data.purchaseRatePerUnitTk != null ? String(data.purchaseRatePerUnitTk) : null;
@@ -192,6 +197,7 @@ export const PATCH = withErrorHandler<{ success: boolean; publicId: string }, [N
     if (data.govtRoyaltyTk !== undefined) updateData.govtRoyaltyTk = data.govtRoyaltyTk != null ? String(data.govtRoyaltyTk) : null;
     if (data.localTollRateTk !== undefined) updateData.localTollRateTk = data.localTollRateTk != null ? String(data.localTollRateTk) : null;
     if (data.localTollTk !== undefined) updateData.localTollTk = data.localTollTk != null ? String(data.localTollTk) : null;
+    if (data.operatingCostRatePerUnitTk !== undefined) updateData.operatingCostRatePerUnitTk = data.operatingCostRatePerUnitTk != null ? String(data.operatingCostRatePerUnitTk) : null;
     if (data.operatingCostTk !== undefined) updateData.operatingCostTk = data.operatingCostTk != null ? String(data.operatingCostTk) : null;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.notes !== undefined) updateData.notes = data.notes;

@@ -9,9 +9,10 @@ import Image from 'next/image';
 
 interface BoatCardProps {
   boat: BoatListItem;
+  priority?: boolean;
 }
 
-export function BoatCard({ boat }: BoatCardProps) {
+export function BoatCard({ boat, priority = false }: BoatCardProps) {
   const t = useTranslations('boatsPage');
   const tShared = useTranslations('shared');
 
@@ -35,6 +36,7 @@ export function BoatCard({ boat }: BoatCardProps) {
             alt={boat.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={priority}
             className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (

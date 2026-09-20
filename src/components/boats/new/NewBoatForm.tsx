@@ -148,7 +148,7 @@ export function NewBoatForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 group">
                 <Label htmlFor="sector" className="text-sm font-medium text-foreground">
-                  Sector <span className="text-destructive">*</span>
+                  {t("form.sector")} <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-river-500 transition-colors z-10">
@@ -160,12 +160,12 @@ export function NewBoatForm() {
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className={`pl-10 h-11 bg-background/50 rounded-xl`}>
-                      <SelectValue placeholder="Select Sector" />
+                      <SelectValue placeholder={t("form.sectorPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={SECTORS.SAND}>Sand</SelectItem>
-                      <SelectItem value={SECTORS.LIME_STONE}>Stone</SelectItem>
-                      <SelectItem value={SECTORS.BRICK}>Brick</SelectItem>
+                      <SelectItem value={SECTORS.SAND}>{t("form.sectors.sand")}</SelectItem>
+                      <SelectItem value={SECTORS.LIME_STONE}>{t("form.sectors.stone")}</SelectItem>
+                      <SelectItem value={SECTORS.BRICK}>{t("form.sectors.brick")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -202,7 +202,7 @@ export function NewBoatForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 group">
                 <Label htmlFor="capacityValue" className="text-sm font-medium text-foreground">
-                  {t("form.capacityValue")}
+                  {t("form.capacityValue")} <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-river-500 transition-colors">
@@ -226,7 +226,7 @@ export function NewBoatForm() {
 
               <div className="space-y-2 group">
                 <Label htmlFor="capacityUnit" className="text-sm font-medium text-foreground">
-                  {t("form.capacityUnit")}
+                  {t("form.capacityUnit")} <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-river-500 transition-colors z-10">
@@ -241,8 +241,8 @@ export function NewBoatForm() {
                       <SelectValue placeholder={t("form.capacityUnitPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={BOAT_CAPACITY_UNITS.CUBIC_FT}>Cubic FT</SelectItem>
-                      <SelectItem value={BOAT_CAPACITY_UNITS.TON}>Ton</SelectItem>
+                      <SelectItem value={BOAT_CAPACITY_UNITS.CUBIC_FT}>{t("form.capacityUnits.cubicFt")}</SelectItem>
+                      <SelectItem value={BOAT_CAPACITY_UNITS.TON}>{t("form.capacityUnits.ton")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

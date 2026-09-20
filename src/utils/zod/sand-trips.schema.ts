@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { SAND_TRIP_STATUSES, SAND_CARGO_UNITS, SAND_TRIP_EXPENSE_CATEGORIES } from '@/constants/db/sand.const';
 
-import { phoneSchema, bdPhoneRegex } from './common.schema';
+import { bdPhoneRegex } from './common.schema';
 
 const baseSandTripSchema = z.object({
   boatPublicId: z.string().min(1, "Boat is required"),
@@ -11,6 +11,7 @@ const baseSandTripSchema = z.object({
   arrivalTime: z.string().min(1, "Arrival time is required"),
   cargoValue: z.number().min(0, "Cannot be negative"),
   cargoUnit: z.nativeEnum(SAND_CARGO_UNITS),
+  saleRatePerUnitTk: z.number().min(0, "Cannot be negative").optional().nullable(),
   saleAmountTk: z.number().min(0, "Cannot be negative"),
   buyerName: z.string().min(1, "Buyer name is required").max(255),
   buyerPhone: z.string().regex(bdPhoneRegex, "Invalid Bangladesh phone number"),
@@ -20,6 +21,7 @@ const baseSandTripSchema = z.object({
   govtRoyaltyTk: z.number().min(0, "Cannot be negative"),
   localTollRateTk: z.number().min(0, "Cannot be negative"),
   localTollTk: z.number().min(0, "Cannot be negative"),
+  operatingCostRatePerUnitTk: z.number().min(0, "Cannot be negative").optional().nullable(),
   operatingCostTk: z.number().min(0, "Cannot be negative"),
   status: z.nativeEnum(SAND_TRIP_STATUSES).optional().default(SAND_TRIP_STATUSES.SCHEDULED),
   notes: z.string().nullable().optional(),

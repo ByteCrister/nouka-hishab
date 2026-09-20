@@ -11,6 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { exportMaintenanceReport } from '@/lib/pdf/report-engine';
 import type { MaintenanceListItem, MaintenanceKpis } from '@/types/maintenance.types';
 
+import { useLocale } from 'next-intl';
+import type { AppLocale } from '@/constants/common.const';
+import { PDF_STRINGS } from '@/lib/pdf/pdf-i18n';
 const PDFViewer = dynamic(
   () => import('@react-pdf/renderer').then((m) => m.PDFViewer),
   { ssr: false, loading: () => <PdfViewerSkeleton /> }
@@ -35,18 +38,20 @@ interface Props {
 
 export function MaintenanceReportPreviewModal({ open, onClose, items, kpis }: Props) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const locale = useLocale() as AppLocale;
+  const strings = PDF_STRINGS[locale];
 
   const handleDownload = useCallback(async () => {
     setIsDownloading(true);
     try {
-      await exportMaintenanceReport(items, kpis);
+      await exportMaintenanceReport(items, kpis, locale);
       toast.success('PDF downloaded');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to generate PDF');
     } finally {
       setIsDownloading(false);
     }
-  }, [items, kpis]);
+  }, [items, kpis, locale]);
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -69,7 +74,7 @@ export function MaintenanceReportPreviewModal({ open, onClose, items, kpis }: Pr
         <div className="flex-1 min-h-0 relative">
           <div className="hidden sm:flex w-full h-full">
             <PDFViewer width="100%" height="100%" showToolbar={false}>
-              <MaintenanceReportDocument items={items} kpis={kpis} />
+              <MaintenanceReportDocument items={items} kpis={kpis} strings={strings} />
             </PDFViewer>
           </div>
           <div className="flex sm:hidden w-full h-full flex-col items-center justify-center gap-6 p-8 text-center">

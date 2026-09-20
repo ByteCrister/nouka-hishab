@@ -127,17 +127,20 @@ const styles = StyleSheet.create({
   },
 });
 
+import type { PdfStrings } from './pdf-i18n';
+
 interface MaintenanceReportDocumentProps {
   items: MaintenanceListItem[];
   kpis?: MaintenanceKpis;
-  reportTitle?: string;
+  strings: PdfStrings;
 }
 
 export function MaintenanceReportDocument({
   items,
   kpis,
-  reportTitle = 'Maintenance Report',
+  strings,
 }: MaintenanceReportDocumentProps) {
+  const t = strings.maintenance;
   // Use 25 rows per page for chunking
   const rowsPerPage = 25;
   const itemChunks = chunk(items, rowsPerPage);
@@ -149,11 +152,11 @@ export function MaintenanceReportDocument({
         <Page size="A4" style={styles.page}>
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>{reportTitle}</Text>
+              <Text style={styles.title}>{t.reportTitle}</Text>
             </View>
           </View>
           <Text style={{ textAlign: 'center', marginTop: 40, color: TEXT_SECONDARY }}>
-            No maintenance records found.
+            {t.noRecords}
           </Text>
         </Page>
       </Document>
@@ -172,9 +175,9 @@ export function MaintenanceReportDocument({
             {isFirstPage && (
               <View style={styles.header}>
                 <View>
-                  <Text style={styles.title}>{reportTitle}</Text>
+                  <Text style={styles.title}>{t.reportTitle}</Text>
                   <Text style={styles.subtitle}>
-                    Total Records: {kpis?.totalRecords || items.length}
+                    {t.totalRecords} {kpis?.totalRecords || items.length}
                   </Text>
                 </View>
               </View>
@@ -183,11 +186,11 @@ export function MaintenanceReportDocument({
             {/* Table Header */}
             <View style={styles.table}>
               <View style={styles.tableHeader}>
-                <Text style={styles.tableCellDate}>Date</Text>
-                <Text style={styles.tableCellBoat}>Boat</Text>
-                <Text style={styles.tableCellDesc}>Description</Text>
-                <Text style={styles.tableCellVendor}>Vendor</Text>
-                <Text style={styles.tableCellCost}>Cost (Tk)</Text>
+                <Text style={styles.tableCellDate}>{t.table.date}</Text>
+                <Text style={styles.tableCellBoat}>{t.table.boat}</Text>
+                <Text style={styles.tableCellDesc}>{t.table.description}</Text>
+                <Text style={styles.tableCellVendor}>{t.table.vendor}</Text>
+                <Text style={styles.tableCellCost}>{t.table.cost}</Text>
               </View>
 
               {/* Table Rows */}
@@ -216,15 +219,15 @@ export function MaintenanceReportDocument({
             {/* Summary only on last page */}
             {isLastPage && kpis && (
               <View style={styles.summaryBox} wrap={false}>
-                <Text style={styles.summaryTitle}>Report Summary</Text>
+                <Text style={styles.summaryTitle}>{t.summary.title}</Text>
                 <View style={styles.summaryRow}>
-                  <Text>Total Maintenance Cost</Text>
+                  <Text>{t.summary.totalCost}</Text>
                   <Text style={{ fontWeight: 'bold' }}>
                     {formatCurrency(kpis.totalCostTk)}
                   </Text>
                 </View>
                 <View style={styles.summaryRow}>
-                  <Text>Current Month Cost</Text>
+                  <Text>{t.summary.currentMonthCost}</Text>
                   <Text>{formatCurrency(kpis.currentMonthCostTk)}</Text>
                 </View>
               </View>
@@ -233,11 +236,15 @@ export function MaintenanceReportDocument({
             {/* Footer */}
             <Text
               style={styles.pageNumber}
-              render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
+              render={({ pageNumber, totalPages }) =>
+                strings.misc.pageOf
+                  .replace('{page}', String(pageNumber))
+                  .replace('{total}', String(totalPages))
+              }
               fixed
             />
             <Text style={styles.generatedDate} fixed>
-              Generated on {new Date().toLocaleDateString()}
+              {strings.meta.generated} {new Date().toLocaleDateString()}
             </Text>
           </Page>
         );

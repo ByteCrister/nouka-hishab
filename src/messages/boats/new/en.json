@@ -8,7 +8,7 @@
     "sectorPlaceholder": "Select sector",
     "sectorRequired": "Sector is required",
     "capacityValue": "Capacity",
-    "capacityValuePlaceholder": "Enter capacity (optional)",
+    "capacityValuePlaceholder": "Enter capacity",
     "capacityMustBePositive": "Capacity must be positive",
     "capacityUnitRequired": "Capacity unit is required if capacity is provided",
     "capacityUnit": "Unit",
@@ -18,6 +18,15 @@
     "notes": "Notes",
     "notesPlaceholder": "Enter any notes about this boat (optional)",
     "notesTooLong": "Notes are too long",
+    "sectors": {
+      "sand": "Sand",
+      "stone": "Stone",
+      "brick": "Brick"
+    },
+    "capacityUnits": {
+      "cubicFt": "Cubic FT",
+      "ton": "Ton"
+    },
     "submit": "Create Boat",
     "submitting": "Creating...",
     "cancel": "Cancel",

@@ -4,9 +4,11 @@ import { drizzle } from 'drizzle-orm/neon-serverless';
 import * as schema from '@/db';
 import { env } from './env';
 
-// Use Node.js built-in WebSocket (Node 18+) to prevent cold-start ErrorEvent
+import ws from 'ws';
+
+// Use ws to support WebSocket in Node.js environments and prevent cold-start ErrorEvent
 // failures that occur when the Pool driver has no WS constructor in Node.js.
-neonConfig.webSocketConstructor = globalThis.WebSocket;
+neonConfig.webSocketConstructor = ws;
 
 // Create a connection pool instead of HTTP client to support true transactions
 const pool = new Pool({ connectionString: env.DATABASE_URL });

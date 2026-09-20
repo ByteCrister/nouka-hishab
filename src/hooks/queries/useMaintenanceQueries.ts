@@ -30,6 +30,8 @@ export function useMaintenanceList(filters: MaintenanceListFilters) {
             const params = compact({
                 search: filters.search.trim() || undefined,
                 boatId: filters.boatId !== 'all' ? filters.boatId : undefined,
+                fromDate: filters.fromDate,
+                toDate: filters.toDate,
                 sortBy: filters.sortBy,
                 sortOrder: filters.sortOrder,
                 page: filters.page,

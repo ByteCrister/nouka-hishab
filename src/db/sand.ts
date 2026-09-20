@@ -69,6 +69,7 @@ export const sandTrips = pgTable(
       .$type<SandCargoUnit>(),
 
     // ── Revenue ──────────────────────────────────────────────────────────
+    saleRatePerUnitTk: numeric('sale_rate_per_unit_tk', { precision: 10, scale: 2 }),
     saleAmountTk: numeric('sale_amount_tk', { precision: 12, scale: 2 }), // 480,000 tk
     buyerName: varchar('buyer_name', { length: 255 }),
     buyerPhone: varchar('buyer_phone', { length: 20 }),
@@ -87,6 +88,7 @@ export const sandTrips = pgTable(
     // BIWTA / union parishad / transport toll collected at river points.
     localTollRateTk: numeric('local_toll_rate_tk', { precision: 10, scale: 2 }),
     localTollTk: numeric('local_toll_tk', { precision: 12, scale: 2 }),
+    operatingCostRatePerUnitTk: numeric('operating_cost_rate_per_unit_tk', { precision: 10, scale: 2 }),
     operatingCostTk: numeric('operating_cost_tk', { precision: 12, scale: 2 }),
 
     // ── Profit summary ───────────────────────────────────────────────────

@@ -11,11 +11,13 @@ import { Search, RotateCcw, Ship, Layers } from 'lucide-react';
 import { SAND_TRIP_STATUSES } from '@/constants/db/sand.const';
 import type { SandTripStatus } from '@/constants/db/sand.const';
 import { useTranslations } from 'next-intl';
+import { SECTORS } from '@/constants/db/app.const';
 
 export function TripsToolbar() {
   const t = useTranslations('trips');
+  const sharedT = useTranslations('shared');
   const { filters, setFilter, resetFilters } = useTripsFiltersStore();
-  const { data: boats } = useBoatsMeta(filters.sector === 'all' ? undefined : filters.sector);
+  const { data: boats } = useBoatsMeta(filters.sector);
 
   const [localSearch, setLocalSearch] = useState(filters.search || '');
   const debouncedSearch = useDebounce(localSearch, 500);
@@ -56,10 +58,11 @@ export function TripsToolbar() {
           <SelectValue placeholder={t('toolbar.allSectors')} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{t('toolbar.allSectors')}</SelectItem>
-          <SelectItem value="sand">Sand</SelectItem>
-          <SelectItem value="brick">Brick</SelectItem>
-          <SelectItem value="limestone">Limestone</SelectItem>
+          {/* Currently only Sand sector is supported */}
+          <SelectItem value={SECTORS.SAND}>{sharedT('sectors.sand')}</SelectItem>
+          {/* <SelectItem value="all">{sharedT('sectors.all')}</SelectItem> */}
+          {/* <SelectItem value={SECTORS.BRICK}>{sharedT('sectors.brick')}</SelectItem> */}
+          {/* <SelectItem value={SECTORS.LIME_STONE}>{sharedT('sectors.lime-stone')}</SelectItem> */}
         </SelectContent>
       </Select>
 

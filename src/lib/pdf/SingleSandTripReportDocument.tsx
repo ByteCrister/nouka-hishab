@@ -160,24 +160,23 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
   
-  // ── Summary Total Block (Bottom Right) ──
+  // ── Summary Total Block (Katha Style) ──
   summaryBlock: {
-    alignSelf: 'flex-end',
-    width: '50%',
-    paddingTop: 8,
-    marginTop: 10,
+    width: '100%',
+    paddingTop: 16,
+    marginTop: 12,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 3,
+    paddingVertical: 4,
   },
   summaryLabel: {
-    fontSize: 10,
-    color: TEXT_SECONDARY,
+    fontSize: 11,
+    color: TEXT_PRIMARY,
   },
   summaryValue: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 700,
     color: BRAND_PRIMARY,
     textAlign: 'right',
@@ -186,17 +185,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
-    marginTop: 4,
-    borderTop: `1px solid ${BRAND_PRIMARY}`,
-    borderBottom: `2px solid ${BRAND_PRIMARY}`,
-    backgroundColor: SECTION_BG,
-    paddingHorizontal: 4,
+    marginTop: 6,
+    borderTop: `1px dashed ${BORDER}`,
   },
   summaryTotalLabel: {
     fontSize: 12,
     fontWeight: 700,
     color: BRAND_PRIMARY,
-    textTransform: 'uppercase',
   },
   summaryTotalValue: {
     fontSize: 12,
@@ -346,6 +341,28 @@ export function SingleSandTripReportDocument({ dto, strings }: Props) {
                 </View>
               ))}
             </View>
+
+            {/* NEW: Expenses Totals */}
+            <View style={{ alignSelf: 'flex-end', width: '50%', marginTop: 2, marginBottom: 16 }} wrap={false}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 }}>
+                <Text style={{ fontSize: 9, color: TEXT_SECONDARY }}>{strings.expenses.totalWithoutOperating}</Text>
+                <Text style={{ fontSize: 9, color: BRAND_PRIMARY, fontWeight: 700 }}>
+                  {row.expenses.reduce((s, e) => s + e.amountTk, 0).toLocaleString('en-IN')}
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 }}>
+                <Text style={{ fontSize: 9, color: TEXT_SECONDARY }}>{strings.expenses.upfrontOperating}</Text>
+                <Text style={{ fontSize: 9, color: BRAND_PRIMARY, fontWeight: 700 }}>
+                  {row.operatingCostTk?.toLocaleString('en-IN') ?? 0}
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, borderTop: '1px dashed #dddddd', marginTop: 2 }}>
+                <Text style={{ fontSize: 9, color: BRAND_PRIMARY, fontWeight: 700 }}>{strings.expenses.totalWithOperating}</Text>
+                <Text style={{ fontSize: 9, color: BRAND_PRIMARY, fontWeight: 700 }}>
+                  {((row.operatingCostTk ?? 0) + row.expenses.reduce((s, e) => s + e.amountTk, 0)).toLocaleString('en-IN')}
+                </Text>
+              </View>
+            </View>
           </>
         )}
 
@@ -377,7 +394,14 @@ export function SingleSandTripReportDocument({ dto, strings }: Props) {
             <Text style={styles.summaryValue}>{formatCurrency(row.localTollTk)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>{strings.summary.totalOperating}</Text>
+            <Text style={styles.summaryLabel}>
+              {strings.expenses.upfrontOperating}
+              {row.operatingCostRatePerUnitTk ? ` (@ ${row.operatingCostRatePerUnitTk})` : ''}
+            </Text>
+            <Text style={styles.summaryValue}>{formatCurrency(row.operatingCostTk)}</Text>
+          </View>
+          <View style={[styles.summaryRow, { borderTop: `1px dashed ${BORDER}`, marginTop: 4, paddingTop: 6 }]}>
+            <Text style={[styles.summaryLabel, { fontWeight: 700 }]}>{strings.summary.totalOperating}</Text>
             <Text style={styles.summaryValue}>{formatCurrency(row.totalOperatingCostTk)}</Text>
           </View>
 

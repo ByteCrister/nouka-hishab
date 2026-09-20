@@ -1,18 +1,12 @@
 import { NextRequest } from "next/server";
-import { z } from "zod";
 import { db } from "@/config/db";
 import { boats } from "@/db/boat";
 import { sandTrips } from "@/db/sand";
-import { eq, and, isNull, desc, asc, sql, count, gte, lte } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { users } from "@/db/app";
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult } from "@/lib/helpers/withErrorHandler";
-import { TripListResponse } from "@/types/trips.types";
-import { SAND_TRIP_STATUSES } from "@/constants/db/sand.const";
-import { getPaginationMeta } from "@/lib/helpers/pagination.helper";
 import { createSandTripSchema } from "@/utils/zod/sand-trips.schema";
-
-
 
 export const POST = withErrorHandler<{ success: boolean; publicId: string }, [NextRequest]>(async (req): Promise<HandlerResult<{ success: boolean; publicId: string }>> => {
   const userPublicId = await requireAuthPublicId();
@@ -36,6 +30,7 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
     arrivalTime: data.arrivalTime ? new Date(data.arrivalTime) : null,
     cargoValue: data.cargoValue != null ? String(data.cargoValue) : null,
     cargoUnit: data.cargoUnit ?? null,
+    saleRatePerUnitTk: data.saleRatePerUnitTk != null ? String(data.saleRatePerUnitTk) : null,
     saleAmountTk: data.saleAmountTk != null ? String(data.saleAmountTk) : null,
     buyerName: data.buyerName ?? null,
     buyerPhone: data.buyerPhone ?? null,
@@ -45,6 +40,7 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
     govtRoyaltyTk: data.govtRoyaltyTk != null ? String(data.govtRoyaltyTk) : null,
     localTollRateTk: data.localTollRateTk != null ? String(data.localTollRateTk) : null,
     localTollTk: data.localTollTk != null ? String(data.localTollTk) : null,
+    operatingCostRatePerUnitTk: data.operatingCostRatePerUnitTk != null ? String(data.operatingCostRatePerUnitTk) : null,
     operatingCostTk: data.operatingCostTk != null ? String(data.operatingCostTk) : null,
     netProfitTk: String(
       (data.saleAmountTk || 0) - (

@@ -32,6 +32,7 @@ import { useTranslations } from 'next-intl';
 interface Props {
   tripPublicId: string;
   expenses: SandTripExpenseItem[];
+  operatingCostTk: string | number | null;
 }
 
 const CATEGORY_COLORS: Record<SandTripExpenseCategory, string> = {
@@ -53,7 +54,7 @@ type ExpenseForm = {
 
 const emptyForm: ExpenseForm = { category: SAND_TRIP_EXPENSE_CATEGORIES.FUEL, description: '', amountTk: '', expenseDate: '' };
 
-export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
+export function SandTripExpensesSection({ tripPublicId, expenses, operatingCostTk }: Props) {
   const t = useTranslations('sandTripsDetail');
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -289,8 +290,25 @@ export function SandTripExpensesSection({ tripPublicId, expenses }: Props) {
           ))}
         </div>
       )}
+
+      {/* NEW: Totals section with dashed borders */}
+      <div className="mt-6 pt-4 border-t-2 border-dashed border-border/60 space-y-3 font-mono text-sm">
+        <div className="flex justify-between items-center text-muted-foreground">
+          <span>{t('expenses.totalWithoutOperating', { fallback: 'Itemized Expenses Total' })}</span>
+          <span>৳ {total.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+        </div>
+        
+        <div className="flex justify-between items-center text-muted-foreground">
+          <span>{t('expenses.upfrontOperating', { fallback: 'Boat Operating Cost' })}</span>
+          <span>৳ {Number(operatingCostTk || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+        </div>
+        
+        <div className="pt-2 border-t-2 border-dashed border-border/60 flex justify-between items-center">
+          <span className="font-bold text-foreground">{t('expenses.totalWithOperating', { fallback: 'Total Expenses' })}</span>
+          <span className="font-bold text-foreground">৳ {(total + Number(operatingCostTk || 0)).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+        </div>
+      </div>
     </div>
   );
 }
-
 

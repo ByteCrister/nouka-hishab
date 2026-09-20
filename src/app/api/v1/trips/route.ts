@@ -3,7 +3,8 @@ import { z } from "zod";
 import { db } from "@/config/db";
 import { boats } from "@/db/boat";
 import { sandTrips } from "@/db/sand";
-import { eq, and, isNull, desc, asc, sql, count, gte, lte } from "drizzle-orm";
+import { eq, and, isNull, desc, asc, sql, count, gte, lte, ilike, or } from "drizzle-orm";
+import { buildFuzzySearchPattern } from "@/lib/helpers/sanitize";
 import { users } from "@/db/app";
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult } from "@/lib/helpers/withErrorHandler";
@@ -11,9 +12,10 @@ import { TripListResponse, TripListItem } from "@/types/trips.types";
 import {  SandTripStatus } from "@/constants/db/sand.const";
 import { getPaginationMeta } from "@/lib/helpers/pagination.helper";
 import { createSandTripSchema } from "@/utils/zod/sand-trips.schema";
+import { SECTORS } from "@/constants/db/app.const";
 
 const getTripsSchema = z.object({
-  sector: z.enum(["all", "sand", "brick", "limestone"]).optional().default("all"),
+  sector: z.enum([SECTORS.SAND, 'all']).optional().default(SECTORS.SAND).transform(v => v === 'all' ? SECTORS.SAND : v),
   search: z.string().optional().default(""),
   status: z.string().optional().default("all"),
   boatPublicId: z.string().optional().nullable(),
@@ -38,7 +40,7 @@ export const GET = withErrorHandler<TripListResponse, [NextRequest]>(async (req)
 
   // In the future, this endpoint will union multiple tables (sand_trips, brick_trips)
   // For now, it only queries sand_trips if sector is 'all' or 'sand'
-  if (query.sector !== 'all' && query.sector !== 'sand') {
+  if (query.sector !== SECTORS.SAND) {
     return {
       data: {
         items: [],
@@ -55,6 +57,20 @@ export const GET = withErrorHandler<TripListResponse, [NextRequest]>(async (req)
 
   if (query.status && query.status !== 'all') {
     baseConditions.push(eq(sandTrips.status, query.status as SandTripStatus));
+  }
+
+  if (query.search) {
+    const fuzzySearch = buildFuzzySearchPattern(query.search);
+    baseConditions.push(
+      or(
+        ilike(sandTrips.source, fuzzySearch),
+        ilike(sandTrips.destination, fuzzySearch),
+        ilike(boats.name, fuzzySearch),
+        ilike(sandTrips.buyerName, fuzzySearch),
+        ilike(sandTrips.buyerPhone, fuzzySearch),
+        ilike(sandTrips.notes, fuzzySearch)
+      )!
+    );
   }
 
   if (query.boatPublicId) {

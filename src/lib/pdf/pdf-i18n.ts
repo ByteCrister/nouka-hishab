@@ -51,6 +51,9 @@ export interface PdfStrings {
     category: string;
     description: string;
     amount: string;
+    totalWithoutOperating: string;
+    upfrontOperating: string;
+    totalWithOperating: string;
     categories: {
       fuel: string;
       labour: string;
@@ -65,6 +68,23 @@ export interface PdfStrings {
     noData: string;
     pageOf: string; // "Page {page} of {total}"
     confidential: string;
+  };
+  maintenance: {
+    reportTitle: string;
+    totalRecords: string;
+    noRecords: string;
+    table: {
+      date: string;
+      boat: string;
+      description: string;
+      vendor: string;
+      cost: string;
+    };
+    summary: {
+      title: string;
+      totalCost: string;
+      currentMonthCost: string;
+    };
   };
 }
 
@@ -108,6 +128,9 @@ const EN: PdfStrings = {
     category: 'Category',
     description: 'Description',
     amount: 'Amount (Tk)',
+    totalWithoutOperating: 'Itemized Expenses Total',
+    upfrontOperating: 'Boat Operating Cost',
+    totalWithOperating: 'Total Expenses',
     categories: {
       fuel: 'Fuel',
       labour: 'Labour',
@@ -122,6 +145,23 @@ const EN: PdfStrings = {
     noData: '—',
     pageOf: 'Page {page} of {total}',
     confidential: 'Confidential — for internal use only',
+  },
+  maintenance: {
+    reportTitle: 'Maintenance Report',
+    totalRecords: 'Total Records:',
+    noRecords: 'No maintenance records found.',
+    table: {
+      date: 'Date',
+      boat: 'Boat',
+      description: 'Description',
+      vendor: 'Vendor',
+      cost: 'Cost (Tk)',
+    },
+    summary: {
+      title: 'Report Summary',
+      totalCost: 'Total Maintenance Cost',
+      currentMonthCost: 'Current Month Cost',
+    },
   },
 };
 
@@ -165,6 +205,9 @@ const BN: PdfStrings = {
     category: 'বিভাগ',
     description: 'বিবরণ',
     amount: 'পরিমাণ (Tk)',
+    totalWithoutOperating: 'মোট বিস্তারিত খরচ',
+    upfrontOperating: 'নৌকা পরিচালন খরচ',
+    totalWithOperating: 'সর্বমোট খরচ',
     categories: {
       fuel: 'জ্বালানি',
       labour: 'শ্রম',
@@ -179,6 +222,23 @@ const BN: PdfStrings = {
     noData: '—',
     pageOf: 'পৃষ্ঠা {page} / {total}',
     confidential: 'গোপনীয় — শুধুমাত্র অভ্যন্তরীণ ব্যবহারের জন্য',
+  },
+  maintenance: {
+    reportTitle: 'রক্ষণাবেক্ষণ রিপোর্ট',
+    totalRecords: 'মোট রেকর্ড:',
+    noRecords: 'কোনো রক্ষণাবেক্ষণ রেকর্ড পাওয়া যায়নি।',
+    table: {
+      date: 'তারিখ',
+      boat: 'নৌকা',
+      description: 'বিবরণ',
+      vendor: 'ভেন্ডর',
+      cost: 'খরচ (Tk)',
+    },
+    summary: {
+      title: 'রিপোর্ট সারাংশ',
+      totalCost: 'মোট রক্ষণাবেক্ষণ খরচ',
+      currentMonthCost: 'চলতি মাসের খরচ',
+    },
   },
 };
 
