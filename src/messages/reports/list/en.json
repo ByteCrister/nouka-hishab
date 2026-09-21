@@ -1,0 +1,41 @@
+{
+  "header": {
+    "title": "Reports",
+    "subtitle": "Manage issues, feature requests, and support tickets"
+  },
+  "overview": {
+    "title": "Overview",
+    "subtitle": "Summary of report statuses",
+    "total": "Total Reports",
+    "open": "Open",
+    "inReview": "In Review",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "filters": {
+    "search": "Search reports...",
+    "allCategories": "All Categories",
+    "allStatuses": "All Statuses",
+    "createReport": "Create Report"
+  },
+  "list": {
+    "noReports": "No reports found",
+    "errorLoading": "Error loading reports",
+    "showing": "Showing {start} to {end} of {total} entries",
+    "previous": "Previous",
+    "next": "Next",
+    "created": "Created"
+  },
+  "status": {
+    "open": "Open",
+    "in_review": "In Review",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "category": {
+    "bug": "Bug",
+    "feature_request": "Feature Request",
+    "billing": "Billing",
+    "other": "Other"
+  }
+}

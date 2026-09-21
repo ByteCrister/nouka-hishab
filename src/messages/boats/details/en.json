@@ -47,6 +47,7 @@
   },
   "trips": {
     "title": "Trips",
+    "createTrip": "Create Trip",
     "searchPlaceholder": "Search trips...",
     "status": {
       "all": "All Statuses",

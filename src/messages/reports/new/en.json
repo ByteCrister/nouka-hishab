@@ -1,0 +1,25 @@
+{
+  "header": {
+    "title": "New Report",
+    "subtitle": "Submit a bug, feature request, or support ticket",
+    "back": "Back to Reports"
+  },
+  "form": {
+    "title": "Title",
+    "titlePlaceholder": "e.g., Cannot upload boat document",
+    "category": "Category",
+    "categoryPlaceholder": "Select Category",
+    "description": "Description",
+    "descriptionPlaceholder": "Provide detailed information about the issue...",
+    "cancel": "Cancel",
+    "submit": "Submit Report",
+    "submitting": "Submitting",
+    "success": "Report created successfully",
+    "attachments": "Attachments (Optional)",
+    "attachmentsHint": "You can attach up to 3 images (max 2MB each)",
+    "dropzoneText": "Click or drag images here to upload",
+    "maxSizeError": "File {name} exceeds the 2MB size limit.",
+    "invalidTypeError": "File {name} is not a valid image format.",
+    "maxFilesError": "You can only attach a maximum of 3 images."
+  }
+}

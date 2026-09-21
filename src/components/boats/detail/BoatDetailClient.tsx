@@ -54,7 +54,7 @@ export function BoatDetailClient({ publicId }: BoatDetailClientProps) {
         <h2 className="text-2xl font-bold tracking-tight text-foreground mb-6">
           {t('trips.title')}
         </h2>
-        <BoatTripsToolbar />
+        <BoatTripsToolbar publicId={publicId} />
         <BoatTripsList publicId={publicId} />
       </div>
     </div>

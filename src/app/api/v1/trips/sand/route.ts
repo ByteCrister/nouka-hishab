@@ -7,10 +7,11 @@ import { users } from "@/db/app";
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult } from "@/lib/helpers/withErrorHandler";
 import { createSandTripSchema } from "@/utils/zod/sand-trips.schema";
+import { recalculateTripFinancials } from "@/lib/helpers/trip-financials.helper";
 
 export const POST = withErrorHandler<{ success: boolean; publicId: string }, [NextRequest]>(async (req): Promise<HandlerResult<{ success: boolean; publicId: string }>> => {
   const userPublicId = await requireAuthPublicId();
-  
+
   const [userRecord] = await db.select({ id: users.id }).from(users).where(eq(users.publicId, userPublicId));
   if (!userRecord) throw new Error("User not found");
 
@@ -52,7 +53,9 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
     ),
     status: data.status,
     notes: data.notes ?? null,
-  }).returning({ publicId: sandTrips.publicId });
+  }).returning({ id: sandTrips.id, publicId: sandTrips.publicId });
+
+  await recalculateTripFinancials(newTrip.id);
 
   return {
     data: { success: true, publicId: newTrip.publicId },

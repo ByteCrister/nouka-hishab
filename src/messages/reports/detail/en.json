@@ -1,0 +1,42 @@
+{
+  "header": {
+    "created": "Created",
+    "edit": "Edit Report",
+    "delete": "Delete Report"
+  },
+  "content": {
+    "userDescription": "User Description",
+    "reportedOn": "Reported on",
+    "noDescription": "No description provided.",
+    "adminReply": "Admin Reply",
+    "resolvedOn": "Resolved on"
+  },
+  "edit": {
+    "title": "Edit Report",
+    "subtitle": "Update the report details and status.",
+    "save": "Save Changes",
+    "saving": "Saving",
+    "success": "Report updated successfully"
+  },
+  "error": {
+    "title": "Error",
+    "notFound": "Failed to load report details. The report may not exist."
+  },
+  "attachments": {
+    "title": "Attachments",
+    "addFile": "Add File",
+    "uploadNew": "Upload a new file",
+    "fileLabel": "File *",
+    "cancel": "Cancel",
+    "uploading": "Uploading...",
+    "saving": "Saving...",
+    "attach": "Attach",
+    "noAttachments": "No attachments added yet.",
+    "addedOn": "Added",
+    "deleteTitle": "Delete Attachment",
+    "deleteDescription": "Are you sure you want to delete this attachment? This action cannot be undone.",
+    "deleteConfirm": "Delete",
+    "uploadFailed": "Upload failed",
+    "fileRequired": "File is required"
+  }
+}

@@ -16,8 +16,14 @@ import {
 import { SAND_TRIP_STATUSES, type SandTripStatus } from '@/constants/db/sand.const';
 import { useDebounce } from 'use-debounce';
 import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
-export function BoatTripsToolbar() {
+interface BoatTripsToolbarProps {
+  publicId: string;
+}
+
+export function BoatTripsToolbar({ publicId }: BoatTripsToolbarProps) {
   const t = useTranslations('boatsPage.detail.trips');
   const { tripsFilters, setTripsSearch, setTripsStatus, resetTripsFilters } = useBoatFiltersStore();
   const [localSearch, setLocalSearch] = useState(tripsFilters.search);
@@ -31,8 +37,8 @@ export function BoatTripsToolbar() {
 
   return (
     <FadeInUp delay={0.2}>
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="relative w-full sm:max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder={t('searchPlaceholder')}
@@ -42,7 +48,7 @@ export function BoatTripsToolbar() {
         />
       </div>
 
-      <div className="flex items-center gap-3 w-full sm:w-auto">
+      <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
         <Select 
           value={tripsFilters.status} 
           onValueChange={(val) => setTripsStatus(val as SandTripStatus | 'all')}
@@ -75,6 +81,13 @@ export function BoatTripsToolbar() {
             Clear
           </Button>
         )}
+        
+        <Button asChild className="shrink-0 shadow-sm">
+          <Link href={`/trips/sand/new?boatPublicId=${publicId}`}>
+            <Plus className="w-4 h-4 mr-2" />
+            {t('createTrip')}
+          </Link>
+        </Button>
         </div>
       </div>
     </FadeInUp>

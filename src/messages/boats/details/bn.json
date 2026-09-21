@@ -47,6 +47,7 @@
   },
   "trips": {
     "title": "ট্রিপসমূহ",
+    "createTrip": "নতুন ট্রিপ তৈরি করুন",
     "searchPlaceholder": "ট্রিপ খুঁজুন...",
     "status": {
       "all": "সব স্ট্যাটাস",

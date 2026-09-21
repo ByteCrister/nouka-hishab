@@ -32,7 +32,8 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
   }, [previewUrl]);
 
   const maxImagesLimit = 5;
-  const isLimitReached = boat.images.length >= maxImagesLimit;
+  const images = boat?.images || [];
+  const isLimitReached = images.length >= maxImagesLimit;
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -65,7 +66,7 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
       const results = await uploadMedia([selectedFile]);
       if (results.length > 0) {
         const { fileId } = results[0];
-        const isPrimary = boat.images.length === 0;
+        const isPrimary = images.length === 0;
         await uploadBoatImage({ publicId: boat.publicId, fileId, isPrimary });
         toast.success(t('imageUploaded'));
         setSelectedFile(null);
@@ -138,7 +139,7 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
             {showLoader ? t('uploading') : isLimitReached ? 'Limit Reached' : t('uploadImage')}
           </Button>
           <div className="text-xs text-muted-foreground mt-2 text-right">
-            {boat.images.length} / {maxImagesLimit} Images
+            {images.length} / {maxImagesLimit} Images
           </div>
         </div>
       </div>
@@ -182,7 +183,7 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
         </div>
       )}
 
-      {boat.images.length === 0 ? (
+      {images.length === 0 ? (
         <div className="rounded-xl border border-dashed bg-muted/30 p-12 flex flex-col items-center justify-center text-center">
           <div className="p-4 bg-muted rounded-full mb-4">
             <ImageIcon className="w-8 h-8 text-muted-foreground" />
@@ -193,7 +194,7 @@ export function BoatImageGallery({ boat }: BoatImageGalleryProps) {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {boat.images.map((img) => (
+          {images.map((img) => (
             <div 
               key={img.fileId} 
               className={`relative group rounded-xl overflow-hidden aspect-[4/3] border-2 transition-all ${
