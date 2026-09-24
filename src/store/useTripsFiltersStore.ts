@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { TripsFilters, TripSortField } from '@/types/trips.types';
 import type { SortOrder } from '@/types/api.types';
-import { SECTORS } from '@/constants/db/app.const';
 
 interface TripsFiltersState {
   filters: TripsFilters;
@@ -13,7 +12,6 @@ interface TripsFiltersState {
 }
 
 const initialFilters: TripsFilters = {
-  sector: SECTORS.SAND,
   status: 'all',
   boatPublicId: null,
   search: '',
@@ -53,16 +51,6 @@ export const useTripsFiltersStore = create<TripsFiltersState>()(
     {
       name: 'nouka-trips-filters',
       version: 1, // Added version for migration
-      migrate: (persistedState: unknown, version: number) => {
-        const state = persistedState as TripsFiltersState;
-        if (version === 0) {
-          // If the persisted state had 'all' as the sector, migrate it to SAND
-          if ((state?.filters?.sector as unknown as string) === 'all') {
-            state.filters.sector = SECTORS.SAND;
-          }
-        }
-        return state;
-      },
       partialize: (state) => ({
         filters: {
           ...state.filters,

@@ -65,7 +65,7 @@ export function SandTripReportFiltersPanel() {
     getValidFilters,
   } = useSandTripReportStore();
 
-  const { data: boats } = useBoatsMeta('sand');
+  const { data: boats } = useBoatsMeta();
 
   // ── Report data query ──────────────────────────────────────────────────────
   // We enable the query as soon as filters become valid so the summary line

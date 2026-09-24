@@ -25,7 +25,6 @@ import {
 } from '@/constants/boats.const';
 import type { BoatStatus } from '@/constants/boats.const';
 import type { SandTripStatus } from '@/constants/db/sand.const';
-import type { SectorName } from '@/constants/db/app.const';
 
 
 // Strip empty values before sending to the API
@@ -71,7 +70,6 @@ interface BoatsListState {
 
     // filter setters — all reset page to 1 unless page is being set
     setSearch: (v: string) => void;
-    setSector: (v: SectorName | 'all') => void;
     setStatus: (v: BoatStatus | 'all') => void;
     setSort: (by: BoatSortField, order?: SortOrder) => void;
     setPage: (p: number) => void;
@@ -100,8 +98,6 @@ export const useBoatsListStore = create<BoatsListState>((set, get) => ({
     // ── filter setters ─────────────────────────────────────────────────────
     setSearch: (v) =>
         set((s) => ({ filters: { ...s.filters, search: v, page: 1 } })),
-    setSector: (v) =>
-        set((s) => ({ filters: { ...s.filters, sector: v, page: 1 } })),
     setStatus: (v) =>
         set((s) => ({ filters: { ...s.filters, status: v, page: 1 } })),
     setSort: (by, order) =>
@@ -127,7 +123,6 @@ export const useBoatsListStore = create<BoatsListState>((set, get) => ({
 
         const params = compact({
             search: filters.search.trim() || undefined,
-            sector: filters.sector !== 'all' ? filters.sector : undefined,
             status: filters.status !== 'all' ? filters.status : undefined,
             sortBy: filters.sortBy,
             sortOrder: filters.sortOrder,

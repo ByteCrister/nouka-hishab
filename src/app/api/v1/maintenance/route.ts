@@ -119,7 +119,6 @@ export const GET = withErrorHandler<MaintenanceListResponse, [NextRequest]>(asyn
                 notes: boatMaintenanceLogs.notes,
                 boatId: boatMaintenanceLogs.boatId,
                 boatName: boats.name,
-                boatSector: boats.sector,
             })
             .from(boatMaintenanceLogs)
             .innerJoin(boats, eq(boatMaintenanceLogs.boatId, boats.id))

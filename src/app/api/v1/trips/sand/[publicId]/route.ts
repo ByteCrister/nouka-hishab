@@ -9,6 +9,7 @@ import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult, ApiError } from "@/lib/helpers/withErrorHandler";
 import { SandTripDetail } from "@/types/trips.types";
 import { SandTripStatus, SandCargoUnit } from "@/constants/db/sand.const";
+import { SECTORS } from "@/constants/db/app.const";
 // import type { UpdateSandTripPayload } from "@/types/trips.types";
 import { updateSandTripSchema } from "@/utils/zod/sand-trips.schema";
 import { recalculateTripFinancials } from "../../../../../../lib/helpers/trip-financials.helper";
@@ -140,6 +141,7 @@ export const GET = withErrorHandler<SandTripDetail, [NextRequest, RouteContext]>
       ...rest,
       expenses: expensesData,
       attachments: attachmentsData,
+      sector: SECTORS.SAND,
     };
 
     return { data: mappedTrip as SandTripDetail };

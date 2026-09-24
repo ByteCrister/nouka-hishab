@@ -15,7 +15,6 @@ import { createSandTripSchema } from "@/utils/zod/sand-trips.schema";
 import { SECTORS } from "@/constants/db/app.const";
 
 const getTripsSchema = z.object({
-  sector: z.enum([SECTORS.SAND, 'all']).optional().default(SECTORS.SAND).transform(v => v === 'all' ? SECTORS.SAND : v),
   search: z.string().optional().default(""),
   status: z.string().optional().default("all"),
   boatPublicId: z.string().optional().nullable(),
@@ -38,17 +37,6 @@ export const GET = withErrorHandler<TripListResponse, [NextRequest]>(async (req)
 
   const offset = (query.page - 1) * query.limit;
 
-  // In the future, this endpoint will union multiple tables (sand_trips, brick_trips)
-  // For now, it only queries sand_trips if sector is 'all' or 'sand'
-  if (query.sector !== SECTORS.SAND) {
-    return {
-      data: {
-        items: [],
-        meta: getPaginationMeta(0, query.page, query.limit),
-        kpis: { totalTrips: 0, totalProfitTk: 0, totalCostTk: 0 }
-      }
-    };
-  }
 
   const baseConditions = [
     isNull(sandTrips.deletedAt),
@@ -137,7 +125,7 @@ export const GET = withErrorHandler<TripListResponse, [NextRequest]>(async (req)
     cargoValue: item.cargoValue ? parseFloat(item.cargoValue) : null,
     saleAmountTk: item.saleAmountTk ? parseFloat(item.saleAmountTk) : null,
     netProfitTk: item.netProfitTk ? parseFloat(item.netProfitTk) : null,
-    sector: 'sand' as const
+    sector: SECTORS.SAND
   }));
 
   return {

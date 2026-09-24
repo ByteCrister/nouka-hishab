@@ -7,6 +7,7 @@ import { withErrorHandler } from "@/lib/helpers/withErrorHandler";
 import { BoatsDashboardMetrics } from "@/types/boats.types";
 import { BOAT_STATUSES } from "@/constants/db/boats.const";
 import { SAND_TRIP_STATUSES } from "@/constants/db/sand.const";
+import { SECTORS } from "@/constants/db/app.const";
 
 export const GET = withErrorHandler<BoatsDashboardMetrics, [Request]>(async () => {
   const userId = await requireAuthUserId();
@@ -60,7 +61,6 @@ export const GET = withErrorHandler<BoatsDashboardMetrics, [Request]>(async () =
         id: sandTrips.id,
         publicId: sandTrips.publicId,
         boatName: boats.name,
-        sector: boats.sector,
         status: sandTrips.status,
         amount: sandTrips.saleAmountTk,
         date: sandTrips.departureTime,
@@ -122,8 +122,8 @@ export const GET = withErrorHandler<BoatsDashboardMetrics, [Request]>(async () =
       recentTrips: (recentTripsResult || []).map(trip => ({
         ...trip,
         boatName: trip.boatName || 'Unknown',
-        sector: trip.sector || 'sand',
         amount: Number(trip.amount) || 0,
+        sector: SECTORS.SAND,
       })),
       recentMaintenance: (recentMaintenanceResult || []).map(item => ({
         ...item,

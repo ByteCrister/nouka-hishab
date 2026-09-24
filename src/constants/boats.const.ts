@@ -19,7 +19,6 @@ export const BOAT_TRIPS_LIMIT_OPTIONS = [10, 20, 50] as const;
 
 // ─── Defaults ──────────────────────────────────────────────────────────────
 export const BOAT_LIST_DEFAULT_FILTERS: BoatListFilters = {
-  sector: 'all',
   search: '',
   status: 'all',
   sortBy: 'createdAt',
@@ -64,14 +63,6 @@ export const BOAT_STATUS_FILTER_OPTIONS: {
 }[] = [
   { value: 'all', label: 'All statuses' },
   ...Object.values(BOAT_STATUSES).map((s) => ({ value: s, label: prettify(s) })),
-];
-
-export const BOAT_SECTOR_FILTER_OPTIONS: {
-  value: SectorName | 'all';
-  label: string;
-}[] = [
-  { value: 'all', label: 'All sectors' },
-  ...Object.values(SECTORS).map((s) => ({ value: s, label: prettify(s) })),
 ];
 
 export const BOAT_TRIP_STATUS_FILTER_OPTIONS: {

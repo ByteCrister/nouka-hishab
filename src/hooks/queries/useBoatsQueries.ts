@@ -36,7 +36,6 @@ export function useBoats(filters: BoatListFilters) {
         queryFn: async () => {
             const params = compact({
                 search: filters.search.trim() || undefined,
-                sector: filters.sector !== 'all' ? filters.sector : undefined,
                 status: filters.status !== 'all' ? filters.status : undefined,
                 sortBy: filters.sortBy,
                 sortOrder: filters.sortOrder,

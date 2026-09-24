@@ -42,8 +42,7 @@ export function MaintenanceFormDialog({
   const t = useTranslations('maintenance.form');
   const sharedT = useTranslations('shared');
   
-  const [selectedSector, setSelectedSector] = useState<string>(SECTORS.SAND);
-  const { data: boats } = useBoatsMeta(selectedSector || undefined);
+  const { data: boats } = useBoatsMeta();
 
   const form = useForm<MaintenanceFormValues, unknown, CreateMaintenanceSchema>({
     resolver: zodResolver(createMaintenanceSchema),
@@ -60,7 +59,6 @@ export function MaintenanceFormDialog({
   useEffect(() => {
     if (open) {
       if (initialData) {
-        setSelectedSector(initialData.boatSector || SECTORS.SAND);
         form.reset({
           boatId: initialData.boatId,
           maintenanceDate: new Date(initialData.maintenanceDate).toISOString().split('T')[0],
@@ -70,7 +68,6 @@ export function MaintenanceFormDialog({
           notes: initialData.notes ?? '',
         });
       } else {
-        setSelectedSector(SECTORS.SAND);
         form.reset({
           boatId: undefined,
           maintenanceDate: new Date().toISOString().split('T')[0],
@@ -98,26 +95,6 @@ export function MaintenanceFormDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-2 sm:col-span-1">
-              <Label htmlFor="sector">{t('sector') || 'Sector'}</Label>
-              <Select
-                value={selectedSector}
-                onValueChange={(val) => {
-                  setSelectedSector(val);
-                  form.resetField('boatId');
-                }}
-              >
-                <SelectTrigger id="sector">
-                  <SelectValue placeholder={t('sector')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={SECTORS.SAND}>
-                    {sharedT(`sectors.${SECTORS.SAND}` as `sectors.${SectorName}`)}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label htmlFor="boatId">{t('boat')} <span className="text-destructive">*</span></Label>
               <Select

@@ -17,6 +17,7 @@ import { MaintenanceKpis } from './MaintenanceKpis';
 import { MaintenanceToolbar } from './MaintenanceToolbar';
 import { MaintenanceFormDialog } from './MaintenanceFormDialog';
 import { MaintenanceReportPreviewModal } from './MaintenanceReportPreviewModal';
+import { MaintenancePageSkeleton } from './MaintenancePageSkeleton';
 import { useMaintenanceList } from '@/hooks/queries/useMaintenanceQueries';
 import { 
   useCreateMaintenance, 
@@ -52,6 +53,10 @@ export function MaintenancePageClient() {
   const [itemToDelete, setItemToDelete] = useState<MaintenanceListItem | undefined>(undefined);
   
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  if (isLoading && !data) {
+    return <MaintenancePageSkeleton />;
+  }
 
   const handleAdd = () => {
     setEditingItem(undefined);

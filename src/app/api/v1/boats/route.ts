@@ -20,7 +20,6 @@ import { createBoatSchema } from "@/utils/zod/boats.schema";
 
 const getBoatsSchema = z.object({
     search: z.string().optional().default(""),
-    sector: z.enum([SECTORS.SAND]).optional().default(SECTORS.SAND),
     status: z.enum([BOAT_STATUSES.ACTIVE, BOAT_STATUSES.MAINTENANCE, BOAT_STATUSES.INACTIVE, "all"]).optional().default("all"),
     sortBy: z.enum(["name", "createdAt", "capacityValue", "status"]).optional().default("createdAt"),
     sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
@@ -43,9 +42,6 @@ export const GET = withErrorHandler<BoatListResponse, [NextRequest]>(async (req)
         eq(boats.createdBy, userId),
     ];
 
-    if (query.sector !== SECTORS.SAND) {
-        baseConditions.push(eq(boats.sector, query.sector));
-    }
 
     if (query.search) {
         const fuzzySearch = buildFuzzySearchPattern(query.search);
@@ -96,7 +92,6 @@ export const GET = withErrorHandler<BoatListResponse, [NextRequest]>(async (req)
             .select({
                 id: boats.id,
                 publicId: boats.publicId,
-                sector: boats.sector,
                 name: boats.name,
                 capacityValue: boats.capacityValue,
                 capacityUnit: boats.capacityUnit,
@@ -132,7 +127,6 @@ export const GET = withErrorHandler<BoatListResponse, [NextRequest]>(async (req)
     const items: BoatListItem[] = itemsResult.map(item => ({
         id: item.id,
         publicId: item.publicId,
-        sector: item.sector as typeof SECTORS[keyof typeof SECTORS],
         name: item.name,
         capacityValue: item.capacityValue ? Number(item.capacityValue) : null,
         capacityUnit: item.capacityUnit,
@@ -140,6 +134,7 @@ export const GET = withErrorHandler<BoatListResponse, [NextRequest]>(async (req)
         primaryImageUrl: item.primaryImageUrl || null,
         totalTrips: item.totalTrips || 0,
         lastTripAt: item.lastTripAt ? new Date(item.lastTripAt).toISOString() : null,
+        sector: SECTORS.SAND,
     }));
 
     return {
@@ -161,7 +156,6 @@ export const POST = withErrorHandler<unknown, [NextRequest]>(async (req) => {
         .insert(boats)
         .values({
             name: payload.name,
-            sector: payload.sector,
             capacityValue: payload.capacityValue ? String(payload.capacityValue) : null,
             capacityUnit: payload.capacityUnit || undefined,
             status: payload.status || BOAT_STATUSES.ACTIVE,

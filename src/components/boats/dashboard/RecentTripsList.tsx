@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { BoatsDashboardMetrics } from '@/types/boats.types';
 import { SAND_TRIP_STATUSES } from '@/constants/db/sand.const';
+import { SECTORS } from '@/constants/db/app.const';
 import { Link, useRouter } from '@/i18n/routing';
 
 interface Props {
@@ -59,7 +60,11 @@ export function RecentTripsList({ trips }: Props) {
                   <TableRow
                     key={trip.id}
                     className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => router.push(`/trips/${trip.sector}/${trip.publicId}`)}
+                    onClick={() => {
+                      if (trip.sector === SECTORS.SAND) {
+                        router.push(`/trips/sand/${trip.publicId}`);
+                      }
+                    }}
                   >
                     <TableCell className="font-medium">{trip.boatName || 'Unknown Boat'}</TableCell>
                     <TableCell>{getStatusBadge(trip.status)}</TableCell>

@@ -1,12 +1,11 @@
 import type { PaginationMeta, SortOrder } from '@/types/api.types';
+import type { SectorName } from '@/constants/db/app.const';
 import type { SandTripStatus, SandCargoUnit, SandTripExpenseCategory } from '@/constants/db/sand.const';
-import { SECTORS } from '@/constants/db/app.const';
 
 export interface BoatMeta {
   id: number;
   publicId: string;
   name: string;
-  sector: string;
   capacityValue: number | null;
   capacityUnit: string | null;
 }
@@ -15,7 +14,6 @@ export interface TripListItem {
   publicId: string;
   boatName: string;
   boatPublicId: string;
-  sector: 'sand' | 'brick' | 'limestone';
   source: string | null;
   destination: string | null;
   departureTime: string;
@@ -26,6 +24,7 @@ export interface TripListItem {
   netProfitTk: number | null;
   status: string;
   createdAt: string;
+  sector: SectorName;
 }
 
 export interface SandTripDetail extends Omit<TripListItem, 'cargoUnit' | 'status'> {
@@ -56,7 +55,6 @@ export type TripSortField =
   | 'saleAmountTk';
 
 export interface TripsFilters {
-  sector: typeof SECTORS.SAND; // sector: 'all' | 'sand' | 'brick' | 'limestone';
   status: string | 'all';
   boatPublicId: string | null;
   search: string;

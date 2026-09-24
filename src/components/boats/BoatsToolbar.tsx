@@ -20,7 +20,7 @@ import { SECTORS, type SectorName } from '@/constants/db/app.const';
 export function BoatsToolbar() {
   const t = useTranslations('boatsPage');
   const sharedT = useTranslations('shared');
-  const { listFilters: filters, setSearch, setStatus, setSector } = useBoatFiltersStore();
+  const { listFilters: filters, setSearch, setStatus } = useBoatFiltersStore();
   const [localSearch, setLocalSearch] = useState(filters.search || '');
 
   const debouncedSearch = useDebounce(localSearch, 400);
@@ -45,23 +45,6 @@ export function BoatsToolbar() {
         />
       </div>
       
-      <div className="w-full sm:w-48">
-        <Select 
-          value={SECTORS.SAND} 
-          onValueChange={(val: string) => setSector(val as SectorName | 'all')}
-        >
-          <SelectTrigger className="h-11 bg-card/50 backdrop-blur-sm border-border/50 font-medium rounded-xl shadow-sm hover:border-primary/30 transition-all">
-            <SelectValue placeholder={sharedT('sectors.all')} />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl shadow-lg border-border/50">
-            <SelectItem value={SECTORS.SAND} className="rounded-lg">{sharedT('sectors.sand')}</SelectItem>
-           {/* Currently the site only supports sand boat */}
-            {/* <SelectItem value="all" className="rounded-lg">{sharedT('sectors.all')}</SelectItem> */}
-            {/* <SelectItem value={SECTORS.LIME_STONE} className="rounded-lg">{sharedT('sectors.lime-stone')}</SelectItem> */}
-            {/* <SelectItem value={SECTORS.BRICK} className="rounded-lg">{sharedT('sectors.brick')}</SelectItem> */}
-          </SelectContent>
-        </Select>
-      </div>
 
       <div className="w-full sm:w-48">
         <Select 

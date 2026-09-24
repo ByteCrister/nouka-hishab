@@ -24,7 +24,6 @@ export function NewBoatForm() {
 
   const [formData, setFormData] = useState({
     name: "",
-    sector: SECTORS.SAND,
     capacityValue: "",
     capacityUnit: "",
     status: BOAT_STATUSES.ACTIVE,
@@ -65,7 +64,6 @@ export function NewBoatForm() {
       
       const newBoat = await createBoat({
         name: validData.name,
-        sector: validData.sector as SectorName,
         capacityValue: validData.capacityValue ? Number(validData.capacityValue) : null,
         capacityUnit: validData.capacityUnit || null,
         status: validData.status,
@@ -146,32 +144,6 @@ export function NewBoatForm() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 group">
-                <Label htmlFor="sector" className="text-sm font-medium text-foreground">
-                  {t("form.sector")} <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-river-500 transition-colors z-10">
-                    <Layers className="h-4 w-4" />
-                  </div>
-                  <Select
-                    value={formData.sector}
-                    onValueChange={(val) => handleSelectChange('sector', val)}
-                    disabled={isSubmitting}
-                  >
-                    <SelectTrigger className={`pl-10 h-11 bg-background/50 rounded-xl`}>
-                      <SelectValue placeholder={t("form.sectorPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={SECTORS.SAND}>{t("form.sectors.sand")}</SelectItem>
-                      <SelectItem value={SECTORS.LIME_STONE}>{t("form.sectors.stone")}</SelectItem>
-                      <SelectItem value={SECTORS.BRICK}>{t("form.sectors.brick")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {renderError("sector")}
-              </div>
-
               <div className="space-y-2 group">
                 <Label htmlFor="status" className="text-sm font-medium text-foreground">
                   {t("form.status")}

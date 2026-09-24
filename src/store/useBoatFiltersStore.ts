@@ -2,13 +2,11 @@ import { create } from 'zustand';
 import type { SortOrder } from '@/types/api.types';
 import type { BoatListFilters, BoatTripsFilters, BoatSortField, BoatTripSortField } from '@/types/boats.types';
 import { BOAT_LIST_DEFAULT_FILTERS, BOAT_TRIPS_DEFAULT_FILTERS, type BoatStatus } from '@/constants/boats.const';
-import type { SectorName } from '@/constants/db/app.const';
 import type { SandTripStatus } from '@/constants/db/sand.const';
 
 interface BoatsFiltersState {
     listFilters: BoatListFilters;
     setSearch: (v: string) => void;
-    setSector: (v: SectorName | 'all') => void;
     setStatus: (v: BoatStatus | 'all') => void;
     setSort: (by: BoatSortField, order?: SortOrder) => void;
     setPage: (p: number) => void;
@@ -28,7 +26,6 @@ interface BoatsFiltersState {
 export const useBoatFiltersStore = create<BoatsFiltersState>((set) => ({
     listFilters: { ...BOAT_LIST_DEFAULT_FILTERS },
     setSearch: (v) => set((s) => ({ listFilters: { ...s.listFilters, search: v, page: 1 } })),
-    setSector: (v) => set((s) => ({ listFilters: { ...s.listFilters, sector: v, page: 1 } })),
     setStatus: (v) => set((s) => ({ listFilters: { ...s.listFilters, status: v, page: 1 } })),
     setSort: (by, order) => set((s) => ({
         listFilters: { ...s.listFilters, sortBy: by, sortOrder: order ?? s.listFilters.sortOrder, page: 1 }

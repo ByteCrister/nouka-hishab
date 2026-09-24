@@ -74,9 +74,7 @@ export function BoatDetailHeader({ boat }: BoatDetailHeaderProps) {
                 {boat.name}
               </h1>
               <div className="flex gap-2">
-                <Badge variant="outline" className="capitalize text-muted-foreground bg-muted/50 font-normal">
-                  {tShared(`sectors.${boat.sector}`)}
-                </Badge>
+
                 <Badge variant="secondary" className={`capitalize ${getStatusColor(boat.status)}`}>
                   {tBoats(`status.${boat.status}`)}
                 </Badge>

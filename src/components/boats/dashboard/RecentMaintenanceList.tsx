@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BoatsDashboardMetrics } from '@/types/boats.types';
-import { Link } from '@/i18n/routing';
+import { Link, useRouter } from '@/i18n/routing';
 
 interface Props {
   maintenance: BoatsDashboardMetrics['recentMaintenance'];
@@ -12,6 +12,7 @@ interface Props {
 
 export function RecentMaintenanceList({ maintenance }: Props) {
   const t = useTranslations('sand.recentActivity');
+  const router = useRouter();
 
   return (
     <Card className="h-full border shadow-sm transition-all hover:shadow-md">
@@ -39,7 +40,11 @@ export function RecentMaintenanceList({ maintenance }: Props) {
               </TableHeader>
               <TableBody>
                 {maintenance.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-muted/50">
+                  <TableRow 
+                    key={item.id} 
+                    className="hover:bg-muted/50 cursor-pointer transition-colors"
+                    onClick={() => router.push('/maintenance')}
+                  >
                     <TableCell className="font-medium whitespace-nowrap">{item.boatName || 'Unknown Boat'}</TableCell>
                     <TableCell className="truncate max-w-[150px] text-sm text-muted-foreground" title={item.description}>
                       {item.description}

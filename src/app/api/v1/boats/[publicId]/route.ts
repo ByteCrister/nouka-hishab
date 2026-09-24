@@ -8,8 +8,8 @@ import { requireAuthUserId } from "@/lib/auth/utils";
 import { withErrorHandler, ApiError } from "@/lib/helpers/withErrorHandler";
 import { BoatDetailResponse, BoatDetail, BoatImage, BoatDetailKpis, BoatDocument } from "@/types/boats.types";
 import { SAND_TRIP_STATUSES } from "@/constants/db/sand.const";
+import { SECTORS } from "@/constants/db/app.const";
 import { updateBoatSchema } from "@/utils/zod/boats.schema";
-import { type SectorName } from "@/constants/db/app.const";
 
 export const GET = withErrorHandler<BoatDetailResponse, [NextRequest, { params: Promise<{ publicId: string }> }]>(async (req, { params }) => {
     const userId = await requireAuthUserId();
@@ -20,7 +20,6 @@ export const GET = withErrorHandler<BoatDetailResponse, [NextRequest, { params: 
         .select({
             id: boats.id,
             publicId: boats.publicId,
-            sector: boats.sector,
             name: boats.name,
             registrationNumber: boats.registrationNumber,
             lengthM: boats.lengthM,
@@ -116,7 +115,6 @@ export const GET = withErrorHandler<BoatDetailResponse, [NextRequest, { params: 
     const detail: BoatDetail = {
         id: boatResult.id,
         publicId: boatResult.publicId,
-        sector: boatResult.sector as SectorName,
         name: boatResult.name,
         registrationNumber: boatResult.registrationNumber,
         lengthM: boatResult.lengthM ? Number(boatResult.lengthM) : null,
@@ -133,6 +131,7 @@ export const GET = withErrorHandler<BoatDetailResponse, [NextRequest, { params: 
         primaryImageUrl: boatResult.primaryImageUrl || null,
         totalTrips: boatResult.totalTrips || 0,
         lastTripAt: boatResult.lastTripAt ? new Date(boatResult.lastTripAt).toISOString() : null,
+        sector: SECTORS.SAND,
         images,
         documents,
         updatedAt: boatResult.updatedAt ? new Date(boatResult.updatedAt).toISOString() : new Date().toISOString(),
@@ -204,7 +203,6 @@ export const PATCH = withErrorHandler<unknown, [NextRequest, { params: Promise<{
     const payload = updateBoatSchema.parse(body);
 
     const updateData: Record<string, unknown> = { updatedAt: new Date() };
-    if (payload.sector !== undefined) updateData.sector = payload.sector;
     if (payload.name !== undefined) updateData.name = payload.name;
     if (payload.registrationNumber !== undefined) updateData.registrationNumber = payload.registrationNumber ? payload.registrationNumber : null;
     if (payload.capacityValue !== undefined) updateData.capacityValue = payload.capacityValue ? String(payload.capacityValue) : null;

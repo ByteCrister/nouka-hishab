@@ -56,9 +56,7 @@ export function BoatCard({ boat, priority = false }: BoatCardProps) {
           <h3 className="font-bold text-xl truncate text-foreground group-hover:text-primary transition-colors">
             {boat.name}
           </h3>
-          <Badge variant="secondary" className="font-normal text-xs bg-muted/50 border-border/50 text-muted-foreground whitespace-nowrap">
-            {tShared(`sectors.${boat.sector}`)}
-          </Badge>
+
         </div>
         
         <div className="space-y-4 mt-auto pt-6">

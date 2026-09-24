@@ -30,7 +30,6 @@ export interface BoatDocument {
 export interface BoatListItem {
   id: number;
   publicId: string;
-  sector: SectorName;
   name: string;
   capacityValue: number | null;
   capacityUnit: BoatCapacityUnit | null;
@@ -38,6 +37,7 @@ export interface BoatListItem {
   primaryImageUrl: string | null;
   totalTrips: number;
   lastTripAt: string | null;
+  sector: SectorName;
 }
 
 // ─── Full detail (detail page) ─────────────────────────────────────────────
@@ -88,7 +88,6 @@ export type BoatSortField =
   | 'status';
 
 export interface BoatListFilters {
-  sector: SectorName | 'all';
   search: string;
   status: BoatStatus | 'all';
   sortBy: BoatSortField;
@@ -132,7 +131,6 @@ export interface BoatTripListItem {
 // ─── Request payloads ──────────────────────────────────────────────────────
 export interface CreateBoatPayload {
   name: string;
-  sector: SectorName;
   registrationNumber?: string | null;
   lengthM?: number | null;
   widthM?: number | null;
@@ -183,10 +181,10 @@ export interface BoatsDashboardRecentTrip {
   id: number;
   publicId: string;
   boatName: string;
-  sector: string;
   status: string;
   amount: number;
   date: Date | null;
+  sector: SectorName;
 }
 
 export interface BoatsDashboardRecentMaintenance {
@@ -214,5 +212,6 @@ export interface BoatsDashboardMetrics {
   };
   recentTrips: BoatsDashboardRecentTrip[];
   recentMaintenance: BoatsDashboardRecentMaintenance[];
-}
+}
+
 

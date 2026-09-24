@@ -17,7 +17,7 @@ export function TripsToolbar() {
   const t = useTranslations('trips');
   const sharedT = useTranslations('shared');
   const { filters, setFilter, resetFilters } = useTripsFiltersStore();
-  const { data: boats } = useBoatsMeta(filters.sector);
+  const { data: boats } = useBoatsMeta();
 
   const [localSearch, setLocalSearch] = useState(filters.search || '');
   const debouncedSearch = useDebounce(localSearch, 500);
@@ -47,24 +47,6 @@ export function TripsToolbar() {
           className="pl-9 h-10 rounded-xl bg-background/50"
         />
       </div>
-
-      {/* Sector */}
-      <Select
-        value={filters.sector}
-        onValueChange={(v) => setFilter('sector', v as typeof filters.sector)}
-      >
-        <SelectTrigger className="w-[140px] h-10 rounded-xl bg-background/50">
-          <Layers className="w-4 h-4 mr-2 text-muted-foreground" />
-          <SelectValue placeholder={t('toolbar.allSectors')} />
-        </SelectTrigger>
-        <SelectContent>
-          {/* Currently only Sand sector is supported */}
-          <SelectItem value={SECTORS.SAND}>{sharedT('sectors.sand')}</SelectItem>
-          {/* <SelectItem value="all">{sharedT('sectors.all')}</SelectItem> */}
-          {/* <SelectItem value={SECTORS.BRICK}>{sharedT('sectors.brick')}</SelectItem> */}
-          {/* <SelectItem value={SECTORS.LIME_STONE}>{sharedT('sectors.lime-stone')}</SelectItem> */}
-        </SelectContent>
-      </Select>
 
       {/* Status */}
       <Select

@@ -91,7 +91,7 @@ export function SandTripForm({ initialData }: { initialData?: SandTripDetail }) 
     return initialForm;
   });
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const { data: boats, isLoading: boatsLoading } = useBoatsMeta('sand');
+  const { data: boats, isLoading: boatsLoading } = useBoatsMeta();
   
   const isEdit = !!initialData;
   const { mutateAsync: createTrip, isPending: isCreating } = useCreateSandTrip((publicId) => {

@@ -17,7 +17,6 @@ import { ulid } from 'ulid';
 import { files } from './media';
 import { users } from './app';
 import { BoatCapacityUnit, BoatStatus, BOAT_CAPACITY_UNITS, BOAT_STATUSES } from '@/constants/db/boats.const';
-import { SECTORS, type SectorName } from '@/constants/db/app.const';
 
 // ─── Boats ─────────────────────────────────────────────────────────────────
 // Steel boat registry.
@@ -32,10 +31,6 @@ export const boats = pgTable(
       .unique()
       .notNull()
       .$defaultFn(() => ulid()), // safe URL param e.g. /boats/01J7K9...
-    sector: varchar('sector', { length: 50 })
-      .notNull()
-      .default(SECTORS.SAND)
-      .$type<SectorName>(),
     name: varchar('name', { length: 255 }).notNull(),
     registrationNumber: varchar('registration_number', { length: 100 }).unique(),
     capacityValue: numeric('capacity_value', { precision: 10, scale: 2 }),
@@ -71,11 +66,6 @@ export const boats = pgTable(
       sql`${t.capacityUnit} IS NULL OR ${t.capacityUnit} IN (${sql.raw(Object.values(BOAT_CAPACITY_UNITS).map(s => `'${s}'`).join(', '))})`,
     ),
     publicIdIdx: index('idx_boats_public_id').on(t.publicId),
-    sectorCheck: check(
-      'boats_sector_check',
-      sql`${t.sector} IN (${sql.raw(Object.values(SECTORS).map(s => `'${s}'`).join(', '))})`,
-    ),
-    sectorIdx: index('idx_boats_sector').on(t.sector),
     statusIdx: index('idx_boats_status').on(t.status),
     createdByIdx: index('idx_boats_created_by').on(t.createdBy),
   }),

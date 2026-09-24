@@ -10,7 +10,6 @@ export interface MaintenanceListItem {
   notes: string | null;
   boatId: number;
   boatName: string;
-  boatSector: string;
 }
 
 export interface MaintenanceKpis {

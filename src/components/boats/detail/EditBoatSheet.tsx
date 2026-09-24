@@ -29,7 +29,6 @@ export function EditBoatSheet({ boat, open, onOpenChange }: EditBoatSheetProps) 
 
   const [formData, setFormData] = useState({
     name: boat.name,
-    sector: boat.sector,
     registrationNumber: boat.registrationNumber || "",
     capacityValue: boat.capacityValue?.toString() || "",
     capacityUnit: boat.capacityUnit || "",
@@ -51,7 +50,6 @@ export function EditBoatSheet({ boat, open, onOpenChange }: EditBoatSheetProps) 
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         name: boat.name,
-        sector: boat.sector,
         registrationNumber: boat.registrationNumber || "",
         capacityValue: boat.capacityValue?.toString() || "",
         capacityUnit: boat.capacityUnit || "",
@@ -103,7 +101,6 @@ export function EditBoatSheet({ boat, open, onOpenChange }: EditBoatSheetProps) 
         publicId: boat.publicId,
         payload: {
           name: validData.name,
-          sector: validData.sector as SectorName,
           registrationNumber: validData.registrationNumber || null,
           capacityValue: validData.capacityValue ? Number(validData.capacityValue) : null,
           capacityUnit: validData.capacityUnit || null,
@@ -170,20 +167,7 @@ export function EditBoatSheet({ boat, open, onOpenChange }: EditBoatSheetProps) 
                   <Input id="name" name="name" value={formData.name} onChange={handleChange} disabled={isSubmitting} />
                   {renderError("name")}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sector">Sector *</Label>
-                  <Select value={formData.sector} onValueChange={(val) => handleSelectChange('sector', val)} disabled={isSubmitting}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={SECTORS.SAND}>Sand</SelectItem>
-                      <SelectItem value={SECTORS.LIME_STONE}>Stone</SelectItem>
-                      <SelectItem value={SECTORS.BRICK}>Brick</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {renderError("sector")}
-                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="registrationNumber">{t("registrationNumber")}</Label>
                   <Input id="registrationNumber" name="registrationNumber" value={formData.registrationNumber} onChange={handleChange} disabled={isSubmitting} placeholder={t("registrationNumberPlaceholder")} />
