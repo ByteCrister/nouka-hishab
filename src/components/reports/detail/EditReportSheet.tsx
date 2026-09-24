@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { z } from "zod";
 import { useUpdateReport } from "@/hooks/mutations/useReportsMutations";
 import { updateReportSchema } from "@/utils/zod/reports.schema";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
 import { 
   Sheet, 
@@ -42,15 +42,16 @@ export function EditReportSheet({ report }: EditReportSheetProps) {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (open) {
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
       setFormData({
         status: report.status,
         adminReply: report.adminReply || "",
       });
       setErrors({});
     }
-  }, [open, report]);
+    setOpen(newOpen);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -116,7 +117,7 @@ export function EditReportSheet({ report }: EditReportSheetProps) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button variant="outline" className="rounded-xl shadow-sm h-10">
           <Edit className="w-4 h-4 mr-2" />

@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { SAND_TRIP_STATUSES, SAND_CARGO_UNITS, SAND_TRIP_EXPENSE_CATEGORIES } from '@/constants/db/sand.const';
+import { SAND_TRIP_STATUSES, SAND_CARGO_UNITS } from '@/constants/db/sand.const';
+import { TRIP_EXPENSE_CATEGORIES } from '@/constants/db/trips.const';
 
 import { bdPhoneRegex } from './common.schema';
 
@@ -44,16 +45,20 @@ export const updateSandTripSchema = baseSandTripSchema.partial().refine(timeRefi
   path: ["arrivalTime"],
 });
 
-export const createSandTripExpenseSchema = z.object({
-  category: z.nativeEnum(SAND_TRIP_EXPENSE_CATEGORIES),
+export const createTripExpenseSchema = z.object({
+  boatPublicId: z.string().min(1, "Boat is required"),
+  sandTripId: z.number().int().positive().nullable().optional(),
+  category: z.nativeEnum(TRIP_EXPENSE_CATEGORIES),
   description: z.string().nullable().optional(),
   amountTk: z.number().min(0, "Amount must be positive"),
   expenseDate: z.string().nullable().optional(),
 });
 
-export const updateSandTripExpenseSchema = createSandTripExpenseSchema.partial();
+export const updateTripExpenseSchema = createTripExpenseSchema.partial();
 
-export const createSandTripAttachmentSchema = z.object({
+export const createTripAttachmentSchema = z.object({
+  boatPublicId: z.string().min(1, "Boat is required"),
+  sandTripId: z.number().int().positive().nullable().optional(),
   fileId: z.number().int().positive("Invalid file ID"),
   description: z.string().nullable().optional(),
 });

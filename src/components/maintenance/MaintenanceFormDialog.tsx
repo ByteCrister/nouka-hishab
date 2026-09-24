@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -19,7 +19,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createMaintenanceSchema, type CreateMaintenanceSchema } from '@/utils/zod/maintenance.schema';
 import { useBoatsMeta } from '@/hooks/queries/useBoatsMetaQueries';
-import { SECTORS, type SectorName } from '@/constants/db/app.const';
 import type { MaintenanceListItem } from '@/types/maintenance.types';
 
 type MaintenanceFormValues = z.input<typeof createMaintenanceSchema>;
@@ -84,6 +83,8 @@ export function MaintenanceFormDialog({
     onSubmit(data);
   });
 
+  const boatIdValue = useWatch({ control: form.control, name: 'boatId' });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -98,7 +99,7 @@ export function MaintenanceFormDialog({
             <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label htmlFor="boatId">{t('boat')} <span className="text-destructive">*</span></Label>
               <Select
-                value={form.watch('boatId')?.toString() || ''}
+                value={boatIdValue?.toString() || ''}
                 onValueChange={(val) => form.setValue('boatId', parseInt(val, 10))}
               >
                 <SelectTrigger id="boatId" className={form.formState.errors.boatId ? 'border-destructive' : ''}>

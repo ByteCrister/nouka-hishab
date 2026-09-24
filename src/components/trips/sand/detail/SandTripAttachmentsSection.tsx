@@ -6,8 +6,8 @@ import {
   useCreateSandTripAttachment,
   useDeleteSandTripAttachment,
 } from '@/hooks/mutations/useSandTripsMutations';
-import { createSandTripAttachmentSchema } from '@/utils/zod/sand-trips.schema';
-import { SandTripAttachmentItem } from '@/types/trips.types';
+import { createTripAttachmentSchema } from '@/utils/zod/sand-trips.schema';
+import { TripAttachmentItem } from '@/types/trips.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,10 +30,11 @@ import { useMediaUpload } from '@/hooks/media/use-media-upload';
 
 interface Props {
   tripPublicId: string;
-  attachments: SandTripAttachmentItem[];
+  boatPublicId: string;
+  attachments: TripAttachmentItem[];
 }
 
-export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props) {
+export function SandTripAttachmentsSection({ tripPublicId, boatPublicId, attachments }: Props) {
   const t = useTranslations('sandTripsDetail');
   const [showAdd, setShowAdd] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -69,7 +70,8 @@ export function SandTripAttachmentsSection({ tripPublicId, attachments }: Props)
       const fileId = uploadResults[0].fileId;
 
       // 2. Attach to trip
-      const payload = createSandTripAttachmentSchema.parse({
+      const payload = createTripAttachmentSchema.parse({
+        boatPublicId,
         fileId,
         description: description || null,
       });

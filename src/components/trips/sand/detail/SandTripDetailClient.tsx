@@ -263,12 +263,12 @@ export function SandTripDetailClient({ publicId }: Props) {
 
       {/* Expenses */}
       <FadeInUp delay={0.35}>
-        <SandTripExpensesSection tripPublicId={publicId} expenses={trip.expenses} operatingCostTk={trip.operatingCostTk} />
+        <SandTripExpensesSection tripPublicId={publicId} boatPublicId={trip.boatPublicId} expenses={trip.expenses} operatingCostTk={trip.operatingCostTk} />
       </FadeInUp>
 
       {/* Attachments */}
       <FadeInUp delay={0.4}>
-        <SandTripAttachmentsSection tripPublicId={publicId} attachments={trip.attachments} />
+        <SandTripAttachmentsSection tripPublicId={publicId} boatPublicId={trip.boatPublicId} attachments={trip.attachments} />
       </FadeInUp>
     </div>
 

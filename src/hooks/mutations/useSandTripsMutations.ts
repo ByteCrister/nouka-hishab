@@ -3,9 +3,9 @@ import { api, extractErrorMessage } from '@/utils/axios';
 import { 
   CreateSandTripPayload, 
   UpdateSandTripPayload,
-  CreateSandTripExpensePayload,
-  UpdateSandTripExpensePayload,
-  CreateSandTripAttachmentPayload
+  CreateTripExpensePayload,
+  UpdateTripExpensePayload,
+  CreateTripAttachmentPayload
 } from '@/types/trips.types';
 import { tripKeys } from '@/hooks/queries/useTripsQueries';
 import { toast } from 'sonner';
@@ -102,7 +102,7 @@ async function createSandTripExpense({
   payload,
 }: {
   tripPublicId: string;
-  payload: CreateSandTripExpensePayload;
+  payload: CreateTripExpensePayload;
 }): Promise<{ success: boolean; publicId: string }> {
   const { data } = await api.post<{ data: { success: boolean; publicId: string } }>(
     `/trips/sand/${tripPublicId}/expenses`,
@@ -137,7 +137,7 @@ async function updateSandTripExpense({
 }: {
   tripPublicId: string;
   expensePublicId: string;
-  payload: UpdateSandTripExpensePayload;
+  payload: UpdateTripExpensePayload;
 }): Promise<{ success: boolean }> {
   const { data } = await api.patch<{ data: { success: boolean } }>(
     `/trips/sand/${tripPublicId}/expenses/${expensePublicId}`,
@@ -204,7 +204,7 @@ async function createSandTripAttachment({
   payload,
 }: {
   tripPublicId: string;
-  payload: CreateSandTripAttachmentPayload;
+  payload: CreateTripAttachmentPayload;
 }): Promise<{ success: boolean }> {
   const { data } = await api.post<{ data: { success: boolean } }>(
     `/trips/sand/${tripPublicId}/attachments`,

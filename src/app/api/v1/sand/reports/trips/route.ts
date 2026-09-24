@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/config/db";
-import { sandTrips, sandTripExpenses } from "@/db/sand";
+import { sandTrips } from "@/db/sand";
+import { tripExpenses } from "@/db/trips";
 import { boats } from "@/db/boat";
 import { users } from "@/db/app";
 import { eq, and, isNull, gte, lte, asc, inArray } from "drizzle-orm";
@@ -72,7 +73,7 @@ export const GET = withErrorHandler<SandTripReportDTO, [NextRequest]>(
     const tripIds = trips.map(t => t.id);
 
     let allExpenses: {
-      sandTripId: number;
+      sandTripId: number | null;
       category: string;
       description: string | null;
       amountTk: string;
@@ -80,16 +81,16 @@ export const GET = withErrorHandler<SandTripReportDTO, [NextRequest]>(
     if (tripIds.length > 0) {
       allExpenses = await db
         .select({
-          sandTripId: sandTripExpenses.sandTripId,
-          category: sandTripExpenses.category,
-          description: sandTripExpenses.description,
-          amountTk: sandTripExpenses.amountTk,
+          sandTripId: tripExpenses.sandTripId,
+          category: tripExpenses.category,
+          description: tripExpenses.description,
+          amountTk: tripExpenses.amountTk,
         })
-        .from(sandTripExpenses)
+        .from(tripExpenses)
         .where(
           and(
-            inArray(sandTripExpenses.sandTripId, tripIds),
-            isNull(sandTripExpenses.deletedAt)
+            inArray(tripExpenses.sandTripId, tripIds),
+            isNull(tripExpenses.deletedAt)
           )
         );
     }

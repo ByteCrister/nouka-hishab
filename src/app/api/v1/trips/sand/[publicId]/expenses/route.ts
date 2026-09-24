@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
 import { db } from "@/config/db";
-import { sandTrips, sandTripExpenses } from "@/db/sand";
+import { sandTrips } from "@/db/sand";
+import { tripExpenses } from "@/db/trips";
 import { boats } from "@/db/boat";
 import { users } from "@/db/app";
 import { eq, and, isNull, count } from "drizzle-orm";
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult, ApiError } from "@/lib/helpers/withErrorHandler";
-import { createSandTripExpenseSchema } from "@/utils/zod/sand-trips.schema";
+import { createTripExpenseSchema } from "@/utils/zod/sand-trips.schema";
 import { recalculateTripFinancials } from "../../../../../../../lib/helpers/trip-financials.helper";
 
 interface RouteContext {
@@ -23,7 +24,7 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
 
     // Verify trip ownership
     const [existingTrip] = await db
-      .select({ id: sandTrips.id })
+      .select({ id: sandTrips.id, boatId: sandTrips.boatId })
       .from(sandTrips)
       .innerJoin(boats, eq(sandTrips.boatId, boats.id))
       .where(
@@ -39,11 +40,11 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
     // Limit expenses to 10 per trip to prevent abuse
     const [{ expenseCount }] = await db
       .select({ expenseCount: count() })
-      .from(sandTripExpenses)
+      .from(tripExpenses)
       .where(
         and(
-          eq(sandTripExpenses.sandTripId, existingTrip.id),
-          isNull(sandTripExpenses.deletedAt)
+          eq(tripExpenses.sandTripId, existingTrip.id),
+          isNull(tripExpenses.deletedAt)
         )
       );
 
@@ -52,16 +53,17 @@ export const POST = withErrorHandler<{ success: boolean; publicId: string }, [Ne
     }
 
     const body = await req.json();
-    const data = createSandTripExpenseSchema.parse(body);
+    const data = createTripExpenseSchema.parse({ ...body, boatPublicId: "placeholder" });
 
-    const [newExpense] = await db.insert(sandTripExpenses).values({
+    const [newExpense] = await db.insert(tripExpenses).values({
+      boatId: existingTrip.boatId,
       sandTripId: existingTrip.id,
       category: data.category,
       description: data.description ?? null,
       amountTk: String(data.amountTk),
       expenseDate: data.expenseDate ?? null,
       createdBy: userRecord.id,
-    }).returning({ publicId: sandTripExpenses.publicId });
+    }).returning({ publicId: tripExpenses.publicId });
 
     await recalculateTripFinancials(existingTrip.id);
 

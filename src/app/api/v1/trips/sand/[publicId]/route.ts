@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/config/db";
-import { sandTrips, sandTripExpenses, sandTripAttachments } from "@/db/sand";
+import { sandTrips } from "@/db/sand";
+import { tripExpenses, tripAttachments } from "@/db/trips";
 import { files, assets } from "@/db/media";
 import { boats } from "@/db/boat";
 import { eq, and, isNull, sql } from "drizzle-orm";
@@ -103,37 +104,38 @@ export const GET = withErrorHandler<SandTripDetail, [NextRequest, RouteContext]>
 
     const expensesData = await db
       .select({
-        publicId: sandTripExpenses.publicId,
-        category: sandTripExpenses.category,
-        description: sandTripExpenses.description,
-        amountTk: sql<number>`${sandTripExpenses.amountTk}::float`,
-        expenseDate: sql<string>`${sandTripExpenses.expenseDate}::text`,
-        createdAt: sql<string>`${sandTripExpenses.createdAt}::text`,
+        publicId: tripExpenses.publicId,
+        category: tripExpenses.category,
+        description: tripExpenses.description,
+        amountTk: sql<number>`${tripExpenses.amountTk}::float`,
+        expenseDate: sql<string>`${tripExpenses.expenseDate}::text`,
+        createdAt: sql<string>`${tripExpenses.createdAt}::text`,
       })
-      .from(sandTripExpenses)
+      .from(tripExpenses)
       .where(
         and(
-          eq(sandTripExpenses.sandTripId, id),
-          isNull(sandTripExpenses.deletedAt)
+          eq(tripExpenses.sandTripId, id),
+          isNull(tripExpenses.deletedAt)
         )
       )
-      .orderBy(sandTripExpenses.createdAt);
+      .orderBy(tripExpenses.createdAt);
 
     const attachmentsData = await db
       .select({
-        fileId: sandTripAttachments.fileId,
-        description: sandTripAttachments.description,
-        createdAt: sql<string>`${sandTripAttachments.createdAt}::text`,
+        id: tripAttachments.id,
+        fileId: tripAttachments.fileId,
+        description: tripAttachments.description,
+        createdAt: sql<string>`${tripAttachments.createdAt}::text`,
         url: assets.cloudinaryUrl,
         originalFileName: files.originalFileName,
       })
-      .from(sandTripAttachments)
-      .innerJoin(files, eq(sandTripAttachments.fileId, files.id))
+      .from(tripAttachments)
+      .innerJoin(files, eq(tripAttachments.fileId, files.id))
       .innerJoin(assets, eq(files.assetId, assets.id))
       .where(
         and(
-          eq(sandTripAttachments.sandTripId, id),
-          isNull(sandTripAttachments.deletedAt)
+          eq(tripAttachments.sandTripId, id),
+          isNull(tripAttachments.deletedAt)
         )
       );
 

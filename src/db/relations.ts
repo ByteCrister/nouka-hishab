@@ -20,9 +20,11 @@ import {
 } from './boat';
 import {
   sandTrips,
-  sandTripExpenses,
-  sandTripAttachments,
 } from './sand';
+import {
+  tripExpenses,
+  tripAttachments,
+} from './trips';
 import { assets, files } from './media';
 
 // ─── Users ─────────────────────────────────────────────────────────────────
@@ -37,7 +39,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   subscriptions: many(userSubscriptions),
   maintenanceLogsCreated: many(boatMaintenanceLogs),
-  sandTripExpensesCreated: many(sandTripExpenses),
+  tripExpensesCreated: many(tripExpenses),
   auditLogsAsActor: many(auditLogs),
   reports: many(reports, { relationName: 'reportFiler' }),
   reportsResolved: many(reports, { relationName: 'reportResolver' }),
@@ -101,6 +103,8 @@ export const boatsRelations = relations(boats, ({ many }) => ({
   images: many(boatImages),
   documents: many(boatDocuments),
   sandTrips: many(sandTrips),
+  tripExpenses: many(tripExpenses),
+  tripAttachments: many(tripAttachments),
 }));
 
 // ─── Boat Maintenance Logs ─────────────────────────────────────────────────
@@ -145,30 +149,38 @@ export const sandTripsRelations = relations(sandTrips, ({ one, many }) => ({
     fields: [sandTrips.boatId],
     references: [boats.id],
   }),
-  expenses: many(sandTripExpenses),
-  attachments: many(sandTripAttachments),
+  expenses: many(tripExpenses),
+  attachments: many(tripAttachments),
 }));
 
-// ─── Sand Trip Expenses ────────────────────────────────────────────────────
-export const sandTripExpensesRelations = relations(sandTripExpenses, ({ one }) => ({
+// ─── Trip Expenses ────────────────────────────────────────────────────
+export const tripExpensesRelations = relations(tripExpenses, ({ one }) => ({
   sandTrip: one(sandTrips, {
-    fields: [sandTripExpenses.sandTripId],
+    fields: [tripExpenses.sandTripId],
     references: [sandTrips.id],
   }),
+  boat: one(boats, {
+    fields: [tripExpenses.boatId],
+    references: [boats.id],
+  }),
   createdBy: one(users, {
-    fields: [sandTripExpenses.createdBy],
+    fields: [tripExpenses.createdBy],
     references: [users.id],
   }),
 }));
 
-// ─── Sand Trip Attachments ─────────────────────────────────────────────────
-export const sandTripAttachmentsRelations = relations(sandTripAttachments, ({ one }) => ({
+// ─── Trip Attachments ─────────────────────────────────────────────────
+export const tripAttachmentsRelations = relations(tripAttachments, ({ one }) => ({
   sandTrip: one(sandTrips, {
-    fields: [sandTripAttachments.sandTripId],
+    fields: [tripAttachments.sandTripId],
     references: [sandTrips.id],
   }),
+  boat: one(boats, {
+    fields: [tripAttachments.boatId],
+    references: [boats.id],
+  }),
   file: one(files, {
-    fields: [sandTripAttachments.fileId],
+    fields: [tripAttachments.fileId],
     references: [files.id],
   }),
 }));
@@ -232,7 +244,7 @@ export const filesRelations = relations(files, ({ one, many }) => ({
   }),
   boatImages: many(boatImages),
   boatDocuments: many(boatDocuments),
-  sandTripAttachments: many(sandTripAttachments),
+  tripAttachments: many(tripAttachments),
   reportAttachments: many(reportAttachments),
 }));
 

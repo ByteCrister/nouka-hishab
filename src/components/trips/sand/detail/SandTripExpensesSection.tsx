@@ -7,10 +7,10 @@ import {
   useUpdateSandTripExpense,
   useDeleteSandTripExpense,
 } from '@/hooks/mutations/useSandTripsMutations';
-import { createSandTripExpenseSchema } from '@/utils/zod/sand-trips.schema';
-import { SandTripExpenseItem } from '@/types/trips.types';
-import { SAND_TRIP_EXPENSE_CATEGORIES } from '@/constants/db/sand.const';
-import type { SandTripExpenseCategory } from '@/constants/db/sand.const';
+import { createTripExpenseSchema } from '@/utils/zod/sand-trips.schema';
+import { TripExpenseItem } from '@/types/trips.types';
+import { TRIP_EXPENSE_CATEGORIES } from '@/constants/db/trips.const';
+import type { TripExpenseCategory } from '@/constants/db/trips.const';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,18 +31,19 @@ import { Plus, Trash2, Edit3, CheckCircle2, X, Receipt, AlertCircle } from 'luci
 import { useTranslations } from 'next-intl';
 interface Props {
   tripPublicId: string;
-  expenses: SandTripExpenseItem[];
+  boatPublicId: string;
+  expenses: TripExpenseItem[];
   operatingCostTk: string | number | null;
 }
 
-const CATEGORY_COLORS: Record<SandTripExpenseCategory, string> = {
-  [SAND_TRIP_EXPENSE_CATEGORIES.FUEL]: 'bg-orange-500/10 text-orange-500',
-  [SAND_TRIP_EXPENSE_CATEGORIES.LABOUR]: 'bg-blue-500/10 text-blue-500',
-  [SAND_TRIP_EXPENSE_CATEGORIES.MAINTENANCE]: 'bg-amber-500/10 text-amber-500',
-  [SAND_TRIP_EXPENSE_CATEGORIES.TOLL_PAYMENT]: 'bg-purple-500/10 text-purple-500',
-  [SAND_TRIP_EXPENSE_CATEGORIES.LOADING_FEE]: 'bg-teal-500/10 text-teal-500',
-  [SAND_TRIP_EXPENSE_CATEGORIES.ENGINE_REPAIR]: 'bg-rose-500/10 text-rose-500',
-  [SAND_TRIP_EXPENSE_CATEGORIES.OTHER]: 'bg-muted text-muted-foreground',
+const CATEGORY_COLORS: Record<TripExpenseCategory, string> = {
+  [TRIP_EXPENSE_CATEGORIES.FUEL]: 'bg-orange-500/10 text-orange-500',
+  [TRIP_EXPENSE_CATEGORIES.LABOUR]: 'bg-blue-500/10 text-blue-500',
+  [TRIP_EXPENSE_CATEGORIES.MAINTENANCE]: 'bg-amber-500/10 text-amber-500',
+  [TRIP_EXPENSE_CATEGORIES.TOLL_PAYMENT]: 'bg-purple-500/10 text-purple-500',
+  [TRIP_EXPENSE_CATEGORIES.LOADING_FEE]: 'bg-teal-500/10 text-teal-500',
+  [TRIP_EXPENSE_CATEGORIES.ENGINE_REPAIR]: 'bg-rose-500/10 text-rose-500',
+  [TRIP_EXPENSE_CATEGORIES.OTHER]: 'bg-muted text-muted-foreground',
 };
 
 type ExpenseForm = {
@@ -52,9 +53,9 @@ type ExpenseForm = {
   expenseDate: string;
 };
 
-const emptyForm: ExpenseForm = { category: SAND_TRIP_EXPENSE_CATEGORIES.FUEL, description: '', amountTk: '', expenseDate: '' };
+const emptyForm: ExpenseForm = { category: TRIP_EXPENSE_CATEGORIES.FUEL, description: '', amountTk: '', expenseDate: '' };
 
-export function SandTripExpensesSection({ tripPublicId, expenses, operatingCostTk }: Props) {
+export function SandTripExpensesSection({ tripPublicId, boatPublicId, expenses, operatingCostTk }: Props) {
   const t = useTranslations('sandTripsDetail');
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -80,8 +81,9 @@ export function SandTripExpensesSection({ tripPublicId, expenses, operatingCostT
   const handleSubmit = async () => {
     setErrors({});
     try {
-      const payload = createSandTripExpenseSchema.parse({
-        category: form.category as SandTripExpenseCategory,
+      const payload = createTripExpenseSchema.parse({
+        boatPublicId,
+        category: form.category as TripExpenseCategory,
         description: form.description || null,
         amountTk: parseFloat(form.amountTk),
         expenseDate: form.expenseDate || null,
@@ -100,7 +102,7 @@ export function SandTripExpensesSection({ tripPublicId, expenses, operatingCostT
     }
   };
 
-  const startEdit = (exp: SandTripExpenseItem) => {
+  const startEdit = (exp: TripExpenseItem) => {
     setEditId(exp.publicId);
     setForm({
       category: exp.category,
@@ -162,7 +164,7 @@ export function SandTripExpensesSection({ tripPublicId, expenses, operatingCostT
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.values(SAND_TRIP_EXPENSE_CATEGORIES).map((k) => (
+                  {Object.values(TRIP_EXPENSE_CATEGORIES).map((k) => (
                     <SelectItem key={k} value={k}>{getCategoryLabel(k)}</SelectItem>
                   ))}
                 </SelectContent>

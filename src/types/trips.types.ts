@@ -1,6 +1,7 @@
 import type { PaginationMeta, SortOrder } from '@/types/api.types';
 import type { SectorName } from '@/constants/db/app.const';
-import type { SandTripStatus, SandCargoUnit, SandTripExpenseCategory } from '@/constants/db/sand.const';
+import type { SandTripStatus, SandCargoUnit } from '@/constants/db/sand.const';
+import type { TripExpenseCategory } from '@/constants/db/trips.const';
 
 export interface BoatMeta {
   id: number;
@@ -43,8 +44,8 @@ export interface SandTripDetail extends Omit<TripListItem, 'cargoUnit' | 'status
   operatingCostTk: number | null;
   totalOperatingCostTk: number | null;
   notes: string | null;
-  expenses: SandTripExpenseItem[];
-  attachments: SandTripAttachmentItem[];
+  expenses: TripExpenseItem[];
+  attachments: TripAttachmentItem[];
   updatedAt: string;
 }
 
@@ -92,25 +93,28 @@ export interface CreateSandTripPayload {
 
 export type UpdateSandTripPayload = Partial<CreateSandTripPayload>;
 
-export interface SandTripExpenseItem {
+export interface TripExpenseItem {
   publicId: string;
-  category: SandTripExpenseCategory;
+  category: TripExpenseCategory;
   description: string | null;
   amountTk: number;
   expenseDate: string | null;
   createdAt: string;
 }
 
-export interface CreateSandTripExpensePayload {
-  category: SandTripExpenseCategory;
+export interface CreateTripExpensePayload {
+  boatPublicId: string;
+  sandTripId?: number | null;
+  category: TripExpenseCategory;
   description?: string | null;
   amountTk: number;
   expenseDate?: string | null;
 }
 
-export type UpdateSandTripExpensePayload = Partial<CreateSandTripExpensePayload>;
+export type UpdateTripExpensePayload = Partial<CreateTripExpensePayload>;
 
-export interface SandTripAttachmentItem {
+export interface TripAttachmentItem {
+  id: number;
   fileId: number;
   description: string | null;
   createdAt: string;
@@ -118,7 +122,9 @@ export interface SandTripAttachmentItem {
   originalFileName: string;
 }
 
-export interface CreateSandTripAttachmentPayload {
+export interface CreateTripAttachmentPayload {
+  boatPublicId: string;
+  sandTripId?: number | null;
   fileId: number;
   description?: string | null;
 }

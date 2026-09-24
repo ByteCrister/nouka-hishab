@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/config/db";
-import { sandTrips, sandTripAttachments } from "@/db/sand";
+import { sandTrips } from "@/db/sand";
+import { tripAttachments } from "@/db/trips";
 import { boats } from "@/db/boat";
 import { users } from "@/db/app";
 import { eq, and, isNull } from "drizzle-orm";
@@ -38,16 +39,16 @@ export const DELETE = withErrorHandler<{ success: boolean }, [NextRequest, Route
     if (isNaN(fileIdNum)) throw new ApiError("Invalid file ID", 400);
 
     const [deletedAttachment] = await db
-      .update(sandTripAttachments)
+      .update(tripAttachments)
       .set({ deletedAt: new Date() })
       .where(
         and(
-          eq(sandTripAttachments.sandTripId, existingTrip.id),
-          eq(sandTripAttachments.fileId, fileIdNum),
-          isNull(sandTripAttachments.deletedAt)
+          eq(tripAttachments.sandTripId, existingTrip.id),
+          eq(tripAttachments.fileId, fileIdNum),
+          isNull(tripAttachments.deletedAt)
         )
       )
-      .returning({ fileId: sandTripAttachments.fileId });
+      .returning({ fileId: tripAttachments.fileId });
 
     if (!deletedAttachment) throw new ApiError("Attachment not found", 404);
 

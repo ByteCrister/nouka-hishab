@@ -21,8 +21,9 @@ export function useCreateMaintenance() {
             toast.success(t('messages.createSuccess'));
             queryClient.invalidateQueries({ queryKey: maintenanceKeys.lists() });
         },
-        onError: (error: any) => {
-            toast.error(error.response?.data?.error || t('messages.createError'));
+        onError: (error: unknown) => {
+            const err = error as { response?: { data?: { error?: string } } };
+            toast.error(err.response?.data?.error || t('messages.createError'));
         },
     });
 }
@@ -40,8 +41,9 @@ export function useUpdateMaintenance() {
             toast.success(t('messages.updateSuccess'));
             queryClient.invalidateQueries({ queryKey: maintenanceKeys.lists() });
         },
-        onError: (error: any) => {
-            toast.error(error.response?.data?.error || t('messages.updateError'));
+        onError: (error: unknown) => {
+            const err = error as { response?: { data?: { error?: string } } };
+            toast.error(err.response?.data?.error || t('messages.updateError'));
         },
     });
 }
@@ -59,8 +61,9 @@ export function useDeleteMaintenance() {
             toast.success(t('messages.deleteSuccess'));
             queryClient.invalidateQueries({ queryKey: maintenanceKeys.lists() });
         },
-        onError: (error: any) => {
-            toast.error(error.response?.data?.error || t('messages.deleteError'));
+        onError: (error: unknown) => {
+            const err = error as { response?: { data?: { error?: string } } };
+            toast.error(err.response?.data?.error || t('messages.deleteError'));
         },
     });
 }

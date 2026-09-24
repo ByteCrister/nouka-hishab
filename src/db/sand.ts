@@ -6,22 +6,16 @@ import {
   timestamp,
   integer,
   numeric,
-  date,
   check,
-  primaryKey,
   index,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { ulid } from 'ulid';
-import { files } from './media';
-import { users } from './app';
 import { boats } from './boat';
 import { 
   SandCargoUnit, 
-  SandTripExpenseCategory, 
   SandTripStatus,
   SAND_CARGO_UNITS,
-  SAND_TRIP_EXPENSE_CATEGORIES,
   SAND_TRIP_STATUSES
 } from '@/constants/db/sand.const';
 
@@ -125,66 +119,7 @@ export const sandTrips = pgTable(
   }),
 );
 
-// ─── Sand Trip Expenses ────────────────────────────────────────────────────
-// Itemised operating costs for a sand trip: fuel, labour, maintenance, etc.
-// The sum of these rows populates sand_trips.total_operating_cost_tk.
-export const sandTripExpenses = pgTable(
-  'sand_trip_expenses',
-  {
-    id: serial('id').primaryKey(),
-    publicId: varchar('public_id', { length: 26 })
-      .unique()
-      .notNull()
-      .$defaultFn(() => ulid()), // safe URL param e.g. /expenses/01J7K9...
-    sandTripId: integer('sand_trip_id')
-      .notNull()
-      .references(() => sandTrips.id, { onDelete: 'cascade' }),
-    category: varchar('category', { length: 50 })
-      .notNull()
-      .$type<SandTripExpenseCategory>(),
-    description: text('description'),
-    amountTk: numeric('amount_tk', { precision: 10, scale: 2 }).notNull(),
-    expenseDate: date('expense_date'),
-    createdBy: integer('created_by')
-      .notNull()
-      .references(() => users.id, { onDelete: 'restrict' }),
-    deletedAt: timestamp('deleted_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (t) => ({
-    categoryCheck: check(
-      'sand_trip_expenses_category_check',
-      sql`${t.category} IN (${sql.raw(Object.values(SAND_TRIP_EXPENSE_CATEGORIES).map(s => `'${s}'`).join(', '))})`,
-    ),
-    tripIdx: index('idx_sand_trip_expenses_trip').on(t.sandTripId),
-  }),
-);
-
-// ─── Sand Trip Attachments ─────────────────────────────────────────────────
-// Photos / documents attached to a sand trip (e.g. loading receipts, permits).
-export const sandTripAttachments = pgTable(
-  'sand_trip_attachments',
-  {
-    sandTripId: integer('sand_trip_id')
-      .notNull()
-      .references(() => sandTrips.id, { onDelete: 'cascade' }),
-    fileId: integer('file_id')
-      .notNull()
-      .references(() => files.id, { onDelete: 'cascade' }),
-    description: text('description'),
-    deletedAt: timestamp('deleted_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  },
-  (t) => ({
-    pk: primaryKey({ columns: [t.sandTripId, t.fileId] }),
-    tripIdx: index('idx_sand_trip_attachments_trip').on(t.sandTripId),
-  }),
-);
-
 // ─── Inferred Types ────────────────────────────────────────────────────────
 export type SandTrip = typeof sandTrips.$inferSelect;
 export type NewSandTrip = typeof sandTrips.$inferInsert;
-export type SandTripExpense = typeof sandTripExpenses.$inferSelect;
-export type NewSandTripExpense = typeof sandTripExpenses.$inferInsert;
-
 

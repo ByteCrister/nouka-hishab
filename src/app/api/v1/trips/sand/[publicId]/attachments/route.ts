@@ -1,13 +1,14 @@
 import { NextRequest } from "next/server";
 import { db } from "@/config/db";
-import { sandTrips, sandTripAttachments } from "@/db/sand";
+import { sandTrips } from "@/db/sand";
+import { tripAttachments } from "@/db/trips";
 import { boats } from "@/db/boat";
 import { files } from "@/db/media";
 import { users } from "@/db/app";
 import { eq, and, isNull } from "drizzle-orm";
 import { requireAuthPublicId } from "@/lib/auth/utils";
 import { withErrorHandler, HandlerResult, ApiError } from "@/lib/helpers/withErrorHandler";
-import { createSandTripAttachmentSchema } from "@/utils/zod/sand-trips.schema";
+import { createTripAttachmentSchema } from "@/utils/zod/sand-trips.schema";
 
 interface RouteContext {
   params: Promise<{ publicId: string }>;
@@ -23,7 +24,7 @@ export const POST = withErrorHandler<{ success: boolean }, [NextRequest, RouteCo
 
     // Verify trip ownership
     const [existingTrip] = await db
-      .select({ id: sandTrips.id })
+      .select({ id: sandTrips.id, boatId: sandTrips.boatId })
       .from(sandTrips)
       .innerJoin(boats, eq(sandTrips.boatId, boats.id))
       .where(
@@ -37,7 +38,7 @@ export const POST = withErrorHandler<{ success: boolean }, [NextRequest, RouteCo
     if (!existingTrip) throw new ApiError("Trip not found", 404);
 
     const body = await req.json();
-    const data = createSandTripAttachmentSchema.parse(body);
+    const data = createTripAttachmentSchema.parse({ ...body, boatPublicId: "placeholder" });
 
     const [fileRecord] = await db
       .select({ id: files.id })
@@ -46,19 +47,11 @@ export const POST = withErrorHandler<{ success: boolean }, [NextRequest, RouteCo
 
     if (!fileRecord) throw new ApiError("File not found", 404);
 
-    // Upsert or just insert
-    // Since it's a composite primary key, we handle conflicts gracefully
-    await db.insert(sandTripAttachments).values({
+    await db.insert(tripAttachments).values({
+      boatId: existingTrip.boatId,
       sandTripId: existingTrip.id,
       fileId: fileRecord.id,
       description: data.description ?? null,
-      deletedAt: null, // ensure it's not marked as deleted if recreating
-    }).onConflictDoUpdate({
-      target: [sandTripAttachments.sandTripId, sandTripAttachments.fileId],
-      set: {
-        description: data.description ?? null,
-        deletedAt: null, // restore
-      }
     });
 
     return {

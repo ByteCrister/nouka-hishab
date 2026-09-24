@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/config/db";
-import { sandTrips, sandTripExpenses } from "@/db/sand";
+import { sandTrips } from "@/db/sand";
+import { tripExpenses } from "@/db/trips";
 import { boats } from "@/db/boat";
 import { users } from "@/db/app";
 import { eq, and, isNull } from "drizzle-orm";
@@ -63,19 +64,19 @@ export const GET = withErrorHandler<SingleSandTripReportDTO, [NextRequest, Route
 
     const expensesData = await db
       .select({
-        category: sandTripExpenses.category,
-        description: sandTripExpenses.description,
-        amountTk: sandTripExpenses.amountTk,
+        category: tripExpenses.category,
+        description: tripExpenses.description,
+        amountTk: tripExpenses.amountTk,
       })
-      .from(sandTripExpenses)
+      .from(tripExpenses)
       .where(
         and(
-          eq(sandTripExpenses.sandTripId, trip.id),
-          isNull(sandTripExpenses.deletedAt)
+          eq(tripExpenses.sandTripId, trip.id),
+          isNull(tripExpenses.deletedAt)
         )
       );
 
-    const tripExpenses = expensesData.map(e => ({
+    const mappedExpenses = expensesData.map(e => ({
       category: e.category,
       description: e.description,
       amountTk: e.amountTk ? parseFloat(e.amountTk) : 0,
@@ -103,7 +104,7 @@ export const GET = withErrorHandler<SingleSandTripReportDTO, [NextRequest, Route
       localTollRateTk: trip.localTollRateTk ? parseFloat(trip.localTollRateTk) : null,
       operatingCostTk: trip.operatingCostTk ? parseFloat(trip.operatingCostTk) : null,
       operatingCostRatePerUnitTk: trip.operatingCostRatePerUnitTk ? parseFloat(trip.operatingCostRatePerUnitTk) : null,
-      expenses: tripExpenses,
+      expenses: mappedExpenses,
     };
 
     const meta = {
